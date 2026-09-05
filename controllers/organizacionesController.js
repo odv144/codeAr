@@ -248,3 +248,12 @@ const eliminarOrganizacion = (req, res) => {
     }
 };
 
+module.exports = {
+
+    obtenerOrganizaciones,
+    obtenerOrganizacionPorId,
+    crearOrganizacion,
+    actualizarOrganizacion,
+    eliminarOrganizacion
+
+};
