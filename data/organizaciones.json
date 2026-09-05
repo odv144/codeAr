@@ -1,0 +1,35 @@
+[
+  {
+    "idOrganizacion": 1,
+    "nombre": "Fundación Esperanza",
+    "tipo": "Fundación",
+    "cuil": "30-71234567-8",
+    "telefono": "341-5551234",
+    "mail": "contacto@esperanza.org",
+    "direccion": "Av. Pellegrini 1234",
+    "responsable": "Laura Gómez"
+  },
+
+{
+    "idOrganizacion": 2,
+    "nombre": "Asociación Civil Luces de Futuro",
+    "tipo": "Asociación Civil",
+    "cuil": "30-71829304-5",
+    "telefono": "341-4809876",
+    "mail": "info@lucesdefuturo.org.ar",
+    "direccion": "Bv. Oroño 850",
+    "responsable": "Carlos Benítez"
+  },
+  
+  {
+    "idOrganizacion": 3,
+    "nombre": "Centro Comunitario San Martín",
+    "tipo": "ONG",
+    "cuil": "30-65432109-1",
+    "telefono": "341-4301122",
+    "mail": "contacto@ccsanmartin.org",
+    "direccion": "San Martín 3410",
+    "responsable": "Mariana Rossi"
+  }
+
+]
