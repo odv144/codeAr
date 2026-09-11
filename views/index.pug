@@ -1,29 +1,43 @@
 extends layout
 
 block content
-  div(class="max-w-4xl mx-auto")
-    div(class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 text-center")
-      span(class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full mb-3") SaaS B2NGO / Tercer Sector
-      h2(class="text-3xl font-bold text-slate-900 mb-3") SumarImpacto
-      p(class="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto") Plataforma digital de control operativo y trazabilidad end-to-end de donaciones físicas (ropa, alimentos, medicamentos, etc.). Resolvemos la pérdida de información y garantizamos transparencia en la gestión de organizaciones sociales y comedores.
+  div(class="max-w-5xl mx-auto")
+    div(class="bg-white rounded-2xl border border-slate-200/80 p-10 mb-10 shadow-xs")
+      div(class="inline-flex items-center space-x-2 bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-emerald-100")
+        span(class="w-2 h-2 rounded-full bg-emerald-600")
+        <span>Trazabilidad End-to-End &bull; SaaS B2NGO</span>
+      h2(class="text-3xl font-bold tracking-tight text-slate-900 mb-4") Portal de Operaciones y Control
+      p(class="text-slate-600 text-base leading-relaxed max-w-3xl") Solución tecnológica integral diseñada para mitigar riesgos operativos, garantizar transparencia pública y asegurar el flujo inmutable de donaciones físicas entre donantes, organizaciones y beneficiarios.
     
     div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
-      a(href="/vistas/proyectos" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
-        div(class="text-3xl mb-3") 📋
-        h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Proyectos
-        p(class="text-slate-500 text-sm") Gestión y seguimiento de iniciativas y campañas solidarias.
+      a(href="/vistas/proyectos" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition group flex flex-col justify-between")
+        <div>
+          div(class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-semibold mb-6 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition") 📋
+          h3(class="text-xl font-bold text-slate-900 mb-2") Proyectos Sociales
+          p(class="text-slate-500 text-sm leading-relaxed") Gestión y seguimiento centralizado de iniciativas y campañas solidarias activas en la red.
+        </div>
+        <div class="mt-6 flex items-center text-sm font-semibold text-emerald-700">Acceder al módulo &rarr;</div>
 
-      a(href="/vistas/organizaciones" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
-        div(class="text-3xl mb-3") 🤝
-        h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Organizaciones
-        p(class="text-slate-500 text-sm") Directorio de ONG, fundaciones y comedores asociados.
+      a(href="/vistas/organizaciones" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition group flex flex-col justify-between")
+        <div>
+          div(class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-semibold mb-6 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition") 🤝
+          h3(class="text-xl font-bold text-slate-900 mb-2") Organizaciones Aliadas
+          p(class="text-slate-500 text-sm leading-relaxed") Directorio oficial de fundaciones, comedores y organizaciones sin fines de lucro vinculadas.
+        </div>
+        <div class="mt-6 flex items-center text-sm font-semibold text-emerald-700">Acceder al módulo &rarr;</div>
 
-      a(href="/vistas/gastos" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
-        div(class="text-3xl mb-3") 📊
-        h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Gastos
-        p(class="text-slate-500 text-sm") Control financiero y erogaciones por proyecto.
+      a(href="/vistas/gastos" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition group flex flex-col justify-between")
+        <div>
+          div(class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-semibold mb-6 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition") 📊
+          h3(class="text-xl font-bold text-slate-900 mb-2") Control de Gastos
+          p(class="text-slate-500 text-sm leading-relaxed") Auditoría de erogaciones, balance de inventario y asignación presupuestaria por proyecto.
+        </div>
+        <div class="mt-6 flex items-center text-sm font-semibold text-emerald-700">Acceder al módulo &rarr;</div>
 
-      a(href="/vistas/donaciones" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
-        div(class="text-3xl mb-3") 💖
-        h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Donaciones
-        p(class="text-slate-500 text-sm") Trazabilidad de aportes: ¿Quién donó, qué, cuándo y a quién se entregó?
+      a(href="/vistas/donaciones" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition group flex flex-col justify-between")
+        <div>
+          div(class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-semibold mb-6 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition") 💖
+          h3(class="text-xl font-bold text-slate-900 mb-2") Registro de Donaciones
+          p(class="text-slate-500 text-sm leading-relaxed") Trazabilidad end-to-end de aportes: ¿Quién donó, qué bienes, cuándo y a quién se entregó?
+        </div>
+        <div class="mt-6 flex items-center text-sm font-semibold text-emerald-700">Acceder al módulo &rarr;</div>
