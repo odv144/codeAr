@@ -3,26 +3,27 @@ extends layout
 block content
   div(class="max-w-4xl mx-auto")
     div(class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 text-center")
-      h2(class="text-3xl font-bold text-slate-900 mb-3") Panel Principal de Gestión
-      p(class="text-slate-600 text-lg") Plataforma integral para la administración transparente de proyectos, organizaciones aliadas, gastos y donaciones solidarias.
+      span(class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full mb-3") SaaS B2NGO / Tercer Sector
+      h2(class="text-3xl font-bold text-slate-900 mb-3") SumarImpacto
+      p(class="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto") Plataforma digital de control operativo y trazabilidad end-to-end de donaciones físicas (ropa, alimentos, medicamentos, etc.). Resolvemos la pérdida de información y garantizamos transparencia en la gestión de organizaciones sociales y comedores.
     
     div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
       a(href="/vistas/proyectos" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
         div(class="text-3xl mb-3") 📋
         h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Proyectos
-        p(class="text-slate-500 text-sm") Administrar y consultar iniciativas sociales en curso.
+        p(class="text-slate-500 text-sm") Gestión y seguimiento de iniciativas y campañas solidarias.
 
       a(href="/vistas/organizaciones" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
         div(class="text-3xl mb-3") 🤝
         h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Organizaciones
-        p(class="text-slate-500 text-sm") Directorio de organizaciones sociales y referentes.
+        p(class="text-slate-500 text-sm") Directorio de ONG, fundaciones y comedores asociados.
 
       a(href="/vistas/gastos" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
         div(class="text-3xl mb-3") 📊
         h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Gastos
-        p(class="text-slate-500 text-sm") Control de erogaciones y asignación de fondos por proyecto.
+        p(class="text-slate-500 text-sm") Control financiero y erogaciones por proyecto.
 
       a(href="/vistas/donaciones" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition group")
         div(class="text-3xl mb-3") 💖
         h3(class="text-xl font-semibold text-slate-900 group-hover:text-emerald-600 transition mb-1") Donaciones
-        p(class="text-slate-500 text-sm") Registro de aportes y donaciones recibidas.
+        p(class="text-slate-500 text-sm") Trazabilidad de aportes: ¿Quién donó, qué, cuándo y a quién se entregó?
