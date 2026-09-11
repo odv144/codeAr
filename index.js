@@ -7,6 +7,7 @@ const proyectosRoutes = require("./routes/proyectosRoutes");
 const organizacionesRoutes = require("./routes/organizacionesRoutes");
 const gastosRoutes = require("./routes/gastosRoutes");
 const donacionesRoutes = require("./routes/donacionesRoutes");
+const donantesRoutes = require("./routes/donantesRoutes");
 const vistasRoutes = require("./routes/vistasRoutes");
 
 // Configuración del motor de plantillas Pug
@@ -21,13 +22,14 @@ app.use("/proyectos", proyectosRoutes);
 app.use("/organizaciones", organizacionesRoutes);
 app.use("/gastos", gastosRoutes);
 app.use("/donaciones", donacionesRoutes);
+app.use("/donantes", donantesRoutes);
 
 // Usar rutas de vistas Pug
 app.use("/vistas", vistasRoutes);
 
 // Ruta principal
 app.get("/", (req, res) => {
-    res.render("index", { titulo: "Trabajo Práctico Backend - Panel Principal" });
+    res.render("index", { titulo: "SumarImpacto - Panel Principal" });
 });
 
 app.listen(PORT, () => {
