@@ -14,7 +14,9 @@ block content
             th Monto
             th CBU
             th Fecha
-            th IDs (Proy / Don / Org)
+            th ID Proyecto
+            th ID Donante
+            th ID Organización
         tbody
           each donacion in donaciones
             tr
@@ -22,6 +24,8 @@ block content
               td $#{donacion.monto}
               td= donacion.cbu
               td= donacion.fecha
-              td P: #{donacion.idProyecto} | D: #{donacion.idDonante} | O: #{donacion.idOrganizacion}
+              td= donacion.idProyecto
+              td= donacion.idDonante
+              td= donacion.idOrganizacion
     else
       p No hay donaciones registradas.
