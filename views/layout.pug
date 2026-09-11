@@ -4,46 +4,24 @@ html(lang="es")
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title= titulo || "SumarImpacto | Trazabilidad End-to-End"
-    link(rel="preconnect" href="https://fonts.googleapis.com")
-    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
-    script(src="https://cdn.tailwindcss.com")
-    script.
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-          }
-        }
-      }
-  body(class="bg-[#F8FAFC] min-h-screen text-slate-900 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white")
-    
-    // Navbar institucional corporativo
-    header(class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs")
-      div(class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center")
-        div(class="flex items-center space-x-3")
-          div(class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-sm shadow-sm tracking-wider") SI
-          <div>
-            span(class="font-bold text-slate-900 text-base tracking-tight block leading-none") SumarImpacto
-            span(class="text-[11px] text-slate-500 font-semibold tracking-wider uppercase") Plataforma B2NGO
-          </div>
-        nav(class="flex items-center space-x-1 text-sm font-medium")
-          a(href="/vistas" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition") Inicio
-          a(href="/vistas/proyectos" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition") Proyectos
-          a(href="/vistas/organizaciones" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition") Organizaciones
-          a(href="/vistas/gastos" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition") Gastos
-          a(href="/vistas/donaciones" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition") Donaciones
-
-    // Contenido Principal
-    main(class="max-w-7xl mx-auto px-6 py-10 w-full flex-grow")
+  body
+    header
+      h1 SumarImpacto - Plataforma B2NGO
+      nav
+        ul
+          li
+            a(href="/vistas") Inicio
+          li
+            a(href="/vistas/proyectos") Proyectos
+          li
+            a(href="/vistas/organizaciones") Organizaciones
+          li
+            a(href="/vistas/gastos") Gastos
+          li
+            a(href="/vistas/donaciones") Donaciones
+    hr
+    main
       block content
-
-    // Footer corporativo
-    footer(class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-500")
-      div(class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4")
-        p SumarImpacto &copy; 2026. Todos los derechos reservados.
-        p(class="text-slate-400 font-medium") Desarrollado por 
-          strong(class="text-slate-600") CodeAr
-          |  para SumarImpacto
+    hr
+    footer
+      p SumarImpacto &copy; 2026. Desarrollado por CodeAr para SumarImpacto.
