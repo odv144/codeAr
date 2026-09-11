@@ -7,15 +7,14 @@ block content
       strong SumarImpacto
       | . Seleccione una sección para consultar los registros:
     
-    div(style="margin-top: 20px;")
-      label(for="seccion") 
-        strong Menú de navegación rápida: 
+    div
+      label(for="seccion") Menú de navegación rápida: 
       br
-      select(name="seccion" id="seccion" style="width: 250px; margin-top: 8px;")
+      select(name="seccion" id="seccion")
         option(value="") -- Seleccione una opción --
         option(value="/vistas/proyectos") Proyectos
         option(value="/vistas/organizaciones") Organizaciones
         option(value="/vistas/gastos") Gastos
         option(value="/vistas/donaciones") Donaciones
       | &nbsp;
-      button(type="button" onclick="const s = document.getElementById('seccion'); if(s.value) window.location.href=s.value;") Ir a la sección
+      button(type="button" onclick="const s = document.getElementById('seccion'); if(s.value) window.location.href=s.value;") Ir
