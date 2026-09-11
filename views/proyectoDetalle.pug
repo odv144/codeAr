@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    title Detalle del Proyecto
+  body
+    h1 Detalle del Proyecto
+    a(href="/vistas/proyectos") Volver a proyectos
+    hr
+    if proyecto
+      p
+        strong ID: 
+        = proyecto.id
+      p
+        strong Nombre: 
+        = proyecto.nombre
+      p
+        strong Descripción: 
+        = proyecto.descripcion
+    else
+      p Proyecto no encontrado.

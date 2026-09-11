@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    title Listado de Organizaciones
+  body
+    h1 Listado de Organizaciones
+    a(href="/vistas") Volver al inicio
+    hr
+    if organizaciones && organizaciones.length > 0
+      ul
+        each org in organizaciones
+          li
+            strong ID: 
+            = org.idOrganizacion
+            |  - 
+            strong #{org.nombre}
+            |  (#{org.tipo}) - CUIL: #{org.cuil}
+            p Tel: #{org.telefono} | Email: #{org.mail} | Dirección: #{org.direccion} | Responsable: #{org.responsable}
+    else
+      p No hay organizaciones registradas.

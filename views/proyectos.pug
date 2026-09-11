@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title Listado de Proyectos
+  body
+    h1 Listado de Proyectos
+    a(href="/vistas") Volver al inicio
+    hr
+    if proyectos && proyectos.length > 0
+      ul
+        each proyecto in proyectos
+          li
+            strong ID: 
+            = proyecto.id
+            |  - 
+            a(href=`/vistas/proyectos/${proyecto.id}`) #{proyecto.nombre}
+            p= proyecto.descripcion
+    else
+      p No hay proyectos registrados.

@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Listado de Donaciones
+  body
+    h1 Listado de Donaciones
+    a(href="/vistas") Volver al inicio
+    hr
+    if donaciones && donaciones.length > 0
+      ul
+        each donacion in donaciones
+          li
+            strong ID Donación: 
+            = donacion.idDonacion
+            |  - Monto: $#{donacion.monto}
+            p CBU: #{donacion.cbu} | Fecha: #{donacion.fecha} | Proyecto ID: #{donacion.idProyecto} | Donante ID: #{donacion.idDonante} | Org ID: #{donacion.idOrganizacion}
+    else
+      p No hay donaciones registradas.

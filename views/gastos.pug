@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Listado de Gastos
+  body
+    h1 Listado de Gastos
+    a(href="/vistas") Volver al inicio
+    hr
+    if gastos && gastos.length > 0
+      ul
+        each gasto in gastos
+          li
+            strong ID Gasto: 
+            = gasto.idGasto
+            |  - Proyecto ID: #{gasto.idProyecto}
+            p Descripción: #{gasto.descripcion} | Monto: $#{gasto.monto} | Fecha: #{gasto.fecha}
+    else
+      p No hay gastos registrados.
