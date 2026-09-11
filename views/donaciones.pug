@@ -1,29 +1,27 @@
 extends layout
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h2(class="text-2xl font-bold text-slate-900") Registro de Donaciones
-    a(href="/vistas" class="text-sm font-medium text-emerald-600 hover:text-emerald-700") &larr; Volver al inicio
-
-  if donaciones && donaciones.length > 0
-    div(class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden")
-      div(class="overflow-x-auto")
-        table(class="w-full text-left border-collapse")
-          thead(class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider")
+  fieldset
+    legend Registro de Donaciones
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if donaciones && donaciones.length > 0
+      table
+        thead
+          tr
+            th ID Donación
+            th Monto
+            th CBU
+            th Fecha
+            th IDs (Proy / Don / Org)
+        tbody
+          each donacion in donaciones
             tr
-              th(class="px-6 py-3") ID Donación
-              th(class="px-6 py-3") Monto
-              th(class="px-6 py-3") CBU
-              th(class="px-6 py-3") Fecha
-              th(class="px-6 py-3") IDs (Proj / Don / Org)
-          tbody(class="divide-y divide-slate-200 text-sm text-slate-700")
-            each donacion in donaciones
-              tr(class="hover:bg-slate-50 transition")
-                td(class="px-6 py-4 font-medium text-slate-900") ##{donacion.idDonacion}
-                td(class="px-6 py-4 font-semibold text-emerald-600") $#{donacion.monto}
-                td(class="px-6 py-4 font-mono text-xs")= donacion.cbu
-                td(class="px-6 py-4 text-slate-500")= donacion.fecha
-                td(class="px-6 py-4 text-xs text-slate-500") Proy: #{donacion.idProyecto} | Don: #{donacion.idDonante} | Org: #{donacion.idOrganizacion}
-  else
-    div(class="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500")
+              td= donacion.idDonacion
+              td $#{donacion.monto}
+              td= donacion.cbu
+              td= donacion.fecha
+              td P: #{donacion.idProyecto} | D: #{donacion.idDonante} | O: #{donacion.idOrganizacion}
+    else
       p No hay donaciones registradas.

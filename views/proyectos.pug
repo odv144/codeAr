@@ -1,24 +1,26 @@
 extends layout
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h2(class="text-2xl font-bold text-slate-900") Listado de Proyectos
-    a(href="/vistas" class="text-sm font-medium text-emerald-600 hover:text-emerald-700") &larr; Volver al inicio
-
-  if proyectos && proyectos.length > 0
-    div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
-      each proyecto in proyectos
-        div(class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between")
-          <div>
-            div(class="flex justify-between items-start mb-2")
-              span(class="text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full") ID ##{proyecto.id}
-            h3(class="text-lg font-bold text-slate-900 mb-2")
-              a(href=`/vistas/proyectos/${proyecto.id}` class="hover:text-emerald-600 transition") #{proyecto.nombre}
-            p(class="text-slate-600 text-sm mb-4")= proyecto.descripcion
-          </div>
-          <div>
-            a(href=`/vistas/proyectos/${proyecto.id}` class="inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700") Ver detalle &rarr;
-          </div>
-  else
-    div(class="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500")
-      p No hay proyectos registrados actualmente.
+  fieldset
+    legend Listado de Proyectos
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if proyectos && proyectos.length > 0
+      table
+        thead
+          tr
+            th ID
+            th Nombre
+            th Apellido / Descripción
+            th Acción
+        tbody
+          each proyecto in proyectos
+            tr
+              td= proyecto.id
+              td= proyecto.nombre
+              td= proyecto.apellido || proyecto.descripcion || "-"
+              td
+                a(href=`/vistas/proyectos/${proyecto.id}`) Ver detalle
+    else
+      p No hay proyectos registrados.

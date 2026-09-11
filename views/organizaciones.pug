@@ -1,32 +1,31 @@
 extends layout
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h2(class="text-2xl font-bold text-slate-900") Organizaciones Sociales Aliadas
-    a(href="/vistas" class="text-sm font-medium text-emerald-600 hover:text-emerald-700") &larr; Volver al inicio
-
-  if organizaciones && organizaciones.length > 0
-    div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
-      each org in organizaciones
-        div(class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm")
-          div(class="flex justify-between items-start mb-3")
-            h3(class="text-lg font-bold text-slate-900")= org.nombre
-            span(class="text-xs font-semibold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full")= org.tipo
-          p(class="text-xs font-mono text-slate-500 mb-3") CUIL: #{org.cuil}
-          
-          div(class="border-t border-slate-100 pt-3 text-sm text-slate-600 space-y-1")
-            p 
-              strong Teléfono: 
-              = org.telefono
-            p 
-              strong Email: 
-              = org.mail
-            p 
-              strong Dirección: 
-              = org.direccion
-            p 
-              strong Responsable: 
-              = org.responsable
-  else
-    div(class="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500")
+  fieldset
+    legend Organizaciones Sociales Aliadas
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if organizaciones && organizaciones.length > 0
+      table
+        thead
+          tr
+            th ID
+            th Nombre
+            th Tipo
+            th CUIL
+            th Teléfono
+            th Email
+            th Responsable
+        tbody
+          each org in organizaciones
+            tr
+              td= org.idOrganizacion
+              td= org.nombre
+              td= org.tipo
+              td= org.cuil
+              td= org.telefono
+              td= org.mail
+              td= org.responsable
+    else
       p No hay organizaciones registradas.
