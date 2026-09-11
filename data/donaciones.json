@@ -1,0 +1,29 @@
+[
+  {
+    "idDonacion": 1,
+    "monto": 5000,
+    "cbu": "0720123888000012345678",
+    "fecha": "2026-08-15",
+    "idProyecto": 1,
+    "idDonante": 1,
+    "idOrganizacion": 1
+  },
+  {
+    "idDonacion": 2,
+    "monto": 12000,
+    "cbu": "0110599520000012345678",
+    "fecha": "2026-08-20",
+    "idProyecto": 3,
+    "idDonante": 2,
+    "idOrganizacion": 2
+  },
+  {
+    "idDonacion": 3,
+    "monto": 8500,
+    "cbu": "0290028710000098765432",
+    "fecha": "2026-09-01",
+    "idProyecto": 4,
+    "idDonante": 3,
+    "idOrganizacion": 3
+  }
+]
