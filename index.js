@@ -4,12 +4,14 @@ const PORT = 3000;
 
 const proyectosRoutes = require("./routes/proyectosRoutes");
 const organizacionesRoutes = require("./routes/organizacionesRoutes");
+const donacionesRoutes = require("./routes/donacionesRoutes");
 
 app.use(express.json());
 
 // usar rutas
 app.use("/proyectos", proyectosRoutes);
 app.use("/organizaciones", organizacionesRoutes);
+app.use("/donaciones", donacionesRoutes);
 
 app.listen(PORT, () => {
     console.log("Servidor corriendo en puerto " + PORT);
