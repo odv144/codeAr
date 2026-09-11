@@ -5,6 +5,7 @@ const proyectosPath = path.join(__dirname, "../data/proyectos.json");
 const organizacionesPath = path.join(__dirname, "../data/organizaciones.json");
 const gastosPath = path.join(__dirname, "../data/gastos.json");
 const donacionesPath = path.join(__dirname, "../data/donaciones.json");
+const donantesPath = path.join(__dirname, "../data/donantes.json");
 
 const renderHome = (req, res) => {
     res.render("index", { titulo: "Panel Principal - Backend" });
@@ -60,11 +61,21 @@ const renderDonaciones = (req, res) => {
     }
 };
 
+const renderDonantes = (req, res) => {
+    try {
+        const donantes = JSON.parse(fs.readFileSync(donantesPath, "utf-8"));
+        res.render("donantes", { donantes });
+    } catch (error) {
+        res.status(500).send("Error al cargar donantes");
+    }
+};
+
 module.exports = {
     renderHome,
     renderProyectos,
     renderProyectoDetalle,
     renderOrganizaciones,
     renderGastos,
-    renderDonaciones
+    renderDonaciones,
+    renderDonantes
 };
