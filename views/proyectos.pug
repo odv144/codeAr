@@ -1,19 +1,24 @@
-doctype html
-html
-  head
-    title Listado de Proyectos
-  body
-    h1 Listado de Proyectos
-    a(href="/vistas") Volver al inicio
-    hr
-    if proyectos && proyectos.length > 0
-      ul
-        each proyecto in proyectos
-          li
-            strong ID: 
-            = proyecto.id
-            |  - 
-            a(href=`/vistas/proyectos/${proyecto.id}`) #{proyecto.nombre}
-            p= proyecto.descripcion
-    else
-      p No hay proyectos registrados.
+extends layout
+
+block content
+  div(class="flex justify-between items-center mb-6")
+    h2(class="text-2xl font-bold text-slate-900") Listado de Proyectos
+    a(href="/vistas" class="text-sm font-medium text-emerald-600 hover:text-emerald-700") &larr; Volver al inicio
+
+  if proyectos && proyectos.length > 0
+    div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+      each proyecto in proyectos
+        div(class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between")
+          <div>
+            div(class="flex justify-between items-start mb-2")
+              span(class="text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full") ID ##{proyecto.id}
+            h3(class="text-lg font-bold text-slate-900 mb-2")
+              a(href=`/vistas/proyectos/${proyecto.id}` class="hover:text-emerald-600 transition") #{proyecto.nombre}
+            p(class="text-slate-600 text-sm mb-4")= proyecto.descripcion
+          </div>
+          <div>
+            a(href=`/vistas/proyectos/${proyecto.id}` class="inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700") Ver detalle &rarr;
+          </div>
+  else
+    div(class="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500")
+      p No hay proyectos registrados actualmente.

@@ -1,0 +1,29 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= titulo || "Portal de Gestión - Red de Organizaciones Sociales"
+    script(src="https://cdn.tailwindcss.com")
+  body(class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col justify-between")
+    
+    // Navbar institucional
+    header(class="bg-white border-b border-slate-200 shadow-sm")
+      div(class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4")
+        div(class="flex items-center space-x-3")
+          span(class="bg-emerald-600 text-white p-2 rounded-lg font-bold text-lg") 🌱
+          h1(class="text-xl font-bold text-slate-900 tracking-tight") Red de Organizaciones Sociales
+        nav(class="flex flex-wrap gap-2 text-sm font-medium")
+          a(href="/vistas" class="px-3 py-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition") Inicio
+          a(href="/vistas/proyectos" class="px-3 py-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition") Proyectos
+          a(href="/vistas/organizaciones" class="px-3 py-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition") Organizaciones
+          a(href="/vistas/gastos" class="px-3 py-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition") Gastos
+          a(href="/vistas/donaciones" class="px-3 py-2 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition") Donaciones
+
+    // Contenido Principal
+    main(class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow")
+      block content
+
+    // Footer
+    footer(class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-sm text-slate-500")
+      p Sistema de Gestión Interna &copy; 2026 - Red de Organizaciones Sociales
