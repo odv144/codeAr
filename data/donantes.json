@@ -6,7 +6,7 @@
     "dni": "12345678",
     "telefono": "1112345678",
     "email": "juan.perez@example.com",
-    "monto": 1500.00,
+    "monto": 1500,
     "fecha": "2026-09-11"
   },
   {
@@ -16,7 +16,7 @@
     "dni": "23456789",
     "telefono": "1123456789",
     "email": "maria.garcia@example.com",
-    "monto": 2200.50,
+    "monto": 2200.5,
     "fecha": "2026-09-12"
   },
   {
@@ -26,7 +26,7 @@
     "dni": "34567890",
     "telefono": "1134567890",
     "email": "carlos.lopez@example.com",
-    "monto": 1800.00,
+    "monto": 1800,
     "fecha": "2026-09-13"
   },
   {
@@ -38,5 +38,15 @@
     "email": "ana.martinez@example.com",
     "monto": 3100.75,
     "fecha": "2026-09-14"
+  },
+  {
+    "idDonante": 5,
+    "nombre": "Carlos",
+    "apellido": "Gómez",
+    "dni": "30123456",
+    "telefono": "3884123456",
+    "email": "carlos@mail.com",
+    "monto": 13000,
+    "fecha": "2026-06-06"
   }
 ]
