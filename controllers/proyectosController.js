@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const Persona = require("../models/Proyectos");
+const Proyecto = require("../models/Proyectos");
 
 const rutaArchivo = path.join(__dirname, "../data/proyectos.json");
 

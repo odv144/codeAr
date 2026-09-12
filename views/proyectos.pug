@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  fieldset
+    legend Listado de Proyectos
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if proyectos && proyectos.length > 0
+      table(border="1" cellpadding="5" cellspacing="0")
+        thead
+          tr
+            th ID
+            th Nombre
+            th Apellido / Descripción
+            th Acción
+        tbody
+          each proyecto in proyectos
+            tr
+              td= proyecto.id
+              td= proyecto.nombre
+              td= proyecto.apellido || proyecto.descripcion || "-"
+              td
+                a(href=`/vistas/proyectos/${proyecto.id}`) Ver detalle
+    else
+      p No hay proyectos registrados.

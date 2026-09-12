@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  fieldset
+    legend Organizaciones Sociales Aliadas
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if organizaciones && organizaciones.length > 0
+      table(border="1" cellpadding="5" cellspacing="0")
+        thead
+          tr
+            th ID
+            th Nombre
+            th Tipo
+            th CUIL
+            th Teléfono
+            th Email
+            th Responsable
+        tbody
+          each org in organizaciones
+            tr
+              td= org.idOrganizacion
+              td= org.nombre
+              td= org.tipo
+              td= org.cuil
+              td= org.telefono
+              td= org.mail
+              td= org.responsable
+    else
+      p No hay organizaciones registradas.

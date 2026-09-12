@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  fieldset
+    legend Panel Principal de Gestión
+    p Bienvenido al sistema de gestión de la red 
+      strong SumarImpacto
+      | . Seleccione una sección para consultar los registros:
+    
+    div
+      label(for="seccion") Menú de navegación rápida: 
+      br
+      select(name="seccion" id="seccion")
+        option(value="") -- Seleccione una opción --
+        option(value="/vistas/proyectos") Proyectos
+        option(value="/vistas/organizaciones") Organizaciones
+        option(value="/vistas/donantes") Donantes
+        option(value="/vistas/gastos") Gastos
+        option(value="/vistas/donaciones") Donaciones
+      | &nbsp;
+      button(type="button" onclick="const s = document.getElementById('seccion'); if(s.value) window.location.href=s.value;") Ir
