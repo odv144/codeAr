@@ -1,0 +1,30 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= titulo || "SumarImpacto | Trazabilidad End-to-End"
+  body
+    header
+      h2 SumarImpacto - Plataforma B2NGO
+      p Sistema de Trazabilidad End-to-End y Control Operativo
+      nav
+        ul
+          li
+            a(href="/vistas") Inicio
+          li
+            a(href="/vistas/proyectos") Proyectos
+          li
+            a(href="/vistas/organizaciones") Organizaciones
+          li
+            a(href="/vistas/donantes") Donantes
+          li
+            a(href="/vistas/gastos") Gastos
+          li
+            a(href="/vistas/donaciones") Donaciones
+    hr
+    main
+      block content
+    hr
+    footer
+      p SumarImpacto &copy; 2026. Desarrollado por CodeAr para SumarImpacto.

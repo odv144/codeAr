@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  fieldset
+    legend Listado de Donantes
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if donantes && donantes.length > 0
+      table(border="1" cellpadding="5" cellspacing="0")
+        thead
+          tr
+            th ID
+            th Nombre
+            th Apellido
+            th DNI
+            th Teléfono
+            th Email
+            th Monto
+            th Fecha
+        tbody
+          each donante in donantes
+            tr
+              td= donante.idDonante
+              td= donante.nombre
+              td= donante.apellido
+              td= donante.dni
+              td= donante.telefono
+              td= donante.email
+              td $#{donante.monto}
+              td= donante.fecha
+    else
+      p No hay donantes registrados.

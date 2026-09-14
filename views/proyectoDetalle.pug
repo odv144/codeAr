@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  fieldset
+    legend Detalle del Proyecto
+    p
+      a(href="/vistas/proyectos") &larr; Volver al listado
+    
+    if proyecto
+      table(border="1" cellpadding="5" cellspacing="0")
+        tr
+          th ID:
+          td= proyecto.idProyecto
+        tr
+          th ID Organización:
+          td= proyecto.idOrganizacion
+        tr
+          th Nombre:
+          td= proyecto.nomProyecto
+        tr
+          th Descripción:
+          td= proyecto.descripcion || "-"
+    else
+      p Proyecto no encontrado.

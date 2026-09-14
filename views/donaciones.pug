@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  fieldset
+    legend Registro de Donaciones
+    p
+      a(href="/vistas") &larr; Volver al inicio
+    
+    if donaciones && donaciones.length > 0
+      table(border="1" cellpadding="5" cellspacing="0")
+        thead
+          tr
+            th ID Donación
+            th Monto
+            th CBU
+            th Fecha
+            th ID Proyecto
+            th ID Donante
+            th ID Organización
+        tbody
+          each donacion in donaciones
+            tr
+              td= donacion.idDonacion
+              td $#{donacion.monto}
+              td= donacion.cbu
+              td= donacion.fecha
+              td= donacion.idProyecto
+              td= donacion.idDonante
+              td= donacion.idOrganizacion
+    else
+      p No hay donaciones registradas.
