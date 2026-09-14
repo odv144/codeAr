@@ -1,22 +1,16 @@
 [
   {
-    "id": 1,
-    "nombre": "Juan",
-    "apellido": "Perez"
+    "idProyecto": 1,
+    "idOrganizacion": 1,
+    "nomProyecto": "Nueva Oportunidad",
+    "descripcion": "Proyecto creador de fuentes de ingresos para personas con formación en diversos oficios",
+    "saldo": 1000
   },
   {
-    "id": 3,
-    "nombre": "Omar",
-    "apellido": "Virili"
-  },
-  {
-    "id": 4,
-    "nombre": "Juana",
-    "apellido": "Pereira"
-  },
-  {
-    "id": 5,
-    "nombre": "Juana",
-    "apellido": "Pereira"
+    "idProyecto": 2,
+    "idOrganizacion": 1,
+    "nomProyecto": "Primer Empleo",
+    "descripcion": "Coordina interesados en ofrecer algun empleo con personas que desen aplicar",
+    "saldo": 1000
   }
 ]

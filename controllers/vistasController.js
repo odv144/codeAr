@@ -24,7 +24,8 @@ const renderProyectoDetalle = (req, res) => {
     try {
         const id = Number(req.params.id);
         const proyectos = JSON.parse(fs.readFileSync(proyectosPath, "utf-8"));
-        const proyecto = proyectos.find(p => p.id === id);
+        const proyecto = proyectos.find(p => p.idProyecto === id);
+        
         if (!proyecto) {
             return res.status(404).render("error", { mensaje: "Proyecto no encontrado" });
         }

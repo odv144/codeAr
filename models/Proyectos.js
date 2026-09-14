@@ -1,8 +1,10 @@
 class Proyectos {
-    constructor(id, nombre, descripcion){
-        this.id=id;
-        this.nombre=nombre;
+    constructor(idProyecto, idOrganizacion, nomProyecto, descripcion, saldo){
+        this.idProyecto=idProyecto;
+        this.idOrganizacion=idOrganizacion;
+        this.nomProyecto=nomProyecto;
         this.descripcion=descripcion;
+        this.saldo=saldo;
     }
 }
 module.exports=Proyectos;

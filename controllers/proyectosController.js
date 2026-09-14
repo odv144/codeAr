@@ -43,7 +43,7 @@ const obtenerProyectoPorId = (req, res) => {
 
     const id = parseInt(req.params.id);
 
-    const proyecto = proyectos.find(p => p.id === id);
+    const proyecto = proyectos.find(p => p.idProyecto === id);
 
     if (!proyecto) {
 
@@ -63,9 +63,9 @@ const crearProyecto = (req, res) => {
 
     const proyectos = leerProyectos();
 
-    const { id, nombre, descripcion } = req.body;
-
-    const nuevoProyecto = new Proyecto(id, nombre, descripcion);
+    const { idProyecto, idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+    let nuevoId = proyectos.length > 0 ? proyectos[proyectos.length - 1].idProyecto + 1 : 1;
+    const nuevoProyecto = new Proyecto(nuevoId, idOrganizacion, nomProyecto, descripcion, saldo);
 
     proyectos.push(nuevoProyecto);
 
@@ -86,7 +86,7 @@ const actualizarProyecto = (req, res) => {
 
     const id = parseInt(req.params.id);
 
-    const proyecto = proyectos.find(p => p.id === id);
+    const proyecto = proyectos.find(p => p.idProyecto === id);
 
     if (!proyecto) {
 
@@ -96,10 +96,11 @@ const actualizarProyecto = (req, res) => {
 
     }
 
-    const { nombre, descripcion } = req.body;
-
-    proyecto.nombre = nombre ?? proyecto.nombre;
+    const {idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+    proyecto.idOrganizacion = idOrganizacion ?? proyecto.idOrganizacion;
+    proyecto.nomProyecto = nomProyecto ?? proyecto.nomProyecto;
     proyecto.descripcion = descripcion ?? proyecto.descripcion;
+    proyecto.saldo = saldo ?? proyecto.saldo;
 
     guardarProyectos(proyectos);
 
@@ -118,7 +119,7 @@ const eliminarProyecto = (req, res) => {
 
     const id = parseInt(req.params.id);
 
-    const nuevosProyectos = proyectos.filter(p => p.id !== id);
+    const nuevosProyectos = proyectos.filter(p => p.idProyecto !== id);
 
     if (proyectos.length === nuevosProyectos.length) {
 

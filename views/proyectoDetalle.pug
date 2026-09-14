@@ -10,12 +10,15 @@ block content
       table(border="1" cellpadding="5" cellspacing="0")
         tr
           th ID:
-          td= proyecto.id
+          td= proyecto.idProyecto
+        tr
+          th ID Organización:
+          td= proyecto.idOrganizacion
         tr
           th Nombre:
-          td= proyecto.nombre
+          td= proyecto.nomProyecto
         tr
-          th Descripción / Apellido:
-          td= proyecto.apellido || proyecto.descripcion || "-"
+          th Descripción:
+          td= proyecto.descripcion || "-"
     else
       p Proyecto no encontrado.
