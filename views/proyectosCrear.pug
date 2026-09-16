@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  fieldset
+    legend Registrar Nuevo Proyecto
+    p
+      a(href="/vistas/proyectos") &larr; Volver al listado de proyectos
+    
+    form(action="/vistas/proyectos" method="POST" style="margin-top: 15px;")
+      div(style="margin-bottom: 10px;")
+        label(for="idOrganizacion") ID de Organización:
+        br
+        input(type="number" name="idOrganizacion" id="idOrganizacion" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="nomProyecto") Nombre del Proyecto:
+        br
+        input(type="text" name="nomProyecto" id="nomProyecto" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="descripcion") Descripción:
+        br
+        textarea(name="descripcion" id="descripcion" rows="4" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 15px;")
+        label(for="saldo") Saldo Inicial ($):
+        br
+        input(type="number" step="0.01" name="saldo" id="saldo" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div
+        button(type="submit") Guardar Proyecto
+        | &nbsp;
+        button(type="reset") Limpiar

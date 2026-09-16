@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const Proyecto = require("../models/Proyectos");
 
 const proyectosPath = path.join(__dirname, "../data/proyectos.json");
 const organizacionesPath = path.join(__dirname, "../data/organizaciones.json");
@@ -20,12 +21,35 @@ const renderProyectos = (req, res) => {
     }
 };
 
+const renderCrearProyecto = (req, res) => {
+    res.render("proyectosCrear");
+};
+
+const guardarProyectoDesdeVista = (req, res) => {
+    try {
+        const { idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+        const proyectos = JSON.parse(fs.readFileSync(proyectosPath, "utf-8"));
+        const nuevoId = proyectos.length > 0 ? Math.max(...proyectos.map(p => p.idProyecto)) + 1 : 1;
+        const nuevoProyecto = new Proyecto(
+            nuevoId,
+            Number(idOrganizacion),
+            nomProyecto,
+            descripcion,
+            Number(saldo)
+        );
+        proyectos.push(nuevoProyecto);
+        fs.writeFileSync(proyectosPath, JSON.stringify(proyectos, null, 2), "utf-8");
+        res.redirect("/vistas/proyectos");
+    } catch (error) {
+        res.status(500).send("Error al guardar el proyecto");
+    }
+};
+
 const renderProyectoDetalle = (req, res) => {
     try {
         const id = Number(req.params.id);
         const proyectos = JSON.parse(fs.readFileSync(proyectosPath, "utf-8"));
         const proyecto = proyectos.find(p => p.idProyecto === id);
-        
         if (!proyecto) {
             return res.status(404).render("error", { mensaje: "Proyecto no encontrado" });
         }
@@ -74,6 +98,8 @@ const renderDonantes = (req, res) => {
 module.exports = {
     renderHome,
     renderProyectos,
+    renderCrearProyecto,
+    guardarProyectoDesdeVista,
     renderProyectoDetalle,
     renderOrganizaciones,
     renderGastos,
