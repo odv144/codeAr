@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Proyecto = require("../models/Proyectos");
+const Organizacion = require("../models/Organizaciones");
 
 const proyectosPath = path.join(__dirname, "../data/proyectos.json");
 const organizacionesPath = path.join(__dirname, "../data/organizaciones.json");
@@ -68,6 +69,33 @@ const renderOrganizaciones = (req, res) => {
     }
 };
 
+const renderCrearOrganizacion = (req, res) => {
+    res.render("organizacionesCrear");
+};
+
+const guardarOrganizacionDesdeVista = (req, res) => {
+    try {
+        const { nombre, tipo, cuil, telefono, mail, direccion, responsable } = req.body;
+        const organizaciones = JSON.parse(fs.readFileSync(organizacionesPath, "utf-8"));
+        const nuevoId = organizaciones.length > 0 ? Math.max(...organizaciones.map(o => o.idOrganizacion)) + 1 : 1;
+        const nuevaOrg = new Organizacion(
+            nuevoId,
+            nombre,
+            tipo,
+            cuil,
+            telefono,
+            mail,
+            direccion,
+            responsable
+        );
+        organizaciones.push(nuevaOrg);
+        fs.writeFileSync(organizacionesPath, JSON.stringify(organizaciones, null, 2), "utf-8");
+        res.redirect("/vistas/organizaciones");
+    } catch (error) {
+        res.status(500).send("Error al guardar la organización");
+    }
+};
+
 const renderGastos = (req, res) => {
     try {
         const gastos = JSON.parse(fs.readFileSync(gastosPath, "utf-8"));
@@ -102,6 +130,8 @@ module.exports = {
     guardarProyectoDesdeVista,
     renderProyectoDetalle,
     renderOrganizaciones,
+    renderCrearOrganizacion,
+    guardarOrganizacionDesdeVista,
     renderGastos,
     renderDonaciones,
     renderDonantes

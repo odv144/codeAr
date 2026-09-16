@@ -1,0 +1,48 @@
+extends layout
+
+block content
+  fieldset
+    legend Registrar Nueva Organización
+    p
+      a(href="/vistas/organizaciones") &larr; Volver al listado de organizaciones
+    
+    form(action="/vistas/organizaciones" method="POST" style="margin-top: 15px;")
+      div(style="margin-bottom: 10px;")
+        label(for="nombre") Nombre de la Organización:
+        br
+        input(type="text" name="nombre" id="nombre" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="tipo") Tipo (Ej. Fundación, Asociación Civil, ONG):
+        br
+        input(type="text" name="tipo" id="tipo" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="cuil") CUIL (Ej. 30-71234567-8):
+        br
+        input(type="text" name="cuil" id="cuil" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="telefono") Teléfono:
+        br
+        input(type="text" name="telefono" id="telefono" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="mail") Correo Electrónico:
+        br
+        input(type="email" name="mail" id="mail" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="direccion") Dirección:
+        br
+        input(type="text" name="direccion" id="direccion" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 15px;")
+        label(for="responsable") Responsable a Cargo:
+        br
+        input(type="text" name="responsable" id="responsable" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div
+        button(type="submit") Guardar Organización
+        | &nbsp;
+        button(type="reset") Limpiar

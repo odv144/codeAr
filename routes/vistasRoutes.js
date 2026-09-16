@@ -7,6 +7,8 @@ const {
     guardarProyectoDesdeVista,
     renderProyectoDetalle,
     renderOrganizaciones,
+    renderCrearOrganizacion,
+    guardarOrganizacionDesdeVista,
     renderGastos,
     renderDonaciones,
     renderDonantes
@@ -17,7 +19,11 @@ router.get("/proyectos", renderProyectos);
 router.get("/proyectos/nuevo", renderCrearProyecto);
 router.post("/proyectos", guardarProyectoDesdeVista);
 router.get("/proyectos/:id", renderProyectoDetalle); // Ruta dinámica
+
 router.get("/organizaciones", renderOrganizaciones);
+router.get("/organizaciones/nuevo", renderCrearOrganizacion);
+router.post("/organizaciones", guardarOrganizacionDesdeVista);
+
 router.get("/gastos", renderGastos);
 router.get("/donaciones", renderDonaciones);
 router.get("/donantes", renderDonantes);
