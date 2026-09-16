@@ -10,6 +10,8 @@ const {
     renderCrearOrganizacion,
     guardarOrganizacionDesdeVista,
     renderGastos,
+    renderCrearGasto,
+    guardarGastoDesdeVista,
     renderDonaciones,
     renderCrearDonacion,
     guardarDonacionDesdeVista,
@@ -29,6 +31,8 @@ router.get("/organizaciones/nuevo", renderCrearOrganizacion);
 router.post("/organizaciones", guardarOrganizacionDesdeVista);
 
 router.get("/gastos", renderGastos);
+router.get("/gastos/nuevo", renderCrearGasto);
+router.post("/gastos", guardarGastoDesdeVista);
 
 router.get("/donaciones", renderDonaciones);
 router.get("/donaciones/nuevo", renderCrearDonacion);
