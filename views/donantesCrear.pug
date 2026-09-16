@@ -1,0 +1,48 @@
+extends layout
+
+block content
+  fieldset
+    legend Registrar Nuevo Donante
+    p
+      a(href="/vistas/donantes") &larr; Volver al listado de donantes
+    
+    form(action="/vistas/donantes" method="POST" style="margin-top: 15px;")
+      div(style="margin-bottom: 10px;")
+        label(for="nombre") Nombre:
+        br
+        input(type="text" name="nombre" id="nombre" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="apellido") Apellido:
+        br
+        input(type="text" name="apellido" id="apellido" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="dni") DNI:
+        br
+        input(type="text" name="dni" id="dni" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="telefono") Teléfono:
+        br
+        input(type="text" name="telefono" id="telefono" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="email") Correo Electrónico:
+        br
+        input(type="email" name="email" id="email" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="monto") Monto ($):
+        br
+        input(type="number" step="0.01" name="monto" id="monto" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 15px;")
+        label(for="fecha") Fecha (YYYY-MM-DD):
+        br
+        input(type="date" name="fecha" id="fecha" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div
+        button(type="submit") Guardar Donante
+        | &nbsp;
+        button(type="reset") Limpiar

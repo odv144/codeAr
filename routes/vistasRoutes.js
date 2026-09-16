@@ -11,7 +11,9 @@ const {
     guardarOrganizacionDesdeVista,
     renderGastos,
     renderDonaciones,
-    renderDonantes
+    renderDonantes,
+    renderCrearDonante,
+    guardarDonanteDesdeVista
 } = require("../controllers/vistasController");
 
 router.get("/", renderHome);
@@ -26,6 +28,9 @@ router.post("/organizaciones", guardarOrganizacionDesdeVista);
 
 router.get("/gastos", renderGastos);
 router.get("/donaciones", renderDonaciones);
+
 router.get("/donantes", renderDonantes);
+router.get("/donantes/nuevo", renderCrearDonante);
+router.post("/donantes", guardarDonanteDesdeVista);
 
 module.exports = router;
