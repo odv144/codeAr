@@ -5,6 +5,8 @@ block content
     legend Registro de Donaciones
     p
       a(href="/vistas") &larr; Volver al inicio
+      | &nbsp;|&nbsp;
+      a(href="/vistas/donaciones/nuevo") + Nueva Donación
     
     if donaciones && donaciones.length > 0
       table(border="1" cellpadding="5" cellspacing="0")

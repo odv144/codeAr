@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  fieldset
+    legend Registrar Nueva Donación
+    p
+      a(href="/vistas/donaciones") &larr; Volver al listado de donaciones
+    
+    form(action="/vistas/donaciones" method="POST" style="margin-top: 15px;")
+      div(style="margin-bottom: 10px;")
+        label(for="monto") Monto ($):
+        br
+        input(type="number" step="0.01" name="monto" id="monto" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="cbu") CBU / Cuenta:
+        br
+        input(type="text" name="cbu" id="cbu" required style="width: 100%; max-width: 400px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="fecha") Fecha (YYYY-MM-DD):
+        br
+        input(type="date" name="fecha" id="fecha" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="idProyecto") ID Proyecto:
+        br
+        input(type="number" name="idProyecto" id="idProyecto" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 10px;")
+        label(for="idDonante") ID Donante:
+        br
+        input(type="number" name="idDonante" id="idDonante" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div(style="margin-bottom: 15px;")
+        label(for="idOrganizacion") ID Organización:
+        br
+        input(type="number" name="idOrganizacion" id="idOrganizacion" required style="width: 100%; max-width: 300px; padding: 5px;")
+      
+      div
+        button(type="submit") Guardar Donación
+        | &nbsp;
+        button(type="reset") Limpiar
