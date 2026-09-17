@@ -12,5 +12,12 @@
     "nomProyecto": "Primer Empleo",
     "descripcion": "Coordina interesados en ofrecer algun empleo con personas que desen aplicar",
     "saldo": 1000
+  },
+  {
+    "idProyecto": 3,
+    "idOrganizacion": 2,
+    "nomProyecto": "Practica",
+    "descripcion": "Proyecto para nuevos desarrolladores",
+    "saldo": 2000
   }
 ]
