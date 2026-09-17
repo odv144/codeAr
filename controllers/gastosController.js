@@ -17,6 +17,22 @@ function guardarGastos(gastos) {
     );
 }
 
+function calcularSaldoDisponible(idProyecto, excluirGastoId = null) {
+    const donacionesFile = path.join(__dirname, "../data/donaciones.json");
+    const donaciones = fs.existsSync(donacionesFile) ? JSON.parse(fs.readFileSync(donacionesFile, "utf-8")) : [];
+    
+    const totalRecaudado = donaciones
+        .filter(d => Number(d.idProyecto) === Number(idProyecto))
+        .reduce((sum, d) => sum + Number(d.monto), 0);
+
+    const gastos = leerGastos();
+    const totalGastado = gastos
+        .filter(g => Number(g.idProyecto) === Number(idProyecto) && (!excluirGastoId || Number(g.idGasto) !== Number(excluirGastoId)))
+        .reduce((sum, g) => sum + Number(g.monto), 0);
+
+    return totalRecaudado - totalGastado;
+}
+
 
 // GET ALL
 const obtenerGastos = (req, res) => {
@@ -95,9 +111,15 @@ const crearGasto = (req, res) => {
             });
         }
 
-        const gastos = leerGastos();
+        // Validación de saldo disponible
+        const saldoDisponible = calcularSaldoDisponible(idProyecto);
+        if (monto > saldoDisponible) {
+            return res.status(400).json({
+                mensaje: "El monto del gasto supera el saldo disponible del proyecto"
+            });
+        }
 
-        // TODO: validar que el gasto no supere el saldo disponible del proyecto (pendiente de confirmar si se necesita para esta entrega)
+        const gastos = leerGastos();
 
         const nuevoId =
             gastos.length > 0
@@ -175,6 +197,14 @@ const actualizarGasto = (req, res) => {
         ) {
             return res.status(400).json({
                 mensaje: "Tipo de dato inválido en alguno de los campos"
+            });
+        }
+
+        // Validación de saldo disponible (excluyendo el gasto actual)
+        const saldoDisponible = calcularSaldoDisponible(idProyecto, id);
+        if (monto > saldoDisponible) {
+            return res.status(400).json({
+                mensaje: "El monto del gasto supera el saldo disponible del proyecto"
             });
         }
 

@@ -9,8 +9,7 @@
     "direccion": "Av. Pellegrini 1234",
     "responsable": "Laura Gómez"
   },
-
-{
+  {
     "idOrganizacion": 2,
     "nombre": "Asociación Civil Luces de Futuro",
     "tipo": "Asociación Civil",
@@ -20,7 +19,6 @@
     "direccion": "Bv. Oroño 850",
     "responsable": "Carlos Benítez"
   },
-  
   {
     "idOrganizacion": 3,
     "nombre": "Centro Comunitario San Martín",
@@ -31,5 +29,4 @@
     "direccion": "San Martín 3410",
     "responsable": "Mariana Rossi"
   }
-
 ]

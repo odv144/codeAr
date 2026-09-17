@@ -5,6 +5,8 @@ block content
     legend Listado de Proyectos
     p
       a(href="/vistas") &larr; Volver al inicio
+      | &nbsp;|&nbsp;
+      a(href="/vistas/proyectos/nuevo") + Nuevo Proyecto
     
     if proyectos && proyectos.length > 0
       table(border="1" cellpadding="5" cellspacing="0")
@@ -14,6 +16,7 @@ block content
             th ID Organización
             th Nombre del Proyecto
             th Descripción
+            th Saldo
             th Acción
         tbody
           each proyecto in proyectos
@@ -22,6 +25,7 @@ block content
               td= proyecto.idOrganizacion
               td= proyecto.nomProyecto || "-"
               td= proyecto.descripcion || "-"
+              td $#{proyecto.saldo || 0}
               td
                 a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
     else

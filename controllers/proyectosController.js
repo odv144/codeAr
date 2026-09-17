@@ -114,27 +114,45 @@ const actualizarProyecto = (req, res) => {
 
 // DELETE
 const eliminarProyecto = (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
 
-    const proyectos = leerProyectos();
+        const proyectos = leerProyectos();
+        const proyecto = proyectos.find(p => p.idProyecto === id);
 
-    const id = parseInt(req.params.id);
+        if (!proyecto) {
+            return res.status(404).json({
+                mensaje: "Proyecto no encontrado"
+            });
+        }
 
-    const nuevosProyectos = proyectos.filter(p => p.idProyecto !== id);
+        // Validación de integridad referencial (gastos o donaciones asociados)
+        const gastosFile = path.join(__dirname, "../data/gastos.json");
+        const donacionesFile = path.join(__dirname, "../data/donaciones.json");
 
-    if (proyectos.length === nuevosProyectos.length) {
+        const gastos = fs.existsSync(gastosFile) ? JSON.parse(fs.readFileSync(gastosFile, "utf-8")) : [];
+        const donaciones = fs.existsSync(donacionesFile) ? JSON.parse(fs.readFileSync(donacionesFile, "utf-8")) : [];
 
-        return res.status(404).json({
-            mensaje: "Proyecto no encontrado"
+        const tieneGastos = gastos.some(g => Number(g.idProyecto) === id);
+        const tieneDonaciones = donaciones.some(d => Number(d.idProyecto) === id);
+
+        if (tieneGastos || tieneDonaciones) {
+            return res.status(409).json({
+                mensaje: "No se puede eliminar el proyecto porque posee gastos o donaciones asociados"
+            });
+        }
+
+        const nuevosProyectos = proyectos.filter(p => p.idProyecto !== id);
+        guardarProyectos(nuevosProyectos);
+
+        res.json({
+            mensaje: "Proyecto eliminado"
         });
-
+    } catch (error) {
+        res.status(500).json({
+            mensaje: "Error al eliminar el proyecto"
+        });
     }
-
-    guardarProyectos(nuevosProyectos);
-
-    res.json({
-        mensaje: "Proyecto eliminado"
-    });
-
 };
 
 

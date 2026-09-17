@@ -3,7 +3,7 @@
 Proyecto desarrollado para la materia de Backend (Tecnicatura Superior en Desarrollo de Software - IFTS 29).
 
 ## 🏢 Sobre la Organización
-**SumarImpacto** es una plataforma SaaS B2NGO concebida para la trazabilidad *end-to-end* y control operativo de donaciones físicas (ropa, alimentos, medicamentos, etc.) en organizaciones sociales, comedores y fundaciones.
+**SumarImpacto** es una plataforma SaaS B2NGO concebida para la trazabilidad *end-to-end* y control operativo de donaciones en organizaciones sociales, comedores y fundaciones.
 
 ## 👥 Integrantes y Responsabilidades (Empresa CodeAr)
 - **Omar Virili:** Configuración del servidor Express, arquitectura y módulo de Proyectos.
