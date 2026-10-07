@@ -1,18 +1,19 @@
 import express from "express";
 import {
-    obtenerDonantes,
-    obtenerDonantePorId,
-    crearDonante,
-    actualizarDonante,
-    eliminarDonante
-} from "../controllers/donantesController.js";
+  listarDonantes,
+  obtenerDonantePorId,
+  crearDonante,
+  modificarDonante,
+  borrarDonante
+} from "../controllers/donantesController.js"; // <-- Importante: no olvidar el .js al final
 
 const router = express.Router();
 
-router.get("/", obtenerDonantes);
+// Rutas CRUD para la API de Donantes
+router.get("/", listarDonantes);
 router.get("/:id", obtenerDonantePorId);
 router.post("/", crearDonante);
-router.put("/:id", actualizarDonante);
-router.delete("/:id", eliminarDonante);
+router.put("/:id", modificarDonante);
+router.delete("/:id", borrarDonante);
 
 export default router;

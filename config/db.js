@@ -3,8 +3,11 @@ import dotenv from "dotenv";
 //coneccion a la base de datos
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, { dbName: process.env.DBNAME });
-    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
+    await mongoose.connect(process.env.MONGO_URI, { 
+      dbName: process.env.DBNAME });
+    console.log(`MongoDB Connected: ${mongoose.connection.host
+      
+    }`);
    
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -13,3 +16,4 @@ const connectDB = async () => {
 };
 
 export {connectDB};
+

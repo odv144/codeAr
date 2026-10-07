@@ -11,15 +11,15 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.3.0",
-    "dotenv": "^18.0.5",
+    "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "method-override": "^3.0.0",
-    "mongoose": "^9.10.3",
+    "mongoose": "^9.11.0",
     "pug": "^3.0.4"
   },
+  "description": "Proyecto para entregar a la materia de Backend - Adaptado a ES Modules (ESM)",
+  "keywords": [],
   "devDependencies": {
     "nodemon": "^3.1.14"
-  },
-  "description": "Proyecto para entregar a la materia de Backend - Adaptado a ES Modules (ESM)",
-  "keywords": []
+  }
 }

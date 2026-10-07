@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import { obtenerDonantes, insertarDonante } from "../services/serviceDonante.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -188,14 +188,13 @@ const guardarDonacionDesdeVista = (req, res) => {
     }
 };
 
-
-/* ===================== DONANTES (JSON) ===================== */
-
-const renderDonantes = (req, res) => {
+const renderDonantes = async   (req, res) => {
     try {
-        const donantes = JSON.parse(fs.readFileSync(donantesPath, "utf-8"));
+        // REEMPLAZO: En lugar de fs.readFileSync, llamamos a la función del servicio
+        const donantes = await obtenerDonantes();
         res.render("donantes", { donantes });
     } catch (error) {
+        console.error(error);
         res.status(500).send("Error al cargar donantes");
     }
 };
@@ -204,25 +203,13 @@ const renderCrearDonante = (req, res) => {
     res.render("donantesCrear");
 };
 
-const guardarDonanteDesdeVista = (req, res) => {
+const guardarDonanteDesdeVista = async (req, res) => {
     try {
-        const { nombre, apellido, dni, telefono, email, monto, fecha } = req.body;
-        const donantes = JSON.parse(fs.readFileSync(donantesPath, "utf-8"));
-        const nuevoId = donantes.length > 0 ? Math.max(...donantes.map(d => d.idDonante)) + 1 : 1;
-        const nuevoDonante = new Donante(
-            nuevoId,
-            nombre,
-            apellido,
-            dni,
-            telefono,
-            email,
-            Number(monto),
-            fecha
-        );
-        donantes.push(nuevoDonante);
-        fs.writeFileSync(donantesPath, JSON.stringify(donantes, null, 2), "utf-8");
+       await insertarDonante(req.body);
         res.redirect("/vistas/donantes");
     } catch (error) {
+        //---------
+        console.error("ERROR AL GUARDAR DONANTE:", error);
         res.status(500).send("Error al guardar el donante");
     }
 };
