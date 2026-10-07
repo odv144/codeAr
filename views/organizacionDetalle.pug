@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  fieldset
+    legend Detalle de la Organización
+    p
+      a(href="/vistas/organizaciones") &larr; Volver al listado
+
+    if organizacion
+      table(border="1" cellpadding="5" cellspacing="0")
+        tr
+          th Nombre:
+          td= organizacion.nombre
+        tr
+          th Tipo:
+          td= organizacion.tipo
+        tr
+          th CUIL:
+          td= organizacion.cuil
+        tr
+          th Teléfono:
+          td= organizacion.telefono
+        tr
+          th Email:
+          td= organizacion.mail
+        tr
+          th Dirección:
+          td= organizacion.direccion
+        tr
+          th Responsable:
+          td= organizacion.responsable
+
+      p(style="margin-top: 15px;")
+        a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar`) Editar
+        | &nbsp;|&nbsp;
+        a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar`) Dar de baja
+        | &nbsp;|&nbsp;
+        a(href="/vistas/organizaciones") Volver al listado
+    else
+      p Organización no encontrada.
