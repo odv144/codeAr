@@ -20,6 +20,7 @@ block content
             th Email
             th Monto
             th Fecha
+            th Acciones
         tbody
           each donante in donantes
             tr
@@ -31,5 +32,11 @@ block content
               td= donante.email
               td $#{donante.monto}
               td= donante.fecha
+              td
+                a(href=`/vistas/donantes/${donante.idDonante}`) Ver detalle
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/donantes/${donante.idDonante}/editar`) Editar
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/donantes/${donante.idDonante}/eliminar`) Eliminar
     else
       p No hay donantes registrados.

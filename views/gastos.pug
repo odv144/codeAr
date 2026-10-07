@@ -17,6 +17,7 @@ block content
             th Descripción
             th Monto
             th Fecha
+            th Acciones
         tbody
           each gasto in gastos
             tr
@@ -25,5 +26,11 @@ block content
               td= gasto.descripcion
               td $#{gasto.monto}
               td= gasto.fecha
+              td
+                a(href=`/vistas/gastos/${gasto.idGasto}`) Ver detalle
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/gastos/${gasto.idGasto}/editar`) Editar
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/gastos/${gasto.idGasto}/eliminar`) Eliminar
     else
       p No hay gastos registrados.
