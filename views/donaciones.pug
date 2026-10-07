@@ -19,6 +19,7 @@ block content
             th ID Proyecto
             th ID Donante
             th ID Organización
+            th Acciones
         tbody
           each donacion in donaciones
             tr
@@ -29,5 +30,11 @@ block content
               td= donacion.idProyecto
               td= donacion.idDonante
               td= donacion.idOrganizacion
+              td
+                a(href=`/vistas/donaciones/${donacion.idDonacion}`) Ver detalle
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
     else
       p No hay donaciones registradas.

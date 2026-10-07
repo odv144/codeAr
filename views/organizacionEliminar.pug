@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  fieldset
+    legend Dar de Baja Organización
+    p
+      a(href="/vistas/organizaciones") &larr; Volver al listado
+      | &nbsp;|&nbsp;
+      a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}`) Ver detalle
+
+    p
+      | ¿Confirma dar de baja la siguiente organización?
+      strong  La organización será dada de baja y dejará de estar activa. El registro y su historial no serán eliminados.
+      |  Es una baja lógica: se conservan los proyectos y donaciones asociados.
+
+    table(border="1" cellpadding="5" cellspacing="0")
+      tr
+        th ID:
+        td= organizacion.idOrganizacion
+      tr
+        th Nombre:
+        td= organizacion.nombre
+      tr
+        th Tipo:
+        td= organizacion.tipo
+      tr
+        th CUIL:
+        td= organizacion.cuil
+      tr
+        th Responsable:
+        td= organizacion.responsable
+
+    form(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar` method="POST" style="margin-top: 15px;")
+      button(type="submit") Sí, dar de baja
+      | &nbsp;
+      a(href="/vistas/organizaciones") Cancelar

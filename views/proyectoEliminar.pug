@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  fieldset
+    legend Eliminar Proyecto
+    p
+      a(href="/vistas/proyectos") &larr; Volver al listado
+      | &nbsp;|&nbsp;
+      a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
+
+    p
+      | ¿Confirma que desea eliminar el siguiente proyecto?
+      strong  Esta acción eliminará permanentemente el proyecto y no podrá deshacerse
+      |  (borrado físico del registro).
+
+    table(border="1" cellpadding="5" cellspacing="0")
+      tr
+        th ID Proyecto:
+        td= proyecto.idProyecto
+      tr
+        th ID Organización:
+        td= proyecto.idOrganizacion
+      tr
+        th Nombre:
+        td= proyecto.nomProyecto
+      tr
+        th Descripción:
+        td= proyecto.descripcion || "-"
+
+    form(action=`/vistas/proyectos/${proyecto.idProyecto}/eliminar` method="POST" style="margin-top: 15px;")
+      button(type="submit") Sí, eliminar
+      | &nbsp;
+      a(href="/vistas/proyectos") Cancelar

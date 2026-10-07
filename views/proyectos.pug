@@ -16,7 +16,7 @@ block content
             th ID Organización
             th Nombre del Proyecto
             th Descripción
-            th Acción
+            th Acciones
         tbody
           each proyecto in proyectos
             tr
@@ -24,8 +24,11 @@ block content
               td= proyecto.idOrganizacion
               td= proyecto.nomProyecto || "-"
               td= proyecto.descripcion || "-"
-              
               td
                 a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
+                | &nbsp;|&nbsp;
+                a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
     else
       p No hay proyectos registrados.

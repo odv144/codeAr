@@ -21,7 +21,18 @@ block content
           th Descripción:
           td= proyecto.descripcion || "-"
         tr
-          th Monto: 
-          td=proyecto.saldo.monto
+          th Saldo actual:
+          td
+            if proyecto.saldo && proyecto.saldo.length > 0
+              | $ #{proyecto.saldo[proyecto.saldo.length - 1].monto}
+            else
+              | -
+
+      p(style="margin-top: 15px;")
+        a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
+        | &nbsp;|&nbsp;
+        a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
+        | &nbsp;|&nbsp;
+        a(href="/vistas/proyectos") Volver al listado
     else
       p Proyecto no encontrado.

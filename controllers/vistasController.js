@@ -11,8 +11,20 @@ import Donacion from "../models/Donaciones.js";
 import Gasto from "../models/Gastos.js";
 
 // Servicios con MongoDB
-import { obtenerProyectosId, insertarProyecto, obtenerProyectos } from "../services/serviceProyecto.js";
-import { obtenerOrganizaciones, crearOrganizacion } from "../services/serviceOrganizacion.js";
+import {
+    obtenerProyectosId,
+    insertarProyecto,
+    obtenerProyectos,
+    actualizarProyecto,
+    eliminarProyecto
+} from "../services/serviceProyecto.js";
+import {
+    obtenerOrganizaciones,
+    crearOrganizacion,
+    obtenerOrganizacionPorId,
+    actualizarOrganizacion,
+    darDeBajaOrganizacion
+} from "../services/serviceOrganizacion.js";
 import { validarDatosOrganizacion } from "../utils/validacionesOrganizacion.js";
 import { AppError } from "../utils/AppError.js";
 
@@ -60,19 +72,61 @@ const guardarProyectoDesdeVista = async (req, res) => {
     }
 };
 
-const renderProyectoDetalle = async (req, res) => {
+const renderProyectoDetalle = async (req, res, next) => {
     try {
-        const id = req.params.id;
-        const proyecto = await obtenerProyectosId(id);
-        if (!proyecto) {
-            return res.status(404).render("error", { mensaje: "Proyecto no encontrado" });
-        }
+        const proyecto = await obtenerProyectosId(req.params.id);
         res.render("proyectoDetalle", { proyecto });
     } catch (error) {
-        if (error.message === "Proyecto no encontrado") {
-            return res.status(404).render("error", { mensaje: "Proyecto no encontrado" });
-        }
-        res.status(500).send("Error al cargar el detalle del proyecto");
+        next(mapearProyectoNoEncontrado(error));
+    }
+};
+
+// obtenerProyectosId lanza un Error simple sin status: acá lo convertimos en 404 real
+// para que errorHandler muestre "Proyecto no encontrado" y no un 500 genérico.
+const mapearProyectoNoEncontrado = (error) =>
+    error.message === "Proyecto no encontrado"
+        ? new AppError(404, "Proyecto no encontrado")
+        : error;
+
+const renderEditarProyecto = async (req, res, next) => {
+    try {
+        const proyecto = await obtenerProyectosId(req.params.id);
+        res.render("proyectoEditar", { proyecto });
+    } catch (error) {
+        next(mapearProyectoNoEncontrado(error));
+    }
+};
+
+const guardarEdicionProyecto = async (req, res, next) => {
+    try {
+        const { idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+
+        // Si "saldo" viene vacío, actualizarProyecto lo omite y conserva el historial
+        await actualizarProyecto(req.params.id, { idOrganizacion, nomProyecto, descripcion, saldo });
+
+        res.redirect("/vistas/proyectos");
+    } catch (error) {
+        next(mapearProyectoNoEncontrado(error));
+    }
+};
+
+const renderEliminarProyecto = async (req, res, next) => {
+    try {
+        const proyecto = await obtenerProyectosId(req.params.id);
+        res.render("proyectoEliminar", { proyecto });
+    } catch (error) {
+        next(mapearProyectoNoEncontrado(error));
+    }
+};
+
+const eliminarProyectoVista = async (req, res, next) => {
+    try {
+        await eliminarProyecto(Number(req.params.id));
+        res.redirect("/vistas/proyectos");
+    } catch (error) {
+        next(error.statusCode === 404
+            ? new AppError(404, "Proyecto no encontrado")
+            : error);
     }
 };
 
@@ -111,6 +165,68 @@ const guardarOrganizacionDesdeVista = async (req, res) => {
         }
         console.error("Error al guardar la organización:", error);
         res.status(500).render("error", { mensaje: "Error al guardar la organización" });
+    }
+};
+
+/* ============ ORGANIZACIONES: detalle / edición / baja lógica (vistas) ============ */
+
+// Devuelve null si la organización no existe o está dada de baja (baja lógica)
+const organizacionNoEncontrada = () => new AppError(404, "Organización no encontrada");
+
+const renderOrganizacionDetalle = async (req, res, next) => {
+    try {
+        const organizacion = await obtenerOrganizacionPorId(req.params.id);
+        if (!organizacion) throw organizacionNoEncontrada();
+        res.render("organizacionDetalle", { organizacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderEditarOrganizacion = async (req, res, next) => {
+    try {
+        const organizacion = await obtenerOrganizacionPorId(req.params.id);
+        if (!organizacion) throw organizacionNoEncontrada();
+        res.render("organizacionEditar", { organizacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const guardarEdicionOrganizacion = async (req, res, next) => {
+    try {
+        // Mismas validaciones que la API y que la creación desde la vista
+        const { errores, datos } = validarDatosOrganizacion(req.body);
+        if (errores.length > 0) throw new AppError(400, errores.join(" | "));
+
+        // actualiza solo organizaciones activas; null = no existe o dada de baja
+        const organizacion = await actualizarOrganizacion(req.params.id, datos);
+        if (!organizacion) throw organizacionNoEncontrada();
+
+        res.redirect("/vistas/organizaciones");
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderEliminarOrganizacion = async (req, res, next) => {
+    try {
+        const organizacion = await obtenerOrganizacionPorId(req.params.id);
+        if (!organizacion) throw organizacionNoEncontrada();
+        res.render("organizacionEliminar", { organizacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// BAJA LÓGICA: no borra el documento, lo marca como inactiva (serviceOrganizacion.js)
+const eliminarOrganizacionVista = async (req, res, next) => {
+    try {
+        const baja = await darDeBajaOrganizacion(Number(req.params.id));
+        if (!baja) throw organizacionNoEncontrada();
+        res.redirect("/vistas/organizaciones");
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -220,9 +336,18 @@ export {
     renderCrearProyecto,
     guardarProyectoDesdeVista,
     renderProyectoDetalle,
+    renderEditarProyecto,
+    guardarEdicionProyecto,
+    renderEliminarProyecto,
+    eliminarProyectoVista,
     renderOrganizaciones,
     renderCrearOrganizacion,
     guardarOrganizacionDesdeVista,
+    renderOrganizacionDetalle,
+    renderEditarOrganizacion,
+    guardarEdicionOrganizacion,
+    renderEliminarOrganizacion,
+    eliminarOrganizacionVista,
     renderGastos,
     renderCrearGasto,
     guardarGastoDesdeVista,
