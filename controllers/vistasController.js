@@ -4,31 +4,36 @@ import { fileURLToPath } from "url";
 import { obtenerDonantes, insertarDonante } from "../services/serviceDonante.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import Proyecto from "../models/Proyectos.js";
-import Organizacion from "../models/Organizaciones.js";
+
+// Modelos (clases simples) que todavía se usan con archivos JSON
 import Donante from "../models/Donantes.js";
 import Donacion from "../models/Donaciones.js";
 import Gasto from "../models/Gastos.js";
 
-import {obtenerProyectosId, insertarProyecto, obtenerProyectos} from "../services/serviceProyecto.js";
+// Servicios con MongoDB
+import { obtenerProyectosId, insertarProyecto, obtenerProyectos } from "../services/serviceProyecto.js";
+import { obtenerOrganizaciones, crearOrganizacion } from "../services/serviceOrganizacion.js";
+import { validarDatosOrganizacion } from "../utils/validacionesOrganizacion.js";
+import { AppError } from "../utils/AppError.js";
 
-//import {obtenerProyectos} from "./proyectosController.js";
-const proyectosPath = path.join(__dirname, "../data/proyectos.json");
-const organizacionesPath = path.join(__dirname, "../data/organizaciones.json");
+// Rutas de los JSON (organizaciones y proyectos ya NO se leen de acá)
 const gastosPath = path.join(__dirname, "../data/gastos.json");
 const donacionesPath = path.join(__dirname, "../data/donaciones.json");
 const donantesPath = path.join(__dirname, "../data/donantes.json");
 
 
+/* ===================== HOME ===================== */
 
 const renderHome = (req, res) => {
     res.render("index", { titulo: "Panel Principal - Backend" });
 };
 
-const renderProyectos =  async(req, res) => {
+
+/* ===================== PROYECTOS (MongoDB) ===================== */
+
+const renderProyectos = async (req, res) => {
     try {
-       
-        const proyectos =await obtenerProyectos();
+        const proyectos = await obtenerProyectos();
         res.render("proyectos", { proyectos });
     } catch (error) {
         res.status(500).send("Error al cargar proyectos");
@@ -39,27 +44,23 @@ const renderCrearProyecto = (req, res) => {
     res.render("proyectosCrear");
 };
 
-const guardarProyectoDesdeVista = (req, res) => {
+const guardarProyectoDesdeVista = async (req, res) => {
     try {
         const { idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
-        //const proyectos = JSON.parse(fs.readFileSync(proyectosPath, "utf-8"));
-        const proyectos = obtenerProyectos();
-        const nuevoId = proyectos.length > 0 ? Math.max(...proyectos.map(p => p.idProyecto)) + 1 : 1;
-        const nuevoProyecto = new Proyecto(
-            nuevoId,
-            Number(idOrganizacion),
-            nomProyecto,
-            descripcion,
-            { monto: Number(saldo), fecha: new Date() }
-        );
-        insertarProyecto(nuevoProyecto);
+
+        // insertarProyecto calcula el idProyecto y arma el saldo inicial por su cuenta
+        await insertarProyecto({ idOrganizacion, nomProyecto, descripcion, saldo });
+
         res.redirect("/vistas/proyectos");
     } catch (error) {
-        res.status(500).send("Error al guardar el proyecto");
+        const mensaje = error.status === 400
+            ? error.message
+            : "Error al guardar el proyecto";
+        res.status(error.status || 500).render("error", { mensaje });
     }
 };
 
-const renderProyectoDetalle = async(req, res) => {
+const renderProyectoDetalle = async (req, res) => {
     try {
         const id = req.params.id;
         const proyecto = await obtenerProyectosId(id);
@@ -68,13 +69,20 @@ const renderProyectoDetalle = async(req, res) => {
         }
         res.render("proyectoDetalle", { proyecto });
     } catch (error) {
+        if (error.message === "Proyecto no encontrado") {
+            return res.status(404).render("error", { mensaje: "Proyecto no encontrado" });
+        }
         res.status(500).send("Error al cargar el detalle del proyecto");
     }
 };
 
-const renderOrganizaciones = (req, res) => {
+
+/* ===================== ORGANIZACIONES (MongoDB) ===================== */
+
+const renderOrganizaciones = async (req, res) => {
     try {
-        const organizaciones = JSON.parse(fs.readFileSync(organizacionesPath, "utf-8"));
+        // Solo organizaciones activas (las dadas de baja lógica no se muestran)
+        const organizaciones = await obtenerOrganizaciones();
         res.render("organizaciones", { organizaciones });
     } catch (error) {
         res.status(500).send("Error al cargar organizaciones");
@@ -85,28 +93,29 @@ const renderCrearOrganizacion = (req, res) => {
     res.render("organizacionesCrear");
 };
 
-const guardarOrganizacionDesdeVista = (req, res) => {
+const guardarOrganizacionDesdeVista = async (req, res) => {
     try {
-        const { nombre, tipo, cuil, telefono, mail, direccion, responsable } = req.body;
-        const organizaciones = JSON.parse(fs.readFileSync(organizacionesPath, "utf-8"));
-        const nuevoId = organizaciones.length > 0 ? Math.max(...organizaciones.map(o => o.idOrganizacion)) + 1 : 1;
-        const nuevaOrg = new Organizacion(
-            nuevoId,
-            nombre,
-            tipo,
-            cuil,
-            telefono,
-            mail,
-            direccion,
-            responsable
-        );
-        organizaciones.push(nuevaOrg);
-        fs.writeFileSync(organizacionesPath, JSON.stringify(organizaciones, null, 2), "utf-8");
+        // Mismas validaciones que usa la API
+        const { errores, datos } = validarDatosOrganizacion(req.body);
+        if (errores.length > 0) {
+            return res.status(400).render("error", { mensaje: errores.join(" | ") });
+        }
+
+        // Asigna idOrganizacion, controla CUIL duplicado y guarda en Mongo
+        await crearOrganizacion(datos);
+
         res.redirect("/vistas/organizaciones");
     } catch (error) {
-        res.status(500).send("Error al guardar la organización");
+        if (error instanceof AppError) {
+            return res.status(error.status).render("error", { mensaje: error.message });
+        }
+        console.error("Error al guardar la organización:", error);
+        res.status(500).render("error", { mensaje: "Error al guardar la organización" });
     }
 };
+
+
+/* ===================== GASTOS (JSON) ===================== */
 
 const renderGastos = (req, res) => {
     try {
@@ -140,6 +149,9 @@ const guardarGastoDesdeVista = (req, res) => {
         res.status(500).send("Error al guardar el gasto");
     }
 };
+
+
+/* ===================== DONACIONES (JSON) ===================== */
 
 const renderDonaciones = (req, res) => {
     try {

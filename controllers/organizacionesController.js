@@ -1,263 +1,100 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import Organizacion from "../models/Organizaciones.js";
-
-const archivo = path.join(__dirname, "../data/organizaciones.json");
+import * as servicio from "../services/serviceOrganizacion.js";
+import { AppError } from "../utils/AppError.js";
 
 
-function leerOrganizaciones() {
-    const datos = fs.readFileSync(archivo, "utf-8");
-    return JSON.parse(datos);
-}
-
-function guardarOrganizaciones(organizaciones) {
-    fs.writeFileSync(
-        archivo,
-        JSON.stringify(organizaciones, null, 2)
-    );
-}
-
-
-// GET ALL
-const obtenerOrganizaciones = (req, res) => {
+// GET /organizaciones            -> solo activas
+// GET /organizaciones?incluirBajas=true -> también las dadas de baja
+const obtenerOrganizaciones = async (req, res, next) => {
     try {
-        const organizaciones = leerOrganizaciones();
-
+        const incluirBajas = req.query.incluirBajas === "true";
+        const organizaciones = await servicio.obtenerOrganizaciones({ incluirBajas });
         res.status(200).json(organizaciones);
-
     } catch (error) {
-        res.status(500).json({
-            mensaje: "Error al obtener las organizaciones"
-        });
+        next(error);
     }
 };
 
-
-// GET BY ID
-const obtenerOrganizacionPorId = (req, res) => {
+// GET /organizaciones/:id
+const obtenerOrganizacionPorId = async (req, res, next) => {
     try {
-        const id = Number(req.params.id);
-
-        const organizaciones = leerOrganizaciones();
-
-        const organizacion = organizaciones.find(
-            o => o.idOrganizacion === id
-        );
+        const organizacion = await servicio.obtenerOrganizacionPorId(req.params.id);
 
         if (!organizacion) {
-            return res.status(404).json({
-                mensaje: "Organización no encontrada"
-            });
+            throw new AppError(404, "Organización no encontrada");
         }
 
         res.status(200).json(organizacion);
-
     } catch (error) {
-        res.status(500).json({
-            mensaje: "Error al obtener la organización"
-        });
+        next(error);
     }
 };
 
-
-// CREATE
-const crearOrganizacion = (req, res) => {
+// POST /organizaciones
+const crearOrganizacion = async (req, res, next) => {
     try {
-
-        const {
-            nombre,
-            tipo,
-            cuil,
-            telefono,
-            mail,
-            direccion,
-            responsable
-        } = req.body;
-
-        if (
-            !nombre ||
-            !tipo ||
-            !cuil ||
-            !telefono ||
-            !mail ||
-            !direccion ||
-            !responsable
-        ) {
-            return res.status(400).json({
-                mensaje: "Todos los campos son obligatorios"
-            });
-        }
-
-        const organizaciones = leerOrganizaciones();
-
-        const existeCuil = organizaciones.some(
-            o => o.cuil === cuil
-        );
-
-        if (existeCuil) {
-            return res.status(409).json({
-                mensaje: "Ya existe una organización con ese CUIL"
-            });
-        }
-
-        const nuevoId =
-            organizaciones.length > 0
-                ? Math.max(
-                    ...organizaciones.map(o => o.idOrganizacion)
-                ) + 1
-                : 1;
-
-        const nuevaOrganizacion = new Organizacion(
-            nuevoId,
-            nombre,
-            tipo,
-            cuil,
-            telefono,
-            mail,
-            direccion,
-            responsable
-        );
-
-        organizaciones.push(nuevaOrganizacion);
-
-        guardarOrganizaciones(organizaciones);
-
+        const nuevaOrganizacion = await servicio.crearOrganizacion(req.datosOrganizacion);
         res.status(201).json(nuevaOrganizacion);
-
     } catch (error) {
-
-        res.status(500).json({
-            mensaje: "Error al crear la organización"
-        });
-
+        next(error);
     }
 };
 
-// UPDATE
-const actualizarOrganizacion = (req, res) => {
+// PUT /organizaciones/:id
+const actualizarOrganizacion = async (req, res, next) => {
     try {
+        const organizacion = await servicio.actualizarOrganizacion(req.params.id, req.datosOrganizacion);
 
-        const id = Number(req.params.id);
-
-        const {
-            nombre,
-            tipo,
-            cuil,
-            telefono,
-            mail,
-            direccion,
-            responsable
-        } = req.body;
-
-        const organizaciones = leerOrganizaciones();
-
-        const indice = organizaciones.findIndex(
-            o => o.idOrganizacion === id
-        );
-
-        if (indice === -1) {
-            return res.status(404).json({
-                mensaje: "Organización no encontrada"
-            });
+        if (!organizacion) {
+            throw new AppError(404, "Organización no encontrada");
         }
 
-        if (
-            !nombre ||
-            !tipo ||
-            !cuil ||
-            !telefono ||
-            !mail ||
-            !direccion ||
-            !responsable
-        ) {
-            return res.status(400).json({
-                mensaje: "Todos los campos son obligatorios"
-            });
-        }
-
-        const existeCuil = organizaciones.some(
-            o =>
-                o.cuil === cuil &&
-                o.idOrganizacion !== id
-        );
-
-        if (existeCuil) {
-            return res.status(409).json({
-                mensaje: "El CUIL ya pertenece a otra organización"
-            });
-        }
-
-        organizaciones[indice] = new Organizacion(
-            id,
-            nombre,
-            tipo,
-            cuil,
-            telefono,
-            mail,
-            direccion,
-            responsable
-        );
-
-        guardarOrganizaciones(organizaciones);
-
-        res.status(200).json(organizaciones[indice]);
-
+        res.status(200).json(organizacion);
     } catch (error) {
-
-        res.status(500).json({
-            mensaje: "Error al actualizar la organización"
-        });
-
+        next(error);
     }
 };
 
-
-// DELETE
-const eliminarOrganizacion = (req, res) => {
+// DELETE /organizaciones/:id  -> BAJA LÓGICA (no borra el documento, lo marca como inactivo)
+const darDeBajaOrganizacion = async (req, res, next) => {
     try {
+        const organizacion = await servicio.darDeBajaOrganizacion(req.params.id);
 
-        const id = Number(req.params.id);
-
-        const organizaciones = leerOrganizaciones();
-
-        const indice = organizaciones.findIndex(
-            o => o.idOrganizacion === id
-        );
-
-        if (indice === -1) {
-            return res.status(404).json({
-                mensaje: "Organización no encontrada"
-            });
+        if (!organizacion) {
+            throw new AppError(404, "Organización no encontrada");
         }
-
-        const eliminada = organizaciones.splice(indice, 1);
-
-        guardarOrganizaciones(organizaciones);
 
         res.status(200).json({
-            mensaje: "Organización eliminada correctamente",
-            organizacion: eliminada[0]
+            mensaje: "Organización dada de baja correctamente",
+            organizacion
         });
-
     } catch (error) {
+        next(error);
+    }
+};
 
-        res.status(500).json({
-            mensaje: "Error al eliminar la organización"
+// PATCH /organizaciones/:id/reactivar  -> revierte la baja lógica
+const reactivarOrganizacion = async (req, res, next) => {
+    try {
+        const organizacion = await servicio.reactivarOrganizacion(req.params.id);
+
+        if (!organizacion) {
+            throw new AppError(404, "Organización no encontrada");
+        }
+
+        res.status(200).json({
+            mensaje: "Organización reactivada correctamente",
+            organizacion
         });
-
+    } catch (error) {
+        next(error);
     }
 };
 
 export {
-
     obtenerOrganizaciones,
     obtenerOrganizacionPorId,
     crearOrganizacion,
     actualizarOrganizacion,
-    eliminarOrganizacion
-
+    darDeBajaOrganizacion,
+    reactivarOrganizacion
 };
