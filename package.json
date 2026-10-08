@@ -20,6 +20,6 @@
   "description": "Proyecto para entregar a la materia de Backend - Adaptado a ES Modules (ESM)",
   "keywords": [],
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^1.14.10"
   }
 }
