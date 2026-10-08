@@ -30,7 +30,7 @@ const obtenerGastoPorId = async (req, res, next) => {
 // POST /gastos
 const crearGasto = async (req, res, next) => {
     try {
-        const nuevoGasto = await servicio.crearGasto(req.body);
+        const nuevoGasto = await servicio.crearGasto(req.datosGasto);
         res.status(201).json(nuevoGasto);
     } catch (error) {
         next(error);
@@ -40,7 +40,7 @@ const crearGasto = async (req, res, next) => {
 // PUT /gastos/:id
 const actualizarGasto = async (req, res, next) => {
     try {
-        const gasto = await servicio.actualizarGasto(req.params.id, req.body);
+        const gasto = await servicio.actualizarGasto(req.params.id, req.datosGasto);
 
         if (!gasto) {
             throw new AppError(404, "Gasto no encontrado");
