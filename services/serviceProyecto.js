@@ -1,6 +1,6 @@
 import { connectDB } from "../config/db.js";
 import mongoose from "mongoose";
-import Proyecto from "../models/ProyectosMdb.js";
+import Proyecto from "../models/Proyectos.js";
 
 //Servicio para obtener un proyecto por su ID desde la base de datos MongoDB
 async function obtenerProyectos() {
