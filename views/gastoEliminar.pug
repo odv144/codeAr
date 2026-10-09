@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  fieldset
+    legend Eliminar Gasto
+    p
+      a(href="/vistas/gastos") &larr; Volver al listado
+      | &nbsp;|&nbsp;
+      a(href=`/vistas/gastos/${gasto.idGasto}`) Ver detalle
+
+    p
+      | ¿Confirma que desea eliminar el siguiente gasto?
+      strong  Esta acción eliminará permanentemente el gasto y no podrá deshacerse
+      |  (borrado físico del registro).
+
+    table
+      tr
+        th.num ID Gasto
+        td.num= gasto.idGasto
+      tr
+        th.num ID Proyecto
+        td.num= gasto.idProyecto
+      tr
+        th Descripción
+        td= gasto.descripcion
+      tr
+        th.num Monto
+        td.num $ #{gasto.monto}
+      tr
+        th Fecha
+        td= gasto.fecha.toISOString().slice(0, 10)
+
+    form.form-actions(action=`/vistas/gastos/${gasto.idGasto}/eliminar` method="POST")
+      a.btn-secundario(href="/vistas/gastos") Cancelar
+      button.btn-peligro(type="submit") Sí, eliminar

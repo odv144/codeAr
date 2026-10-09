@@ -46,6 +46,7 @@ import vistasRoutes from "./routes/vistasRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { isAuthenticated, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "./middlewares/auth.js";
 import { connectDB } from "./config/db.js";
+import { sembrarUsuarios } from "./scripts/seedUsers.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 
@@ -110,6 +111,11 @@ app.use(errorHandler);
 // connectDB ya informa el error y corta el proceso (process.exit(1)) si no puede conectar,
 // por eso acá no hace falta un try/catch.
 await connectDB();
+
+// Auto-inicialización idempotente de usuarios de desarrollo: crea los usuarios
+// si la colección está vacía y sólo sincroniza password/role si difieren del .env.
+// Nunca duplica registros (verifica por email o userName antes de crear).
+await sembrarUsuarios({ exitOnFinish: false });
 
 const server = app.listen(PORT, () => {
     console.log("Servidor corriendo en puerto " + PORT);
