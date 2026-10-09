@@ -14,6 +14,10 @@ const proyectoSchema = new mongoose.Schema({
             required: false 
         }
     }],
+     // Baja lógica: la organización no se borra de la base, se marca como inactiva.
+    // Así se conserva el historial y los proyectos/donaciones que la referencian.
+    activa: { type: Boolean, default: true },
+    fechaBaja: { type: Date, default: null }
 },  
 { collection: 'proyectos' });
 
