@@ -25,7 +25,7 @@ block content
               td= gasto.idProyecto
               td= gasto.descripcion
               td $#{gasto.monto}
-              td= gasto.fecha
+              td= gasto.fecha.toISOString().slice(0, 10)
               td
                 a(href=`/vistas/gastos/${gasto.idGasto}`) Ver detalle
                 | &nbsp;|&nbsp;

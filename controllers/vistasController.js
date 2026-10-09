@@ -27,6 +27,10 @@ import {
 } from "../services/serviceOrganizacion.js";
 import { validarDatosOrganizacion } from "../utils/validacionesOrganizacion.js";
 import { AppError } from "../utils/AppError.js";
+import {
+    obtenerGastos,
+    crearGasto
+} from "../services/serviceGastos.js";
 
 // Rutas de los JSON (organizaciones y proyectos ya NO se leen de acá)
 const gastosPath = path.join(__dirname, "../data/gastos.json");
@@ -231,37 +235,29 @@ const eliminarOrganizacionVista = async (req, res, next) => {
 };
 
 
-/* ===================== GASTOS (JSON) ===================== */
+/* ===================== GASTOS (MongoDB) ===================== */
 
-const renderGastos = (req, res) => {
+const renderGastos = async (req, res) => {
     try {
-        const gastos = JSON.parse(fs.readFileSync(gastosPath, "utf-8"));
+        const gastos = await obtenerGastos() ;
         res.render("gastos", { gastos });
     } catch (error) {
         res.status(500).send("Error al cargar gastos");
     }
 };
-
 const renderCrearGasto = (req, res) => {
     res.render("gastosCrear");
 };
 
-const guardarGastoDesdeVista = (req, res) => {
+const guardarGastoDesdeVista = async (req, res) => {
     try {
         const { idProyecto, descripcion, monto, fecha } = req.body;
-        const gastos = JSON.parse(fs.readFileSync(gastosPath, "utf-8"));
-        const nuevoId = gastos.length > 0 ? Math.max(...gastos.map(g => g.idGasto)) + 1 : 1;
-        const nuevoGasto = new Gasto(
-            nuevoId,
-            Number(idProyecto),
-            descripcion,
-            Number(monto),
-            fecha
-        );
-        gastos.push(nuevoGasto);
-        fs.writeFileSync(gastosPath, JSON.stringify(gastos, null, 2), "utf-8");
+        await crearGasto({ idProyecto: Number(idProyecto) , descripcion, monto: Number(monto) , fecha });
         res.redirect("/vistas/gastos");
     } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.status).render("error", { mensaje: error.message });
+        }
         res.status(500).send("Error al guardar el gasto");
     }
 };
