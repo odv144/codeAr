@@ -1,281 +1,79 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import Gasto from "../models/Gastos.js";
-
-const archivo = path.join(__dirname, "../data/gastos.json");
+import * as servicio from "../services/serviceGastos.js";
+import { AppError } from "../utils/AppError.js";
 
 
-function leerGastos() {
-    const datos = fs.readFileSync(archivo, "utf-8");
-    return JSON.parse(datos);
-}
-
-function guardarGastos(gastos) {
-    fs.writeFileSync(
-        archivo,
-        JSON.stringify(gastos, null, 2)
-    );
-}
-
-function calcularSaldoDisponible(idProyecto, excluirGastoId = null) {
-    const donacionesFile = path.join(__dirname, "../data/donaciones.json");
-    const donaciones = fs.existsSync(donacionesFile) ? JSON.parse(fs.readFileSync(donacionesFile, "utf-8")) : [];
-    
-    const totalRecaudado = donaciones
-        .filter(d => Number(d.idProyecto) === Number(idProyecto))
-        .reduce((sum, d) => sum + Number(d.monto), 0);
-
-    const gastos = leerGastos();
-    const totalGastado = gastos
-        .filter(g => Number(g.idProyecto) === Number(idProyecto) && (!excluirGastoId || Number(g.idGasto) !== Number(excluirGastoId)))
-        .reduce((sum, g) => sum + Number(g.monto), 0);
-
-    return totalRecaudado - totalGastado;
-}
-
-
-// GET ALL
-const obtenerGastos = (req, res) => {
+// GET /gastos
+const obtenerGastos = async (req, res, next) => {
     try {
-        const gastos = leerGastos();
-
-        res.status(200).json(gastos);
-
+        const gasto = await servicio.obtenerGastos();
+        res.status(200).json(gasto);
     } catch (error) {
-        res.status(500).json({
-            mensaje: "Error al obtener los gastos"
-        });
+        next(error);
     }
 };
 
-
-// GET BY ID
-const obtenerGastoPorId = (req, res) => {
+// GET /gasto/:id
+const obtenerGastoPorId = async (req, res, next) => {
     try {
-        const id = Number(req.params.id);
-
-        const gastos = leerGastos();
-
-        const gasto = gastos.find(
-            g => g.idGasto === id
-        );
+        const gasto = await servicio.obtenerGastoPorId(req.params.id);
 
         if (!gasto) {
-            return res.status(404).json({
-                mensaje: "Gasto no encontrado"
-            });
+            throw new AppError(404, "Gasto no encontrado");
         }
 
         res.status(200).json(gasto);
-
     } catch (error) {
-        res.status(500).json({
-            mensaje: "Error al obtener el gasto"
-        });
+        next(error);
     }
 };
 
-
-// CREATE
-const crearGasto = (req, res) => {
+// POST /gastos
+const crearGasto = async (req, res, next) => {
     try {
-
-        const {
-            idProyecto,
-            descripcion,
-            monto,
-            fecha
-        } = req.body;
-
-        if (
-            !idProyecto ||
-            !descripcion ||
-            monto === undefined ||
-            monto === null ||
-            !fecha
-        ) {
-            return res.status(400).json({
-                mensaje: "Todos los campos son obligatorios"
-            });
-        }
-
-        if (
-            typeof idProyecto !== "number" ||
-            typeof descripcion !== "string" ||
-            typeof monto !== "number" ||
-            isNaN(monto) ||
-            typeof fecha !== "string"
-        ) {
-            return res.status(400).json({
-                mensaje: "Tipo de dato inválido en alguno de los campos"
-            });
-        }
-
-        // Validación de saldo disponible
-        const saldoDisponible = calcularSaldoDisponible(idProyecto);
-        if (monto > saldoDisponible) {
-            return res.status(400).json({
-                mensaje: "El monto del gasto supera el saldo disponible del proyecto"
-            });
-        }
-
-        const gastos = leerGastos();
-
-        const nuevoId =
-            gastos.length > 0
-                ? Math.max(
-                    ...gastos.map(g => g.idGasto)
-                ) + 1
-                : 1;
-
-        const nuevoGasto = new Gasto(
-            nuevoId,
-            idProyecto,
-            descripcion,
-            monto,
-            fecha
-        );
-
-        gastos.push(nuevoGasto);
-
-        guardarGastos(gastos);
-
+        const nuevoGasto = await servicio.crearGasto(req.datosGasto);
         res.status(201).json(nuevoGasto);
-
     } catch (error) {
-
-        res.status(500).json({
-            mensaje: "Error al crear el gasto"
-        });
-
+        next(error);
     }
 };
 
-// UPDATE
-const actualizarGasto = (req, res) => {
+// PUT /gastos/:id
+const actualizarGasto = async (req, res, next) => {
     try {
+        const gasto = await servicio.actualizarGasto(req.params.id, req.datosGasto);
 
-        const id = Number(req.params.id);
-
-        const {
-            idProyecto,
-            descripcion,
-            monto,
-            fecha
-        } = req.body;
-
-        const gastos = leerGastos();
-
-        const indice = gastos.findIndex(
-            g => g.idGasto === id
-        );
-
-        if (indice === -1) {
-            return res.status(404).json({
-                mensaje: "Gasto no encontrado"
-            });
+        if (!gasto) {
+            throw new AppError(404, "Gasto no encontrado");
         }
 
-        if (
-            !idProyecto ||
-            !descripcion ||
-            monto === undefined ||
-            monto === null ||
-            !fecha
-        ) {
-            return res.status(400).json({
-                mensaje: "Todos los campos son obligatorios"
-            });
-        }
-
-        if (
-            typeof idProyecto !== "number" ||
-            typeof descripcion !== "string" ||
-            typeof monto !== "number" ||
-            isNaN(monto) ||
-            typeof fecha !== "string"
-        ) {
-            return res.status(400).json({
-                mensaje: "Tipo de dato inválido en alguno de los campos"
-            });
-        }
-
-        // Validación de saldo disponible (excluyendo el gasto actual)
-        const saldoDisponible = calcularSaldoDisponible(idProyecto, id);
-        if (monto > saldoDisponible) {
-            return res.status(400).json({
-                mensaje: "El monto del gasto supera el saldo disponible del proyecto"
-            });
-        }
-
-        gastos[indice] = new Gasto(
-            id,
-            idProyecto,
-            descripcion,
-            monto,
-            fecha
-        );
-
-        guardarGastos(gastos);
-
-        res.status(200).json(gastos[indice]);
-
+        res.status(200).json(gasto);
     } catch (error) {
-
-        res.status(500).json({
-            mensaje: "Error al actualizar el gasto"
-        });
-
+        next(error);
     }
 };
 
-
-// DELETE
-const eliminarGasto = (req, res) => {
+// DELETE /gastos/:id
+const eliminarGasto = async (req, res, next) => {
     try {
+        const gasto = await servicio.eliminarGasto(req.params.id);
 
-        const id = Number(req.params.id);
-
-        const gastos = leerGastos();
-
-        const indice = gastos.findIndex(
-            g => g.idGasto === id
-        );
-
-        if (indice === -1) {
-            return res.status(404).json({
-                mensaje: "Gasto no encontrado"
-            });
+        if (!gasto) {
+            throw new AppError(404, "Gasto no encontrado");
         }
-
-        const eliminado = gastos.splice(indice, 1);
-
-        guardarGastos(gastos);
 
         res.status(200).json({
             mensaje: "Gasto eliminado correctamente",
-            gasto: eliminado[0]
+            gasto
         });
-
     } catch (error) {
-
-        res.status(500).json({
-            mensaje: "Error al eliminar el gasto"
-        });
-
+        next(error);
     }
 };
 
 export {
-
     obtenerGastos,
-    obtenerGastoPorId,
+    obtenerGastoPorId, 
     crearGasto,
     actualizarGasto,
     eliminarGasto
-
 };
