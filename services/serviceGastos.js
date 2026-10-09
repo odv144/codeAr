@@ -1,6 +1,7 @@
 import Gasto from "../models/Gastos.js";
 import Proyecto from "../models/Proyectos.js";
 import { AppError } from "../utils/AppError.js";
+import { saldoProyectosActivos } from "./serviceProyecto.js";
 
 async function obtenerGastos() {
     return Gasto.find().select("-_id").sort({ idGasto: 1 }).lean();
@@ -11,14 +12,17 @@ async function obtenerGastoPorId(id) {
 }
 
 async function existeProyecto(id) {
-    return (await Proyecto.exists({ idProyecto: Number(id) })) !== null;
+    return (await Proyecto.exists({ idProyecto: Number(id), activa: { $ne: false } })) !== null;
 }
 
 async function crearGasto(datos) {
     if (!(await existeProyecto(datos.idProyecto))) {
-        throw new AppError(400, "El proyecto indicado no existe");
+        throw new AppError(400, "El proyecto indicado no existe o está dado de baja");
     }
-
+    const disponible = await saldoDisponible(datos.idProyecto);
+    if (datos.monto > disponible) {
+        throw new AppError(400, "El monto del gasto supera el saldo disponible del proyecto");
+    }
     const ultimo = await Gasto.findOne().sort({ idGasto: -1 }).select("idGasto").lean();
     const idGasto = ultimo ? ultimo.idGasto + 1 : 1;
     const nuevo = await Gasto.create({ ...datos, idGasto });
@@ -31,9 +35,14 @@ async function actualizarGasto(id, datos) {
     if (!(await Gasto.exists({ idGasto: idNumerico }))) return null;
 
     if (!(await existeProyecto(datos.idProyecto))) {
-        throw new AppError(400, "El proyecto indicado no existe");
+        throw new AppError(400, "El proyecto indicado no existe o está dado de baja");
     }
 
+    const disponible = await saldoDisponible(datos.idProyecto, idNumerico);
+    if (datos.monto > disponible) {
+        throw new AppError(400, "El monto del gasto supera el saldo disponible del proyecto");
+    }
+    
     const actualizado = await Gasto.findOneAndUpdate(
         { idGasto: idNumerico },
         { $set: datos },
@@ -57,6 +66,12 @@ async function totalGastado(idProyecto, excluirIdGasto = null) {
   ]);
 
   return resultado.length > 0 ? resultado[0].total : 0;
+}
+
+async function saldoDisponible(idProyecto, excluirIdGasto = null) {
+    const donado = await saldoProyectosActivos(idProyecto);
+    const gastado = await totalGastado(idProyecto, excluirIdGasto);
+    return donado - gastado;
 }
 
 export { 
