@@ -47,10 +47,23 @@ async function eliminarGasto(id) {
     return eliminado ? eliminado.toJSON() : null;
 }
 
+async function totalGastado(idProyecto, excluirIdGasto = null) {
+  const filtro = { idProyecto: Number(idProyecto) };
+  if (excluirIdGasto !== null) filtro.idGasto = { $ne: Number(excluirIdGasto) };
+
+  const resultado = await Gasto.aggregate([
+    { $match: filtro },
+    { $group: { _id: null, total: { $sum: "$monto" } } }
+  ]);
+
+  return resultado.length > 0 ? resultado[0].total : 0;
+}
+
 export { 
     obtenerGastos,
     obtenerGastoPorId,
     crearGasto,
     actualizarGasto,
-    eliminarGasto
+    eliminarGasto,
+    totalGastado
 };
