@@ -5,36 +5,36 @@ block content
     legend Registro de Donaciones
     p
       a(href="/vistas") &larr; Volver al inicio
-      | &nbsp;|&nbsp;
-      a(href="/vistas/donaciones/nuevo") + Nueva Donación
+      if currentUser && currentUser.role === 'admin'
+        | &nbsp;|&nbsp;
+        a(href="/vistas/donaciones/nuevo") + Nueva Donación
     
     if donaciones && donaciones.length > 0
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         thead
           tr
-            th ID Donación
-            th Monto
+            th.num ID Donación
+            th.num Monto
             th CBU
             th Fecha
-            th ID Proyecto
-            th ID Donante
-            th ID Organización
+            th.num ID Proyecto
+            th.num ID Donante
+            th.num ID Organización
             th Acciones
         tbody
           each donacion in donaciones
             tr
-              td= donacion.idDonacion
-              td $#{donacion.monto}
+              td.num= donacion.idDonacion
+              td.num $#{donacion.monto}
               td= donacion.cbu
               td= donacion.fecha
-              td= donacion.idProyecto
-              td= donacion.idDonante
-              td= donacion.idOrganizacion
-              td
+              td.num= donacion.idProyecto
+              td.num= donacion.idDonante
+              td.num= donacion.idOrganizacion
+              td.acciones
                 a(href=`/vistas/donaciones/${donacion.idDonacion}`) Ver detalle
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
+                if currentUser && currentUser.role === 'admin'
+                  a(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
+                  a(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
     else
       p No hay donaciones registradas.

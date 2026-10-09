@@ -9,33 +9,28 @@ block content
       a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
 
     p
-      strong ID Proyecto: 
+      strong ID Proyecto:
       = proyecto.idProyecto
       |  (no editable)
 
-    form(action=`/vistas/proyectos/${proyecto.idProyecto}/editar` method="POST" style="margin-top: 15px;")
-      div(style="margin-bottom: 10px;")
-        label(for="idOrganizacion") ID de Organización:
-        br
-        input(type="number" name="idOrganizacion" id="idOrganizacion" value=proyecto.idOrganizacion required style="width: 100%; max-width: 300px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="nomProyecto") Nombre del Proyecto:
-        br
-        input(type="text" name="nomProyecto" id="nomProyecto" value=proyecto.nomProyecto required style="width: 100%; max-width: 400px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="descripcion") Descripción:
-        br
-        textarea(name="descripcion" id="descripcion" rows="4" required style="width: 100%; max-width: 400px; padding: 5px;")= proyecto.descripcion
-
-      div(style="margin-bottom: 15px;")
-        label(for="saldo") Nuevo Saldo ($):
-        br
-        input(type="number" step="0.01" name="saldo" id="saldo" style="width: 100%; max-width: 300px; padding: 5px;")
-        small(style="display: block; margin-top: 4px;") Opcional: dejarlo vacío para conservar el saldo actual. Si se informa un monto, reemplaza el historial de saldo por ese único movimiento.
+    form(action=`/vistas/proyectos/${proyecto.idProyecto}/editar` method="POST")
+      div
+        label(for="idOrganizacion") ID de Organización
+        input(type="number" name="idOrganizacion" id="idOrganizacion" value=proyecto.idOrganizacion required)
 
       div
+        label(for="nomProyecto") Nombre del Proyecto
+        input(type="text" name="nomProyecto" id="nomProyecto" value=proyecto.nomProyecto required)
+
+      div
+        label(for="descripcion") Descripción
+        textarea(name="descripcion" id="descripcion" rows="4" required)= proyecto.descripcion
+
+      div
+        label(for="saldo") Nuevo Saldo ($)
+        input(type="number" step="0.01" name="saldo" id="saldo")
+        small.ayuda Opcional: dejarlo vacío para conservar el saldo actual. Si se informa un monto, reemplaza el historial de saldo por ese único movimiento.
+
+      .form-actions
+        a.btn-secundario(href="/vistas/proyectos") Cancelar
         button(type="submit") Guardar Cambios
-        | &nbsp;
-        a(href="/vistas/proyectos") Cancelar

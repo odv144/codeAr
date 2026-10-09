@@ -1,0 +1,434 @@
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --marca-principal: #183b4e;
+  --marca-principal-hover: #244f64;
+  --marca-positivo: #287d70;
+  --marca-error: #b42318;
+  --marca-advertencia: #b54708;
+  --marca-fondo: #f5f7f8;
+  --marca-superficie: #ffffff;
+  --marca-borde: #dce3e7;
+  --marca-texto: #334155;
+  --marca-texto-secundario: #64748b;
+
+  --pico-background-color: var(--marca-fondo);
+  --pico-card-background-color: var(--marca-superficie);
+  --pico-card-border-color: var(--marca-borde);
+  --pico-card-box-shadow: none;
+  --pico-card-sectioning-background-color: var(--marca-superficie);
+  --pico-color: var(--marca-texto);
+  --pico-muted-color: var(--marca-texto-secundario);
+  --pico-muted-border-color: var(--marca-borde);
+  --pico-border-color: var(--marca-borde);
+  --pico-border-radius: 6px;
+  --pico-border-width: 1px;
+  --pico-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pico-font-size: 95%;
+  --pico-line-height: 1.5;
+
+  --pico-primary: var(--marca-principal);
+  --pico-primary-background: var(--marca-principal);
+  --pico-primary-border: var(--marca-principal);
+  --pico-primary-hover: var(--marca-principal-hover);
+  --pico-primary-hover-background: var(--marca-principal-hover);
+  --pico-primary-hover-border: var(--marca-principal-hover);
+  --pico-primary-focus: rgba(24, 59, 78, 0.28);
+  --pico-primary-inverse: #ffffff;
+  --pico-primary-underline: rgba(24, 59, 78, 0.35);
+
+  --pico-secondary: var(--marca-texto);
+  --pico-secondary-background: transparent;
+  --pico-secondary-border: var(--marca-borde);
+  --pico-secondary-hover: var(--marca-principal);
+  --pico-secondary-hover-background: transparent;
+  --pico-secondary-hover-border: var(--marca-principal);
+  --pico-secondary-focus: rgba(51, 65, 85, 0.22);
+  --pico-secondary-inverse: var(--marca-texto);
+  --pico-secondary-underline: rgba(51, 65, 85, 0.35);
+
+  --pico-form-element-background-color: var(--marca-superficie);
+  --pico-form-element-border-color: var(--marca-borde);
+  --pico-form-element-color: var(--marca-texto);
+  --pico-form-element-active-border-color: var(--marca-principal);
+  --pico-form-element-focus-color: var(--marca-principal);
+  --pico-form-element-invalid-border-color: var(--marca-error);
+  --pico-form-element-invalid-active-border-color: var(--marca-error);
+  --pico-form-element-invalid-focus-color: var(--marca-error);
+  --pico-form-element-placeholder-color: var(--marca-texto-secundario);
+  --pico-form-element-spacing-vertical: 0.4rem;
+  --pico-form-element-spacing-horizontal: 0.7rem;
+  --pico-form-label-font-weight: 500;
+
+  --pico-table-border-color: var(--marca-borde);
+  --pico-table-row-stripped-background-color: #eef2f4;
+
+  --pico-h1-color: var(--marca-principal);
+  --pico-h2-color: var(--marca-principal);
+  --pico-h3-color: var(--marca-texto);
+  --pico-h4-color: var(--marca-texto);
+
+  --pico-box-shadow: none;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+}
+
+header {
+  background: var(--marca-superficie);
+  border-bottom: 1px solid var(--marca-borde);
+  padding-block: 0.7rem;
+}
+
+header .marca {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  color: var(--marca-principal);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+header .marca:hover {
+  color: var(--marca-principal-hover);
+}
+
+header .bajada {
+  color: var(--marca-texto-secundario);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.45rem;
+}
+
+header nav ul {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+  gap: 0.25rem;
+}
+
+header nav a {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--pico-border-radius);
+  color: var(--marca-texto-secundario);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+header nav a:hover {
+  color: var(--marca-principal);
+  background: rgba(24, 59, 78, 0.06);
+}
+
+header nav li.activo a {
+  color: var(--marca-principal);
+  background: rgba(24, 59, 78, 0.09);
+  font-weight: 600;
+}
+
+header nav .sesion {
+  color: var(--marca-texto-secundario);
+  font-size: 0.85rem;
+}
+
+footer.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid var(--marca-borde);
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+  color: var(--marca-texto-secundario);
+  font-size: 0.8rem;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 6rem;
+  min-height: 2rem;
+}
+
+.footer-logo img {
+  max-height: 2.5rem;
+  width: auto;
+}
+
+table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  background: var(--marca-superficie);
+  border: 1px solid var(--marca-borde);
+  border-radius: var(--pico-border-radius);
+}
+
+thead th {
+  background: var(--marca-fondo);
+  color: var(--marca-principal);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--marca-borde);
+}
+
+table th,
+table td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--marca-borde);
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody th {
+  color: var(--marca-texto-secundario);
+  font-weight: 500;
+  text-align: left;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nowrap,
+table td:nth-child(4),
+table td:nth-child(5) {
+  white-space: nowrap;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.acciones a {
+  padding: 0.15rem 0.35rem;
+  color: var(--marca-principal);
+}
+
+.acciones a:hover {
+  text-decoration: underline;
+}
+
+.acciones-detalle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.acciones-detalle a {
+  color: var(--marca-principal);
+}
+
+form,
+article:has(form),
+.formulario-card {
+  max-width: 620px;
+  margin: 1.5rem auto;
+}
+
+form {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+form label {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  font-size: 0.82rem;
+  color: var(--marca-texto);
+}
+
+form input,
+form select,
+form textarea {
+  margin-bottom: 0.75rem;
+  font-size: 0.88rem;
+  border-radius: var(--pico-border-radius);
+}
+
+form button,
+form input[type="submit"],
+.form-actions button,
+.form-actions a[role="button"] {
+  width: auto;
+  margin-bottom: 0;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.btn-secundario {
+  display: inline-block;
+  padding: 0.4rem 1.1rem;
+  border: 1px solid var(--marca-borde);
+  border-radius: var(--pico-border-radius);
+  background: transparent;
+  color: var(--marca-texto);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.btn-secundario:hover {
+  border-color: var(--marca-principal);
+  color: var(--marca-principal);
+  background: rgba(24, 59, 78, 0.04);
+}
+
+.btn-peligro,
+form button.btn-peligro {
+  display: inline-block;
+  padding: 0.4rem 1.1rem;
+  border: 1px solid var(--marca-error);
+  border-radius: var(--pico-border-radius);
+  background: var(--marca-error);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.btn-peligro:hover,
+form button.btn-peligro:hover {
+  background: #8f1c13;
+  border-color: #8f1c13;
+  color: #ffffff;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.ayuda {
+  display: block;
+  margin-top: -0.5rem;
+  margin-bottom: 0.85rem;
+  color: var(--marca-texto-secundario);
+  font-size: 0.78rem;
+}
+
+.estado-ok {
+  color: var(--marca-positivo);
+}
+
+.estado-warn {
+  color: var(--marca-advertencia);
+}
+
+.estado-error {
+  color: var(--marca-error);
+}
+
+.tarjeta-login {
+  max-width: 450px;
+  margin: 2rem auto;
+}
+
+.tarjeta-login h3 {
+  color: var(--marca-principal);
+}
+
+.tarjeta-error {
+  max-width: 520px;
+  margin: 2rem auto;
+}
+
+.tarjeta-error h3 {
+  color: var(--marca-principal);
+}
+
+#login-form button {
+  width: 100%;
+}
+
+#error-box {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--marca-error);
+}
+
+#error-box[hidden] {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  header nav {
+    justify-content: flex-start;
+  }
+
+  .acciones,
+  .acciones-detalle {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  form,
+  .tarjeta-login {
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  table th,
+  table td {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.35rem;
+  }
+
+  footer.container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}

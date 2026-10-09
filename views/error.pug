@@ -1,8 +1,8 @@
 extends layout
 
 block content
-  fieldset
-    legend Error
-    p= mensaje
+  article.tarjeta-error
+    h3 Error
+    p.estado-error= mensaje
     p
-      a(href="/vistas") Volver al inicio
+      a.btn-secundario(href="/vistas") Volver al inicio

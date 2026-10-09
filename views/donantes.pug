@@ -5,38 +5,38 @@ block content
     legend Listado de Donantes
     p
       a(href="/vistas") &larr; Volver al inicio
-      | &nbsp;|&nbsp;
-      a(href="/vistas/donantes/nuevo") + Nuevo Donante
+      if currentUser && currentUser.role === 'admin'
+        | &nbsp;|&nbsp;
+        a(href="/vistas/donantes/nuevo") + Nuevo Donante
     
     if donantes && donantes.length > 0
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         thead
           tr
-            th ID
+            th.num ID
             th Nombre
             th Apellido
-            th DNI
-            th Teléfono
+            th.num DNI
+            th.num Teléfono
             th Email
-            th Monto
+            th.num Monto
             th Fecha
             th Acciones
         tbody
           each donante in donantes
             tr
-              td= donante.idDonante
+              td.num= donante.idDonante
               td= donante.nombre
               td= donante.apellido
-              td= donante.dni
-              td= donante.telefono
+              td.num= donante.dni
+              td.num= donante.telefono
               td= donante.email
-              td $#{donante.monto}
+              td.num $#{donante.monto}
               td= donante.fecha
-              td
+              td.acciones
                 a(href=`/vistas/donantes/${donante.idDonante}`) Ver detalle
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/donantes/${donante.idDonante}/editar`) Editar
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/donantes/${donante.idDonante}/eliminar`) Eliminar
+                if currentUser && currentUser.role === 'admin'
+                  a(href=`/vistas/donantes/${donante.idDonante}/editar`) Editar
+                  a(href=`/vistas/donantes/${donante.idDonante}/eliminar`) Eliminar
     else
       p No hay donantes registrados.

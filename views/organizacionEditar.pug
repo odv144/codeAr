@@ -8,43 +8,35 @@ block content
       | &nbsp;|&nbsp;
       a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}`) Ver detalle
 
-    form(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar` method="POST" style="margin-top: 15px;")
-      div(style="margin-bottom: 10px;")
-        label(for="nombre") Nombre de la Organización:
-        br
-        input(type="text" name="nombre" id="nombre" value=organizacion.nombre required style="width: 100%; max-width: 400px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="tipo") Tipo (Ej. Fundación, Asociación Civil, ONG):
-        br
-        input(type="text" name="tipo" id="tipo" value=organizacion.tipo required style="width: 100%; max-width: 300px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="cuil") CUIL (Ej. 30-71234567-8):
-        br
-        input(type="text" name="cuil" id="cuil" value=organizacion.cuil required style="width: 100%; max-width: 300px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="telefono") Teléfono:
-        br
-        input(type="text" name="telefono" id="telefono" value=organizacion.telefono required style="width: 100%; max-width: 300px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="mail") Correo Electrónico:
-        br
-        input(type="email" name="mail" id="mail" value=organizacion.mail required style="width: 100%; max-width: 400px; padding: 5px;")
-
-      div(style="margin-bottom: 10px;")
-        label(for="direccion") Dirección:
-        br
-        input(type="text" name="direccion" id="direccion" value=organizacion.direccion required style="width: 100%; max-width: 400px; padding: 5px;")
-
-      div(style="margin-bottom: 15px;")
-        label(for="responsable") Responsable a Cargo:
-        br
-        input(type="text" name="responsable" id="responsable" value=organizacion.responsable required style="width: 100%; max-width: 300px; padding: 5px;")
+    form(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar` method="POST")
+      div
+        label(for="nombre") Nombre de la Organización
+        input(type="text" name="nombre" id="nombre" value=organizacion.nombre required)
 
       div
+        label(for="tipo") Tipo (Ej. Fundación, Asociación Civil, ONG)
+        input(type="text" name="tipo" id="tipo" value=organizacion.tipo required)
+
+      div
+        label(for="cuil") CUIL (Ej. 30-71234567-8)
+        input(type="text" name="cuil" id="cuil" value=organizacion.cuil required)
+
+      div
+        label(for="telefono") Teléfono
+        input(type="text" name="telefono" id="telefono" value=organizacion.telefono required)
+
+      div
+        label(for="mail") Correo Electrónico
+        input(type="email" name="mail" id="mail" value=organizacion.mail required)
+
+      div
+        label(for="direccion") Dirección
+        input(type="text" name="direccion" id="direccion" value=organizacion.direccion required)
+
+      div
+        label(for="responsable") Responsable a Cargo
+        input(type="text" name="responsable" id="responsable" value=organizacion.responsable required)
+
+      .form-actions
+        a.btn-secundario(href="/vistas/organizaciones") Cancelar
         button(type="submit") Guardar Cambios
-        | &nbsp;
-        a(href="/vistas/organizaciones") Cancelar

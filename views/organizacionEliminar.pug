@@ -13,24 +13,23 @@ block content
       strong  La organización será dada de baja y dejará de estar activa. El registro y su historial no serán eliminados.
       |  Es una baja lógica: se conservan los proyectos y donaciones asociados.
 
-    table(border="1" cellpadding="5" cellspacing="0")
+    table
       tr
-        th ID:
-        td= organizacion.idOrganizacion
+        th.num ID
+        td.num= organizacion.idOrganizacion
       tr
-        th Nombre:
+        th Nombre
         td= organizacion.nombre
       tr
-        th Tipo:
+        th Tipo
         td= organizacion.tipo
       tr
-        th CUIL:
-        td= organizacion.cuil
+        th.num CUIL
+        td.num= organizacion.cuil
       tr
-        th Responsable:
+        th Responsable
         td= organizacion.responsable
 
-    form(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar` method="POST" style="margin-top: 15px;")
-      button(type="submit") Sí, dar de baja
-      | &nbsp;
-      a(href="/vistas/organizaciones") Cancelar
+    form.form-actions(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar` method="POST")
+      a.btn-secundario(href="/vistas/organizaciones") Cancelar
+      button.btn-peligro(type="submit") Sí, dar de baja

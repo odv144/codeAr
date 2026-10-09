@@ -7,34 +7,33 @@ block content
       a(href="/vistas/organizaciones") &larr; Volver al listado
 
     if organizacion
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         tr
-          th Nombre:
+          th Nombre
           td= organizacion.nombre
         tr
-          th Tipo:
+          th Tipo
           td= organizacion.tipo
         tr
-          th CUIL:
-          td= organizacion.cuil
+          th.num CUIL
+          td.num= organizacion.cuil
         tr
-          th Teléfono:
-          td= organizacion.telefono
+          th.num Teléfono
+          td.num= organizacion.telefono
         tr
-          th Email:
+          th Email
           td= organizacion.mail
         tr
-          th Dirección:
+          th Dirección
           td= organizacion.direccion
         tr
-          th Responsable:
+          th Responsable
           td= organizacion.responsable
 
-      p(style="margin-top: 15px;")
-        a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar`) Editar
-        | &nbsp;|&nbsp;
-        a(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar`) Dar de baja
-        | &nbsp;|&nbsp;
+      p.acciones-detalle
+        if currentUser && currentUser.role === 'admin'
+          a.btn-secundario(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar`) Editar
+          a.btn-peligro(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar`) Dar de baja
         a(href="/vistas/organizaciones") Volver al listado
     else
       p Organización no encontrada.

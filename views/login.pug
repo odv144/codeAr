@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  article.tarjeta-login
+    h3 Iniciar sesión
+    form#login-form
+      label(for="email") Email o usuario
+      input#email(type="text" name="email" autocomplete="username" required placeholder="admin o admin@sumarimpacto.com")
+
+      label(for="password") Contraseña
+      input#password(type="password" name="password" autocomplete="current-password" required)
+
+      div(role="group")
+        button(type="submit") Ingresar
+
+      div#error-box(role="alert" aria-live="assertive" hidden)
+
+    script.
+      const form = document.getElementById('login-form');
+      const errorBox = document.getElementById('error-box');
+
+      const mostrarError = (mensaje) => {
+        errorBox.textContent = mensaje;
+        errorBox.hidden = false;
+      };
+
+      const limpiarError = () => {
+        errorBox.textContent = '';
+        errorBox.hidden = true;
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        limpiarError();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+          const res = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 200) {
+            window.location.href = data.redirectUrl || '/vistas';
+            return;
+          }
+
+          mostrarError(data.error || 'No se pudo iniciar sesión. Intente nuevamente.');
+        } catch (error) {
+          mostrarError('No se pudo conectar con el servidor.');
+        }
+      });

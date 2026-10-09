@@ -1,30 +1,44 @@
 doctype html
-html(lang="es")
+html(lang="es" data-theme="light")
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap")
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css")
+    link(rel="stylesheet" href="/css/styles.css")
     title= titulo || "SumarImpacto | Trazabilidad End-to-End"
   body
-    header
-      h2 SumarImpacto - Plataforma B2NGO - SEGUNDA ENTREGA
-      p Sistema de Trazabilidad End-to-End y Control Operativo
-      nav
-        ul
-          li
-            a(href="/vistas") Inicio
-          li
-            a(href="/vistas/proyectos") Proyectos
-          li
-            a(href="/vistas/organizaciones") Organizaciones
-          li
-            a(href="/vistas/donantes") Donantes
-          li
-            a(href="/vistas/gastos") Gastos
-          li
-            a(href="/vistas/donaciones") Donaciones
-    hr
-    main
+    - const ruta = typeof rutaActual !== "undefined" && rutaActual ? rutaActual : "";
+    - const enInicio = ruta === "/" || ruta === "/vistas";
+    - const enModulo = (m) => ruta === `/vistas/${m}` || ruta.startsWith(`/vistas/${m}/`);
+    if currentUser
+      header
+        .container
+          a.marca(href="/vistas") SumarImpacto
+            span.bajada Plataforma B2NGO · Trazabilidad y control operativo
+        nav.container
+          ul
+            li(class=(enInicio ? "activo" : ""))
+              a(href="/vistas") Inicio
+            li(class=(enModulo("organizaciones") ? "activo" : ""))
+              a(href="/vistas/organizaciones") Organizaciones
+            li(class=(enModulo("proyectos") ? "activo" : ""))
+              a(href="/vistas/proyectos") Proyectos
+            li(class=(enModulo("donantes") ? "activo" : ""))
+              a(href="/vistas/donantes") Donantes
+            li(class=(enModulo("donaciones") ? "activo" : ""))
+              a(href="/vistas/donaciones") Donaciones
+            li(class=(enModulo("gastos") ? "activo" : ""))
+              a(href="/vistas/gastos") Gastos
+          ul
+            li.sesion
+              strong #{currentUser.userName} (#{currentUser.role})
+            li
+              a(href="/logout") Cerrar sesión
+    main.container
       block content
-    hr
-    footer
+    footer.container
       p SumarImpacto &copy; 2026. Desarrollado por CodeAr para SumarImpacto.
+      .footer-logo(aria-label="codeAr")
