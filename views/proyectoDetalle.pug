@@ -5,34 +5,33 @@ block content
     legend Detalle del Proyecto
     p
       a(href="/vistas/proyectos") &larr; Volver al listado
-    
+
     if proyecto
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         tr
-          th ID:
-          td= proyecto.idProyecto
+          th.num ID
+          td.num= proyecto.idProyecto
         tr
-          th ID Organización:
-          td= proyecto.idOrganizacion
+          th.num ID Organización
+          td.num= proyecto.idOrganizacion
         tr
-          th Nombre:
+          th Nombre
           td= proyecto.nomProyecto
         tr
-          th Descripción:
+          th Descripción
           td= proyecto.descripcion || "-"
         tr
-          th Saldo actual:
-          td
+          th.num Saldo actual
+          td.num
             if proyecto.saldo && proyecto.saldo.length > 0
               | $ #{proyecto.saldo[proyecto.saldo.length - 1].monto}
             else
               | -
 
-      p(style="margin-top: 15px;")
-        a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
-        | &nbsp;|&nbsp;
-        a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
-        | &nbsp;|&nbsp;
+      p.acciones-detalle
+        if currentUser && currentUser.role === 'admin'
+          a.btn-secundario(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
+          a.btn-peligro(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
         a(href="/vistas/proyectos") Volver al listado
     else
       p Proyecto no encontrado.

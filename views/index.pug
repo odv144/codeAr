@@ -3,19 +3,34 @@ extends layout
 block content
   fieldset
     legend Panel Principal de Gestión para la Segunda Entrega de SumarImpacto
-    p Bienvenido al sistema de gestión de la red 
+    p Bienvenido al sistema de gestión de la red
       strong SumarImpacto
-      | . Seleccione una sección para consultar los registros:
-    
-    div
-      label(for="seccion") Menú de navegación rápida: 
-      br
-      select(name="seccion" id="seccion")
-        option(value="") -- Seleccione una opción --
-        option(value="/vistas/proyectos") Proyectos
-        option(value="/vistas/organizaciones") Organizaciones
-        option(value="/vistas/donantes") Donantes
-        option(value="/vistas/gastos") Gastos
-        option(value="/vistas/donaciones") Donaciones
-      | &nbsp;
-      button(type="button" onclick="const s = document.getElementById('seccion'); if(s.value) window.location.href=s.value;") Ir
+      | . Seleccione un módulo para operar:
+
+    table
+      thead
+        tr
+          th Módulo
+          th Descripción
+          th Alcance operativo
+      tbody
+        tr
+          td Organizaciones
+          td Padrón y administración de ONGs activas vinculadas a la red.
+          td Listado, consulta, alta, edición y baja lógica.
+        tr
+          td Proyectos
+          td Gestión de iniciativas sociales y saldos disponibles.
+          td Listado, consulta, alta, edición y baja física.
+        tr
+          td Donantes
+          td Registro y seguimiento de aportantes individuales y corporativos.
+          td Padrón, consulta, alta, edición y baja física.
+        tr
+          td Donaciones
+          td Registro de aportes monetarios con trazabilidad por destino.
+          td Control de ingresos, asignación a proyectos y baja física.
+        tr
+          td Gastos
+          td Imputación de egresos operativos y rendición de cuentas por proyecto.
+          td Rendición por comprobante, impacto en saldo y baja física.

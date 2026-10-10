@@ -1,7 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { obtenerDonaciones, obtenerDonacionPorId, crearDonacion, actualizarDonacion, eliminarDonacion } from "../services/serviceDonaciones.js";
+import {
+    obtenerDonantes,
+    obtenerDonantesId,
+    insertarDonante,
+    actualizarDonante,
+    eliminarDonante
+} from "../services/serviceDonante.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,7 +34,10 @@ import { validarDatosOrganizacion } from "../utils/validacionesOrganizacion.js";
 import { AppError } from "../utils/AppError.js";
 import {
     obtenerGastos,
-    crearGasto
+    obtenerGastoPorId,
+    crearGasto,
+    actualizarGasto,
+    eliminarGasto
 } from "../services/serviceGastos.js";
 
 // Rutas de los JSON (organizaciones y proyectos ya NO se leen de acá)
@@ -260,6 +269,68 @@ const guardarGastoDesdeVista = async (req, res) => {
     }
 };
 
+// Devuelve null si el gasto no existe: se convierte en 404 real para que
+// errorHandler muestre "Gasto no encontrado" y no un 500 genérico.
+const gastoNoEncontrado = () => new AppError(404, "Gasto no encontrado");
+
+const renderGastoDetalle = async (req, res, next) => {
+    try {
+        const gasto = await obtenerGastoPorId(req.params.id);
+        if (!gasto) throw gastoNoEncontrado();
+        res.render("gastoDetalle", { gasto });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderGastoEditar = async (req, res, next) => {
+    try {
+        const gasto = await obtenerGastoPorId(req.params.id);
+        if (!gasto) throw gastoNoEncontrado();
+        res.render("gastoEditar", { gasto });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const guardarEdicionGasto = async (req, res, next) => {
+    try {
+        const { idProyecto, descripcion, monto, fecha } = req.body;
+        // El servicio valida proyecto existente/activo y tope de saldo disponible
+        const gasto = await actualizarGasto(req.params.id, {
+            idProyecto: Number(idProyecto),
+            descripcion,
+            monto: Number(monto),
+            fecha
+        });
+        if (!gasto) throw gastoNoEncontrado();
+        res.redirect("/vistas/gastos");
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderGastoEliminar = async (req, res, next) => {
+    try {
+        const gasto = await obtenerGastoPorId(req.params.id);
+        if (!gasto) throw gastoNoEncontrado();
+        res.render("gastoEliminar", { gasto });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// BORRADO FÍSICO: mismo criterio que DELETE /gastos/:id (serviceGastos.eliminarGasto)
+const eliminarGastoVista = async (req, res, next) => {
+    try {
+        const eliminado = await eliminarGasto(req.params.id);
+        if (!eliminado) throw gastoNoEncontrado();
+        res.redirect("/vistas/gastos");
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 /* ===================== DONACIONES ===================== */
 
@@ -382,6 +453,64 @@ const guardarDonanteDesdeVista = async (req, res) => {
     }
 };
 
+// obtenerDonantesId lanza un Error simple sin status: acá lo convertimos en 404 real
+// para que errorHandler muestre "Donante no encontrado" y no un 500 genérico.
+const mapearDonanteNoEncontrado = (error) =>
+    error.message === "Donante no encontrado"
+        ? new AppError(404, "Donante no encontrado")
+        : error;
+
+const renderDonanteDetalle = async (req, res, next) => {
+    try {
+        const donante = await obtenerDonantesId(req.params.id);
+        res.render("donanteDetalle", { donante });
+    } catch (error) {
+        next(mapearDonanteNoEncontrado(error));
+    }
+};
+
+const renderDonanteEditar = async (req, res, next) => {
+    try {
+        const donante = await obtenerDonantesId(req.params.id);
+        res.render("donanteEditar", { donante });
+    } catch (error) {
+        next(mapearDonanteNoEncontrado(error));
+    }
+};
+
+const guardarEdicionDonante = async (req, res, next) => {
+    try {
+        const { nombre, apellido, dni, telefono, email, monto, fecha } = req.body;
+        // El service normaliza strings/Number/Date según el schema del donante
+        const donante = await actualizarDonante(req.params.id, {
+            nombre, apellido, dni, telefono, email, monto: Number(monto), fecha
+        });
+        if (!donante) throw new AppError(404, "Donante no encontrado");
+        res.redirect("/vistas/donantes");
+    } catch (error) {
+        next(mapearDonanteNoEncontrado(error));
+    }
+};
+
+const renderDonanteEliminar = async (req, res, next) => {
+    try {
+        const donante = await obtenerDonantesId(req.params.id);
+        res.render("donanteEliminar", { donante });
+    } catch (error) {
+        next(mapearDonanteNoEncontrado(error));
+    }
+};
+
+// BORRADO FÍSICO: mismo criterio que DELETE /donantes/:id (serviceDonante.eliminarDonante)
+const eliminarDonanteVista = async (req, res, next) => {
+    try {
+        await eliminarDonante(req.params.id);
+        res.redirect("/vistas/donantes");
+    } catch (error) {
+        next(mapearDonanteNoEncontrado(error));
+    }
+};
+
 export {
     renderHome,
     renderProyectos,
@@ -403,6 +532,11 @@ export {
     renderGastos,
     renderCrearGasto,
     guardarGastoDesdeVista,
+    renderGastoDetalle,
+    renderGastoEditar,
+    guardarEdicionGasto,
+    renderGastoEliminar,
+    eliminarGastoVista,
     renderDonaciones,
     renderCrearDonacion,
     guardarDonacionDesdeVista,
@@ -413,5 +547,10 @@ export {
     eliminarDonacionVista,
     renderDonantes,
     renderCrearDonante,
-    guardarDonanteDesdeVista
+    guardarDonanteDesdeVista,
+    renderDonanteDetalle,
+    renderDonanteEditar,
+    guardarEdicionDonante,
+    renderDonanteEliminar,
+    eliminarDonanteVista
 };

@@ -5,32 +5,32 @@ block content
     legend Control de Gastos
     p
       a(href="/vistas") &larr; Volver al inicio
-      | &nbsp;|&nbsp;
-      a(href="/vistas/gastos/nuevo") + Nuevo Gasto
+      if currentUser && currentUser.role === 'admin'
+        | &nbsp;|&nbsp;
+        a(href="/vistas/gastos/nuevo") + Nuevo Gasto
     
     if gastos && gastos.length > 0
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         thead
           tr
-            th ID Gasto
-            th Proyecto ID
+            th.num ID Gasto
+            th.num Proyecto ID
             th Descripción
-            th Monto
+            th.num Monto
             th Fecha
             th Acciones
         tbody
           each gasto in gastos
             tr
-              td= gasto.idGasto
-              td= gasto.idProyecto
+              td.num= gasto.idGasto
+              td.num= gasto.idProyecto
               td= gasto.descripcion
-              td $#{gasto.monto}
+              td.num $#{gasto.monto}
               td= gasto.fecha.toISOString().slice(0, 10)
-              td
+              td.acciones
                 a(href=`/vistas/gastos/${gasto.idGasto}`) Ver detalle
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/gastos/${gasto.idGasto}/editar`) Editar
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/gastos/${gasto.idGasto}/eliminar`) Eliminar
+                if currentUser && currentUser.role === 'admin'
+                  a(href=`/vistas/gastos/${gasto.idGasto}/editar`) Editar
+                  a(href=`/vistas/gastos/${gasto.idGasto}/eliminar`) Eliminar
     else
       p No hay gastos registrados.

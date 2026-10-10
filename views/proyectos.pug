@@ -5,30 +5,30 @@ block content
     legend Listado de Proyectos
     p
       a(href="/vistas") &larr; Volver al inicio
-      | &nbsp;|&nbsp;
-      a(href="/vistas/proyectos/nuevo") + Nuevo Proyecto
+      if currentUser && currentUser.role === 'admin'
+        | &nbsp;|&nbsp;
+        a(href="/vistas/proyectos/nuevo") + Nuevo Proyecto
     
     if proyectos && proyectos.length > 0
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         thead
           tr
-            th ID Proyecto
-            th ID Organización
+            th.num ID Proyecto
+            th.num ID Organización
             th Nombre del Proyecto
             th Descripción
             th Acciones
         tbody
           each proyecto in proyectos
             tr
-              td= proyecto.idProyecto
-              td= proyecto.idOrganizacion
+              td.num= proyecto.idProyecto
+              td.num= proyecto.idOrganizacion
               td= proyecto.nomProyecto || "-"
               td= proyecto.descripcion || "-"
-              td
+              td.acciones
                 a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
+                if currentUser && currentUser.role === 'admin'
+                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
+                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
     else
       p No hay proyectos registrados.

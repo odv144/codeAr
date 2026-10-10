@@ -5,36 +5,36 @@ block content
     legend Organizaciones Sociales Aliadas
     p
       a(href="/vistas") &larr; Volver al inicio
-      | &nbsp;|&nbsp;
-      a(href="/vistas/organizaciones/nuevo") + Nueva Organización
+      if currentUser && currentUser.role === 'admin'
+        | &nbsp;|&nbsp;
+        a(href="/vistas/organizaciones/nuevo") + Nueva Organización
     
     if organizaciones && organizaciones.length > 0
-      table(border="1" cellpadding="5" cellspacing="0")
+      table
         thead
           tr
-            th ID
+            th.num ID
             th Nombre
             th Tipo
-            th CUIL
-            th Teléfono
+            th.num CUIL
+            th.num Teléfono
             th Email
             th Responsable
             th Acciones
         tbody
           each org in organizaciones
             tr
-              td= org.idOrganizacion
+              td.num= org.idOrganizacion
               td= org.nombre
               td= org.tipo
-              td= org.cuil
-              td= org.telefono
+              td.num= org.cuil
+              td.num= org.telefono
               td= org.mail
               td= org.responsable
-              td
+              td.acciones
                 a(href=`/vistas/organizaciones/${org.idOrganizacion}`) Ver detalle
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/organizaciones/${org.idOrganizacion}/editar`) Editar
-                | &nbsp;|&nbsp;
-                a(href=`/vistas/organizaciones/${org.idOrganizacion}/eliminar`) Dar de baja
+                if currentUser && currentUser.role === 'admin'
+                  a(href=`/vistas/organizaciones/${org.idOrganizacion}/editar`) Editar
+                  a(href=`/vistas/organizaciones/${org.idOrganizacion}/eliminar`) Dar de baja
     else
       p No hay organizaciones registradas.

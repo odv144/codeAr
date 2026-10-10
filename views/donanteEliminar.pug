@@ -1,0 +1,41 @@
+extends layout
+
+block content
+  fieldset
+    legend Eliminar Donante
+    p
+      a(href="/vistas/donantes") &larr; Volver al listado
+      | &nbsp;|&nbsp;
+      a(href=`/vistas/donantes/${donante.idDonante}`) Ver detalle
+
+    p
+      | ¿Confirma que desea eliminar el siguiente donante?
+      strong  Esta acción eliminará permanentemente el donante y no podrá deshacerse
+      |  (borrado físico del registro).
+
+    table
+      tr
+        th.num ID Donante
+        td.num= donante.idDonante
+      tr
+        th Nombre
+        td= donante.nombre
+      tr
+        th Apellido
+        td= donante.apellido
+      tr
+        th.num DNI
+        td.num= donante.dni
+      tr
+        th Email
+        td= donante.email
+      tr
+        th.num Monto
+        td.num $ #{donante.monto}
+      tr
+        th Fecha
+        td= donante.fecha.toISOString().slice(0, 10)
+
+    form.form-actions(action=`/vistas/donantes/${donante.idDonante}/eliminar` method="POST")
+      a.btn-secundario(href="/vistas/donantes") Cancelar
+      button.btn-peligro(type="submit") Sí, eliminar
