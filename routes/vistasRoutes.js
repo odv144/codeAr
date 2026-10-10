@@ -23,6 +23,11 @@ import {
     renderDonaciones,
     renderCrearDonacion,
     guardarDonacionDesdeVista,
+    renderDonacionDetalle,
+    renderEditarDonacion,
+    guardarEdicionDonacion,
+    renderEliminarDonacion,
+    eliminarDonacionVista,
     renderDonantes,
     renderCrearDonante,
     guardarDonanteDesdeVista
@@ -60,6 +65,11 @@ router.post("/gastos", guardarGastoDesdeVista);
 router.get("/donaciones", renderDonaciones);
 router.get("/donaciones/nuevo", renderCrearDonacion);
 router.post("/donaciones", guardarDonacionDesdeVista);
+router.get("/donaciones/:id", validarId, renderDonacionDetalle);
+router.get("/donaciones/:id/editar", validarId, renderEditarDonacion);
+router.post("/donaciones/:id/editar", validarId, guardarEdicionDonacion);
+router.get("/donaciones/:id/eliminar", validarId, renderEliminarDonacion);
+router.post("/donaciones/:id/eliminar", validarId, eliminarDonacionVista);
 
 router.get("/donantes", renderDonantes);
 router.get("/donantes/nuevo", renderCrearDonante);

@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  fieldset
+    legend Detalle de la Donación
+    p
+      a(href="/vistas/donaciones") &larr; Volver al listado
+
+    if donacion
+      table(border="1" cellpadding="5" cellspacing="0")
+        tr
+          th ID Donación:
+          td= donacion.idDonacion
+        tr
+          th Monto:
+          td $#{donacion.monto}
+        tr
+          th CBU:
+          td= donacion.cbu
+        tr
+          th Fecha:
+          td= donacion.fecha
+        tr
+          th ID Proyecto:
+          td= donacion.idProyecto
+        tr
+          th ID Donante:
+          td= donacion.idDonante
+        tr
+          th ID Organización:
+          td= donacion.idOrganizacion
+
+      p(style="margin-top: 15px;")
+        a(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
+        | &nbsp;|&nbsp;
+        a(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
+        | &nbsp;|&nbsp;
+        a(href="/vistas/donaciones") Volver al listado
+    else
+      p Donación no encontrada.
