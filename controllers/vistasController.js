@@ -13,7 +13,6 @@ const __dirname = path.dirname(__filename);
 
 // Modelos (clases simples) que todavía se usan con archivos JSON
 import Donante from "../models/Donantes.js";
-import Donacion from "../models/Donaciones.js";
 import Gasto from "../models/Gastos.js";
 
 // Servicios con MongoDB
@@ -43,7 +42,6 @@ import {
 
 // Rutas de los JSON (organizaciones y proyectos ya NO se leen de acá)
 const gastosPath = path.join(__dirname, "../data/gastos.json");
-const donacionesPath = path.join(__dirname, "../data/donaciones.json");
 const donantesPath = path.join(__dirname, "../data/donantes.json");
 
 
@@ -334,11 +332,11 @@ const eliminarGastoVista = async (req, res, next) => {
 };
 
 
-/* ===================== DONACIONES (JSON) ===================== */
+/* ===================== DONACIONES ===================== */
 
-const renderDonaciones = (req, res) => {
+const renderDonaciones = async (req, res) => {
     try {
-        const donaciones = JSON.parse(fs.readFileSync(donacionesPath, "utf-8"));
+        const donaciones = await obtenerDonaciones();
         res.render("donaciones", { donaciones });
     } catch (error) {
         res.status(500).send("Error al cargar donaciones");
@@ -349,25 +347,83 @@ const renderCrearDonacion = (req, res) => {
     res.render("donacionesCrear");
 };
 
-const guardarDonacionDesdeVista = (req, res) => {
+const guardarDonacionDesdeVista = async (req, res) => {
     try {
         const { monto, cbu, fecha, idProyecto, idDonante, idOrganizacion } = req.body;
-        const donaciones = JSON.parse(fs.readFileSync(donacionesPath, "utf-8"));
-        const nuevoId = donaciones.length > 0 ? Math.max(...donaciones.map(d => d.idDonacion)) + 1 : 1;
-        const nuevaDonacion = new Donacion(
-            nuevoId,
-            Number(monto),
+        await crearDonacion({
+            monto: Number(monto),
             cbu,
             fecha,
-            Number(idProyecto),
-            Number(idDonante),
-            Number(idOrganizacion)
-        );
-        donaciones.push(nuevaDonacion);
-        fs.writeFileSync(donacionesPath, JSON.stringify(donaciones, null, 2), "utf-8");
+            idProyecto: Number(idProyecto),
+            idDonante: Number(idDonante),
+            idOrganizacion: Number(idOrganizacion)
+        });
         res.redirect("/vistas/donaciones");
     } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.status).render("error", { mensaje: error.message });
+        }
         res.status(500).send("Error al guardar la donación");
+    }
+};
+
+const donacionNoEncontrada = () => new AppError(404, "Donación no encontrada");
+
+const renderDonacionDetalle = async (req, res, next) => {
+    try {
+        const donacion = await obtenerDonacionPorId(req.params.id);
+        if (!donacion) throw donacionNoEncontrada();
+        res.render("donacionDetalle", { donacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderEditarDonacion = async (req, res, next) => {
+    try {
+        const donacion = await obtenerDonacionPorId(req.params.id);
+        if (!donacion) throw donacionNoEncontrada();
+        res.render("donacionEditar", { donacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const guardarEdicionDonacion = async (req, res, next) => {
+    try {
+        const { monto, cbu, fecha, idProyecto, idDonante, idOrganizacion } = req.body;
+        const donacion = await actualizarDonacion(req.params.id, {
+            monto: Number(monto),
+            cbu,
+            fecha,
+            idProyecto: Number(idProyecto),
+            idDonante: Number(idDonante),
+            idOrganizacion: Number(idOrganizacion)
+        });
+        if (!donacion) throw donacionNoEncontrada();
+        res.redirect("/vistas/donaciones");
+    } catch (error) {
+        next(error);
+    }
+};
+
+const renderEliminarDonacion = async (req, res, next) => {
+    try {
+        const donacion = await obtenerDonacionPorId(req.params.id);
+        if (!donacion) throw donacionNoEncontrada();
+        res.render("donacionEliminar", { donacion });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const eliminarDonacionVista = async (req, res, next) => {
+    try {
+        const donacion = await eliminarDonacion(req.params.id);
+        if (!donacion) throw donacionNoEncontrada();
+        res.redirect("/vistas/donaciones");
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -388,7 +444,7 @@ const renderCrearDonante = (req, res) => {
 
 const guardarDonanteDesdeVista = async (req, res) => {
     try {
-       await insertarDonante(req.body);
+      await insertarDonante(req.body);
         res.redirect("/vistas/donantes");
     } catch (error) {
         //---------
@@ -484,6 +540,11 @@ export {
     renderDonaciones,
     renderCrearDonacion,
     guardarDonacionDesdeVista,
+    renderDonacionDetalle,
+    renderEditarDonacion,
+    guardarEdicionDonacion,
+    renderEliminarDonacion,
+    eliminarDonacionVista,
     renderDonantes,
     renderCrearDonante,
     guardarDonanteDesdeVista,

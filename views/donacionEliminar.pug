@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    fieldset
+    legend Eliminar Donación
+    p
+        a(href="/vistas/donaciones") &larr; Volver al listado
+        | &nbsp;|&nbsp;
+        a(href=`/vistas/donaciones/${donacion.idDonacion}`) Ver detalle
+
+    p ¿Confirmás eliminar la siguiente donación? Esta acción no se puede deshacer.
+
+    table(border="1" cellpadding="5" cellspacing="0")
+    tr
+        th ID:
+        td= donacion.idDonacion
+    tr
+        th Monto:
+        td $#{donacion.monto}
+    tr
+        th CBU:
+        td= donacion.cbu
+    tr
+        th Fecha:
+        td= donacion.fecha
+
+    form(action=`/vistas/donaciones/${donacion.idDonacion}/eliminar` method="POST" style="margin-top: 15px;")
+        button(type="submit") Sí, eliminar
+        | &nbsp;
+        a(href="/vistas/donaciones") Cancelar
