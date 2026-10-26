@@ -110,7 +110,7 @@ const guardarProyectoDesdeVista = async (req, res) => {
 
 const renderProyectoDetalle = async (req, res, next) => {
     try {
-        const proyecto = await obtenerProyectosId(req.params.id);
+        const proyecto = await obtenerProyectosId(req.params._id);
         const organizacion = await organizacionDelProyecto(proyecto);
         res.render("proyectoDetalle", { proyecto, organizacion });
     } catch (error) {
@@ -134,7 +134,7 @@ const mapearProyectoNoEncontrado = (error) =>
 
 const renderEditarProyecto = async (req, res, next) => {
     try {
-        const proyecto = await obtenerProyectosId(req.params.id);
+        const proyecto = await obtenerProyectosId(req.params._id);
         const organizaciones = await organizacionesParaFormulario(proyecto.idOrganizacion);
         res.render("proyectoEditar", { proyecto, organizaciones });
     } catch (error) {
@@ -147,7 +147,7 @@ const guardarEdicionProyecto = async (req, res, next) => {
         const { idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
 
         // Si "saldo" viene vacío, actualizarProyecto lo omite y conserva el historial
-        await actualizarProyecto(req.params.id, { idOrganizacion, nomProyecto, descripcion, saldo });
+        await actualizarProyecto(req.params._id, { idOrganizacion, nomProyecto, descripcion, saldo });
 
         res.redirect("/vistas/proyectos");
     } catch (error) {
@@ -157,7 +157,7 @@ const guardarEdicionProyecto = async (req, res, next) => {
 
 const renderEliminarProyecto = async (req, res, next) => {
     try {
-        const proyecto = await obtenerProyectosId(req.params.id);
+        const proyecto = await obtenerProyectosId(req.params._id);
         const organizacion = await organizacionDelProyecto(proyecto);
         res.render("proyectoEliminar", { proyecto, organizacion });
     } catch (error) {
@@ -167,7 +167,7 @@ const renderEliminarProyecto = async (req, res, next) => {
 
 const eliminarProyectoVista = async (req, res, next) => {
     try {
-        await eliminarProyecto(Number(req.params.id));
+        await eliminarProyecto(req.params._id);
         res.redirect("/vistas/proyectos");
     } catch (error) {
         next(error.statusCode === 404

@@ -56,11 +56,11 @@ router.get("/", renderHome);
 router.get("/proyectos", renderProyectos);
 router.get("/proyectos/nuevo", isAdmin, renderCrearProyecto);
 router.post("/proyectos", isAdmin, guardarProyectoDesdeVista);
-router.get("/proyectos/:id", validarId, renderProyectoDetalle);
-router.get("/proyectos/:id/editar", isAdmin, validarId, renderEditarProyecto);
-router.post("/proyectos/:id/editar", isAdmin, validarId, guardarEdicionProyecto);
-router.get("/proyectos/:id/eliminar", isAdmin, validarId, renderEliminarProyecto);
-router.post("/proyectos/:id/eliminar", isAdmin, validarId, eliminarProyectoVista);
+router.get("/proyectos/:_id", validarObjectId, renderProyectoDetalle);
+router.get("/proyectos/:_id/editar", isAdmin, validarObjectId, renderEditarProyecto);
+router.post("/proyectos/:_id/editar", isAdmin, validarObjectId, guardarEdicionProyecto);
+router.get("/proyectos/:_id/eliminar", isAdmin, validarObjectId, renderEliminarProyecto);
+router.post("/proyectos/:_id/eliminar", isAdmin, validarObjectId, eliminarProyectoVista);
 
 // ORGANIZACIONES (se identifican por el _id de MongoDB (:_id); eliminar = baja lógica, reactivar la revierte)
 router.get("/organizaciones", renderOrganizaciones);
