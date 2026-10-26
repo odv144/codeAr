@@ -3,9 +3,9 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Proyecto
-    p.subtitulo-detalle ID Proyecto: ##{proyecto.idProyecto} (solo lectura)
+    p.subtitulo-detalle ID Proyecto: ##{proyecto._id} (solo lectura)
 
-    form(action=`/vistas/proyectos/${proyecto.idProyecto}/editar` method="POST")
+    form(action=`/vistas/proyectos/${proyecto._id}/editar` method="POST")
       div
         label(for="idOrganizacion") Organización
         select(name="idOrganizacion" id="idOrganizacion" required)

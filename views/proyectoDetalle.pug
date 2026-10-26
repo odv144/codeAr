@@ -8,7 +8,7 @@ block content
       table.tabla-detalle
         tr
           th ID
-          td.num= proyecto.idProyecto
+          td.num= proyecto._id
         tr
           th Organización
           td= organizacion ? `${organizacion.nombre} (#${proyecto.idOrganizacion})` : `(#${proyecto.idOrganizacion})`
@@ -28,8 +28,8 @@ block content
 
       p.acciones-detalle
         if currentUser && currentUser.role === 'admin'
-          a.btn-secundario(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
-          a.btn-peligro(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
+          a.btn-secundario(href=`/vistas/proyectos/${proyecto._id}/editar`) Editar
+          a.btn-peligro(href=`/vistas/proyectos/${proyecto._id}/eliminar`) Eliminar
         a.btn-secundario(href="/vistas/proyectos") Volver al listado
     else
       p Proyecto no encontrado.

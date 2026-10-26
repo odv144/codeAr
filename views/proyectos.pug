@@ -19,14 +19,14 @@ block content
         tbody
           each proyecto in proyectos
             tr
-              td= proyecto.idProyecto
+              td= proyecto._id
               td= proyecto.nombreOrganizacion || proyecto.idOrganizacion
               td= proyecto.nomProyecto || "-"
               td= proyecto.descripcion || "-"
               td.acciones
-                a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
+                a(href=`/vistas/proyectos/${proyecto._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
-                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
-                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
+                  a(href=`/vistas/proyectos/${proyecto._id}/editar`) Editar
+                  a(href=`/vistas/proyectos/${proyecto._id}/eliminar`) Eliminar
     else
       p No hay proyectos registrados.

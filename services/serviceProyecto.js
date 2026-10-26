@@ -1,5 +1,5 @@
 import { connectDB } from "../config/db.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import Proyecto from "../models/Proyectos.js";
 import { obtenerOrganizacionPorId } from "./serviceOrganizacion.js";
 
@@ -28,7 +28,7 @@ async function proyectosBorrados(){
 //Servicio para obtener un proyecto por su ID desde la base de datos MongoDB
 async function obtenerProyectosId(id) {
   try {
-    const proyecto = await Proyecto.findById();
+    const proyecto = await Proyecto.findById(id);
     if (!proyecto) {
       throw new Error("Proyecto no encontrado");
     }
@@ -93,7 +93,7 @@ async function agregarSaldo(id, monto, fecha = new Date()) {
     }
     const proyecto = await Proyecto.findOneAndUpdate(
       {
-        idProyecto: id,
+        _id: id,
         activa: true, // solo permite agregar saldo a proyectos activos
       },
       {
@@ -150,15 +150,12 @@ async function actualizarProyecto(id, datos) {
     }
 
     // 3) Normalizar tipos según el schema
-    if (update.idOrganizacion !== undefined) {
-      update.idOrganizacion = Number(update.idOrganizacion);
-      if (Number.isNaN(update.idOrganizacion)) {
+       if (isValidObjectId(update.idOrganizacion)) {
         const err = new Error("idOrganizacion debe ser un número");
         err.status = 400;
         throw err;
       }
-    }
-
+    
     if (update.nomProyecto !== undefined) {
       update.nomProyecto = String(update.nomProyecto).trim();
     }
@@ -182,7 +179,7 @@ async function actualizarProyecto(id, datos) {
 
     // 4) Update con validación del schema
     const proyecto = await Proyecto.findOneAndUpdate(
-      { idProyecto: Number(id) },
+      { _id: id },
       { $set: update }, // $set = solo toca esos campos
       { returnDocument: "after", runValidators: true },
     );
@@ -210,7 +207,7 @@ async function actualizarProyecto(id, datos) {
 async function eliminarProyecto(id) {
   try {
     const proyecto = await Proyecto.findOneAndUpdate(
-      { idProyecto: Number(id), ...SOLO_ACTIVAS },
+      { _id:id, ...SOLO_ACTIVAS },
       { $set: { activa: false, fechaBaja: new Date() } },
       { returnDocument: "after" },
     );
@@ -227,10 +224,8 @@ async function eliminarProyecto(id) {
     throw error;
   }
 }
-async function reactivarProyectos(id) {
-  const idNumerico = Number(id);
-
-  const existente = await Proyecto.findOne({ idProyecto: idNumerico })
+async function reactivarProyectos(_id) {
+  const existente = await Proyecto.findById({ _id: id })
     .select("activa")
     .lean();
   if (!existente) return null;
@@ -240,18 +235,18 @@ async function reactivarProyectos(id) {
   }
 
   const reactivada = await Proyecto.findOneAndUpdate(
-    { idProyecto: idNumerico, activa: false },
+    { _id: id, activa: false },
     { $set: { activa: true, fechaBaja: null } },
     { returnDocument: "after" },
   );
   return reactivada;
 }
 //obtener total de saldo de todos los proyectos activos
-async function saldoProyectosActivos(id) {
+async function saldoProyectosActivos(_id) {
   try {
     const filtro = { activa: true };
-    if (id) {
-      filtro.idProyecto = Number(id);
+    if (isValidObjectId(_id)) {
+      filtro._id = _id;
     }
     const proyectosActivos = await Proyecto.find(filtro).select("saldo");
     console.log("Proyectos activos encontrados:", proyectosActivos);
