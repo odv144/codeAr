@@ -1,4 +1,5 @@
 import express from "express";
+import { validarObjectId } from "../middlewares/validarObjectId.js";
 import {
   listarDonantes,
   obtenerDonantePorId,
@@ -12,9 +13,8 @@ const router = express.Router();
 
 // Rutas CRUD para la API de Donantes
 router.get("/", listarDonantes);
-router.get("/:id", obtenerDonantePorId);
+router.get("/:_id", validarObjectId, obtenerDonantePorId);
 router.post("/", isAdmin, crearDonante);
-router.put("/:id", isAdmin, modificarDonante);
-router.delete("/:id", isAdmin, borrarDonante);
-
+router.put("/:_id", isAdmin, validarObjectId, modificarDonante);
+router.delete("/:_id", isAdmin, validarObjectId, borrarDonante);
 export default router;

@@ -12,7 +12,7 @@ block content
     table.tabla-detalle
       tr
         th ID
-        td.num= organizacion.idOrganizacion
+        td.num= organizacion._id
       tr
         th Nombre
         td= organizacion.nombre
@@ -26,6 +26,6 @@ block content
         th Responsable
         td= organizacion.responsable
 
-    form.form-actions(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar` method="POST")
+    form.form-actions(action=`/vistas/organizaciones/${organizacion._id}/eliminar` method="POST")
       a.btn-secundario(href="/vistas/organizaciones") Cancelar
       button.btn-peligro(type="submit") Sí, dar de baja

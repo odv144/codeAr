@@ -221,6 +221,14 @@ table {
   border-radius: var(--pico-border-radius);
 }
 
+/* Tablas de listado (Gastos, Donaciones, Donantes, Organizaciones, Proyectos): ocupan
+   solo el ancho de su contenido; crecen hasta el disponible cuando el contenido lo
+   necesita y al superarlo las celdas envuelven. Excluye las tablas de detalle y la de
+   la home, que conservan el ancho pleno. */
+fieldset > table:not(.tabla-detalle):not(.tabla-modulos) {
+  width: fit-content;
+}
+
 thead th {
   background: var(--marca-fondo);
   color: var(--marca-principal);
@@ -269,38 +277,53 @@ tbody th {
   font-weight: 600;
 }
 
-/* Listados: encabezados numéricos y de acciones alineados con sus celdas */
+/* Listados: encabezados numéricos a la derecha; de acciones a la izquierda, igual que
+   sus celdas, para que "Ver detalle" arranque en la misma vertical en todas las filas
+   (las filas dadas de baja tienen un enlace menos que las activas).
+   width: 1% hace que la columna pida solo el ancho intrínseco de sus enlaces y no
+   absorba el sobrante del ancho de la tabla. */
 thead th.num {
   text-align: right;
 }
 
 thead th.acciones,
 td.acciones {
-  text-align: right;
+  text-align: left;
+  white-space: nowrap;
+  width: 1%;
 }
 
-.nowrap,
-table td:nth-child(4),
-table td:nth-child(5) {
+/* Los números (.num), las acciones (.acciones) y los badges de estado (.estado-*)
+   ya traen white-space: nowrap; el resto de las columnas de texto se parte en varias
+   líneas para que la tabla no desborde el contenedor. */
+.nowrap {
   white-space: nowrap;
 }
 
+/* .acciones ya no aplica flex (las celdas son table-cell; ver regla más abajo):
+   solo aporta nowrap y tipografía a la celda. */
 .acciones {
-  display: flex;
-  gap: 0.35rem;
-  align-items: center;
-  justify-content: flex-end;
   white-space: nowrap;
   font-size: 0.78rem;
 }
 
-.acciones a {
+td.acciones a {
+  display: inline-block;
   padding: 0.15rem 0;
+  margin-right: 0.75rem;
   color: var(--marca-principal);
 }
 
 .acciones a:hover {
   text-decoration: underline;
+}
+
+/* Las celdas de acciones conservan el display de tabla y nunca toman flex: si .acciones
+   se estiliza como flex (p. ej. para un contenedor interno futuro), el navegador envolvería
+   la celda en una anónima y el borde y el fondo no llegarían al alto de la fila. */
+thead th.acciones,
+table td.acciones {
+  display: table-cell;
 }
 
 .acciones-detalle {
@@ -570,7 +593,6 @@ a.btn-primario:focus,
     justify-content: flex-start;
   }
 
-  .acciones,
   .acciones-detalle {
     justify-content: flex-start;
     flex-wrap: wrap;
@@ -619,3 +641,30 @@ a.btn-primario:focus,
   color: #64748B;
   margin-bottom: 0;
 }
+
+/* Organizaciones: filas dadas de baja y etiquetas de estado */
+tr.fila-baja td {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.estado-baja,
+.estado-activa {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.estado-baja {
+  background: #f8e3e3;
+  color: #8B1E1E;
+}
+
+.estado-activa {
+  background: #e3f4e8;
+  color: #1f6b3a;
+}
+

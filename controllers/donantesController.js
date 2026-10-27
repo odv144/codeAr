@@ -6,7 +6,7 @@ import {
   eliminarDonante 
 } from "../services/serviceDonante.js";
 
-// GET ALL
+
 const listarDonantes = async (req, res) => {
   try {
     const donantes = await obtenerDonantes();
@@ -16,11 +16,11 @@ const listarDonantes = async (req, res) => {
   }
 };
 
-// GET BY ID
+
 const obtenerDonantePorId = async (req, res) => {
   try {
-    const { id } = req.params;
-    const donante = await obtenerDonantesId(id);
+    const { _id } = req.params;
+    const donante = await obtenerDonantesId(_id);
     res.status(200).json(donante);
   } catch (error) {
     const status = error.statusCode || 500;
@@ -39,11 +39,10 @@ const crearDonante = async (req, res) => {
   }
 };
 
-// UPDATE
 const modificarDonante = async (req, res) => {
   try {
-    const { id } = req.params;
-    const donanteActualizado = await actualizarDonante(id, req.body);
+    const { _id } = req.params;
+    const donanteActualizado = await actualizarDonante(_id, req.body);
     res.status(200).json({ mensaje: "Donante actualizado", donante: donanteActualizado });
   } catch (error) {
     const status = error.status || 500;
@@ -51,11 +50,10 @@ const modificarDonante = async (req, res) => {
   }
 };
 
-// DELETE
 const borrarDonante = async (req, res) => {
   try {
-    const { id } = req.params;
-    await eliminarDonante(id);
+    const { _id } = req.params;
+    await eliminarDonante(_id);
     res.status(200).json({ mensaje: "Donante eliminado correctamente" });
   } catch (error) {
     const status = error.statusCode || 500;

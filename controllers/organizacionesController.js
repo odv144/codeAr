@@ -14,10 +14,10 @@ const obtenerOrganizaciones = async (req, res, next) => {
     }
 };
 
-// GET /organizaciones/:id
+// GET /organizaciones/:_id
 const obtenerOrganizacionPorId = async (req, res, next) => {
     try {
-        const organizacion = await servicio.obtenerOrganizacionPorId(req.params.id);
+        const organizacion = await servicio.obtenerOrganizacionPorId(req.params._id);
 
         if (!organizacion) {
             throw new AppError(404, "Organización no encontrada");
@@ -39,10 +39,10 @@ const crearOrganizacion = async (req, res, next) => {
     }
 };
 
-// PUT /organizaciones/:id
+// PUT /organizaciones/:_id
 const actualizarOrganizacion = async (req, res, next) => {
     try {
-        const organizacion = await servicio.actualizarOrganizacion(req.params.id, req.datosOrganizacion);
+        const organizacion = await servicio.actualizarOrganizacion(req.params._id, req.datosOrganizacion);
 
         if (!organizacion) {
             throw new AppError(404, "Organización no encontrada");
@@ -54,10 +54,10 @@ const actualizarOrganizacion = async (req, res, next) => {
     }
 };
 
-// DELETE /organizaciones/:id  -> BAJA LÓGICA (no borra el documento, lo marca como inactivo)
+// DELETE /organizaciones/:_id  -> BAJA LÓGICA (no borra el documento, lo marca como inactivo)
 const darDeBajaOrganizacion = async (req, res, next) => {
     try {
-        const organizacion = await servicio.darDeBajaOrganizacion(req.params.id);
+        const organizacion = await servicio.darDeBajaOrganizacion(req.params._id);
 
         if (!organizacion) {
             throw new AppError(404, "Organización no encontrada");
@@ -72,10 +72,10 @@ const darDeBajaOrganizacion = async (req, res, next) => {
     }
 };
 
-// PATCH /organizaciones/:id/reactivar  -> revierte la baja lógica
+// PATCH /organizaciones/:_id/reactivar  -> revierte la baja lógica
 const reactivarOrganizacion = async (req, res, next) => {
     try {
-        const organizacion = await servicio.reactivarOrganizacion(req.params.id);
+        const organizacion = await servicio.reactivarOrganizacion(req.params._id);
 
         if (!organizacion) {
             throw new AppError(404, "Organización no encontrada");

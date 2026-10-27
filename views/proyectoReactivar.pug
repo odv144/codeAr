@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  fieldset
+    legend Reactivar Proyecto
+
+    p
+      | ¿Confirma reactivar el siguiente proyecto?
+      strong  El proyecto volverá a estar activo y podrá editarse y asociarse a gastos y donaciones.
+
+    table.tabla-detalle
+      tr
+        th ID
+        td.num= proyecto._id
+      tr
+        th Organización
+        td= organizacion ? organizacion.nombre : "-"
+      tr
+        th Nombre
+        td= proyecto.nomProyecto
+      tr
+        th Descripción
+        td= proyecto.descripcion || "-"
+      if proyecto.fechaBaja
+        tr
+          th Dada de baja el
+          td= new Date(proyecto.fechaBaja).toLocaleDateString('es-AR')
+
+    form.form-actions(action=`/vistas/proyectos/${proyecto._id}/reactivar` method="POST")
+      a.btn-secundario(href="/vistas/proyectos?incluirBajas=true") Cancelar
+      button(type="submit") Sí, reactivar

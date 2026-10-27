@@ -1,8 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import Proyecto from "../models/Proyectos.js";
-import mongoose from "mongoose";
 import {
   obtenerProyectosId,
   insertarProyecto,
@@ -13,149 +8,107 @@ import {
   saldoProyectosActivos,
   proyectosBorrados,
 } from "../services/serviceProyecto.js";
+import { AppError } from "../utils/AppError.js";
 
-const __filename = fileURLToPath(import.meta.url);
-//const __dirname = path.dirname(__filename);
+// Los servicios lanzan Errores simples sin status: acá se convierten en 404 real
+// para que errorHandler muestre el mensaje y no un 500 genérico.
+const mapearProyectoNoEncontrado = (error) =>
+  error.message === "Proyecto no encontrado" ||
+  error.message === "Proyecto dado de baja logica"
+    ? new AppError(404, error.message)
+    : error;
 
-//const rutaArchivo = path.join(__dirname, "../data/proyectos.json");
-
-// función leer archivo
-// const leerProyectos = () => {
-//     const data = fs.readFileSync(rutaArchivo, "utf-8");
-
-//     return JSON.parse(data);
-
-// };
-// función leer archivo desde MongoDB
-// const leerProyectosMdb = async () => {
-//     try {
-//         return await obtenerDatos("proyectos");
-
-//     } catch (error) {
-//         console.error("Error al leer proyectos desde MongoDB:", error);
-//         return [];
-//     }
-// };
-
-// función guardar archivo
-// const guardarProyectos = (proyectos) => {
-
-//     fs.writeFileSync(
-//         rutaArchivo,
-//         JSON.stringify(proyectos, null, 2)
-//     );
-
-// };
-//pruebas para obtener proyectos borrados
-const obtenerProyectosBorrados = async (req, res) => {
+// pruebas para obtener proyectos borrados
+const obtenerProyectosBorrados = async (req, res, next) => {
   try {
-    console.log("obteniendo proyectos borrados");  
-    const proyectosBorrados = await proyectosBorrados();
-    res.json(proyectosBorrados);
+    const borrados = await proyectosBorrados();
+    res.json(borrados);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener los proyectos borrados" });
+    next(error);
   }
 };
 
 // GET ALL
-const obtenerTodos = async (req, res) => {
+const obtenerTodos = async (req, res, next) => {
   try {
-    const proyectos = await obtenerProyectos();
+    const proyectos = await obtenerProyectos({ incluirBajas: true });
     res.json(proyectos);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener los proyectos" });
+    next(error);
   }
 };
-// GET BY ID
-const obtenerProyectoPorId = async (req, res) => {
+
+// GET BY ID (incluye bajas: permite ver el detalle de un proyecto dado de baja)
+const obtenerProyectoPorId = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const proyecto = await obtenerProyectosId(id);
-    if (!proyecto) {
-      return res.status(404).json({ mensaje: "Proyecto no encontrado" });
-    }
-    return res.json(proyecto);
+    const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
+    res.json(proyecto);
   } catch (error) {
-    return res.status(500).json({ mensaje: "Error al obtener el proyecto" });
+    next(mapearProyectoNoEncontrado(error));
   }
 };
+
 // saldos proyectos activos(para pruebas)
-const obtenerSaldoProyectosActivos = async (req, res) => {
-  try { 
-    const totalSaldo = await saldoProyectosActivos(req.params.id);
+const obtenerSaldoProyectosActivos = async (req, res, next) => {
+  try {
+    const totalSaldo = await saldoProyectosActivos(req.params._id);
     res.json({ totalSaldo });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener el total de saldo de proyectos activos" });
+    next(error);
   }
 };
 
 //agregar saldo a un proyecto (para pruebas)
-const agregarSaldoAProyecto = async (req, res) => {
+const agregarSaldoAProyecto = async (req, res, next) => {
   try {
-  const { idProyecto, monto, fecha} = req.body;
-  const fechaFinal = fecha ? new Date(fecha) : undefined;
-  console.log("id a buscar:", idProyecto," monto a agregar:", monto);
+    const { idProyecto, monto, fecha } = req.body;
+    const fechaFinal = fecha ? new Date(fecha) : undefined;
     const proyectoActualizado = await agregarSaldo(idProyecto, monto, fechaFinal);
     res.json({ mensaje: "Saldo agregado correctamente", proyecto: proyectoActualizado });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al agregar saldo al proyecto" });
+    next(error);
   }
 };
+
 // CREATE
-const crearProyecto = async (req, res) => {
+const crearProyecto = async (req, res, next) => {
   try {
-    const nuevoProyecto = await insertarProyecto(req.body);
+    const nuevoProyecto = await insertarProyecto(req.datosProyecto);
     res.status(201).json({
       mensaje: "Proyecto creado exitosamente",
       proyecto: nuevoProyecto,
     });
-
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al crear el proyecto" });
+    next(error);
   }
 };
 
 // UPDATE
-const updateProyecto = async (req, res) => {
+const updateProyecto = async (req, res, next) => {
   try {
-    const proyecto = await actualizarProyecto(req.params.id, req.body);
+    const proyecto = await actualizarProyecto(req.params._id, req.datosProyecto);
     res.json({
       mensaje: "Proyecto actualizado",
       proyecto,
     });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al actualizar el proyecto aqui" });
+    next(mapearProyectoNoEncontrado(error));
   }
 };
 
-// DELETE
-const deleteProyecto = async (req, res) => {
+// DELETE (baja lógica: no borra el documento, lo marca como inactivo)
+const deleteProyecto = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    console.log("id a buscar:", id);
-    const proyecto = await eliminarProyecto(id);
+    const proyecto = await eliminarProyecto(req.params._id);
     res.status(200).json({
-      mensaje: "Proyecto eliminado correctamente",
+      mensaje: "Proyecto dado de baja correctamente",
       proyecto,
     });
   } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al eliminar el proyecto",
-      error: error.message,
-    });
+    next(error.statusCode === 404
+      ? new AppError(404, "Proyecto no encontrado")
+      : error);
   }
-  //const tieneGastos = gastos.some((g) => Number(g.idProyecto) === id);
-  //const tieneDonaciones = donaciones.some((d) => Number(d.idProyecto) === id);
-
-  // if (tieneGastos || tieneDonaciones) {
-  //   return res.status(409).json({
-  //     mensaje:
-  //       "No se puede eliminar el proyecto porque posee gastos o donaciones asociados",
-  //   });
-  // }
-
-  // const nuevosProyectos = proyectos.filter((p) => p.idProyecto !== id);
-  // guardarProyectos(nuevosProyectos);
 };
 
 export {

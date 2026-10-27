@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  fieldset
+    legend Reactivar Organización
+
+    p
+      | ¿Confirma reactivar la siguiente organización?
+      strong  La organización volverá a estar activa y podrá editarse y asociarse a proyectos y donaciones.
+
+    table.tabla-detalle
+      tr
+        th ID
+        td.num= organizacion._id
+      tr
+        th Nombre
+        td= organizacion.nombre
+      tr
+        th Tipo
+        td= organizacion.tipo
+      tr
+        th CUIL
+        td.num= organizacion.cuil
+      tr
+        th Responsable
+        td= organizacion.responsable
+      if organizacion.fechaBaja
+        tr
+          th Dada de baja el
+          td= new Date(organizacion.fechaBaja).toLocaleDateString('es-AR')
+
+    form.form-actions(action=`/vistas/organizaciones/${organizacion._id}/reactivar` method="POST")
+      a.btn-secundario(href="/vistas/organizaciones?incluirBajas=true") Cancelar
+      button(type="submit") Sí, reactivar

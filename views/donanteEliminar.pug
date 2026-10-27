@@ -12,7 +12,7 @@ block content
     table.tabla-detalle
       tr
         th ID Donante
-        td.num= donante.idDonante
+        td.num= donante._id 
       tr
         th Nombre
         td= donante.nombre
@@ -32,6 +32,6 @@ block content
         th Fecha
         td= donante.fecha.toISOString().slice(0, 10)
 
-    form.form-actions(action=`/vistas/donantes/${donante.idDonante}/eliminar` method="POST")
+    form.form-actions(action=`/vistas/donantes/${donante._id  }/eliminar` method="POST")
       a.btn-secundario(href="/vistas/donantes") Cancelar
       button.btn-peligro(type="submit") Sí, eliminar

@@ -5,6 +5,7 @@ block content
     legend Detalle de la Organización
 
     if organizacion
+      - const dadaDeBaja = organizacion.activa === false
       table.tabla-detalle
         tr
           th Nombre
@@ -27,11 +28,21 @@ block content
         tr
           th Responsable
           td= organizacion.responsable
+        if dadaDeBaja
+          tr
+            th Estado
+            td
+              span.estado-baja Dada de baja
+              if organizacion.fechaBaja
+                |  el #{new Date(organizacion.fechaBaja).toLocaleDateString('es-AR')}
 
       p.acciones-detalle
         if currentUser && currentUser.role === 'admin'
-          a.btn-secundario(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar`) Editar
-          a.btn-peligro(href=`/vistas/organizaciones/${organizacion.idOrganizacion}/eliminar`) Dar de baja
+          if dadaDeBaja
+            a.btn-primario(href=`/vistas/organizaciones/${organizacion._id}/reactivar`) Reactivar
+          else
+            a.btn-secundario(href=`/vistas/organizaciones/${organizacion._id}/editar`) Editar
+            a.btn-peligro(href=`/vistas/organizaciones/${organizacion._id}/eliminar`) Dar de baja
         a.btn-secundario(href="/vistas/organizaciones") Volver al listado
     else
       p Organización no encontrada.

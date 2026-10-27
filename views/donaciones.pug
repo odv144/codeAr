@@ -11,8 +11,7 @@ block content
       table
         thead
           tr
-              th ID Donación
-              th.num Monto
+              th Monto
               th CBU
               th Fecha
               th Proyecto
@@ -22,17 +21,16 @@ block content
         tbody
           each donacion in donaciones
             tr
-              td= donacion.idDonacion
-              td.num $#{donacion.monto}
+              td $#{donacion.monto}
               td= donacion.cbu
-              td= donacion.fecha.toISOString().slice(0, 10)
+              td.nowrap= donacion.fecha.toISOString().slice(0, 10)
               td= donacion.nombreProyecto || donacion.idProyecto
               td= donacion.nombreDonante || donacion.idDonante
               td= donacion.nombreOrganizacion || donacion.idOrganizacion
               td.acciones
-                a(href=`/vistas/donaciones/${donacion.idDonacion}`) Ver detalle
+                a(href=`/vistas/donaciones/${donacion._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
-                  a(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
-                  a(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
+                  a(href=`/vistas/donaciones/${donacion._id}/editar`) Editar
+                  a(href=`/vistas/donaciones/${donacion._id}/eliminar`) Eliminar
     else
       p No hay donaciones registradas.

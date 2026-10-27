@@ -6,11 +6,8 @@ block content
 
     table.tabla-detalle
       tr
-        th ID Gasto
-        td.num= gasto.idGasto
-      tr
         th Proyecto
-        td= proyecto ? `${proyecto.nomProyecto} (#${gasto.idProyecto})` : `(#${gasto.idProyecto})`
+        td= proyecto ? (proyecto.nombre || proyecto.nomProyecto) : "-"
       tr
         th Descripción
         td= gasto.descripcion
@@ -23,6 +20,6 @@ block content
 
     p.acciones-detalle
       if currentUser && currentUser.role === 'admin'
-        a.btn-secundario(href=`/vistas/gastos/${gasto.idGasto}/editar`) Editar
-        a.btn-peligro(href=`/vistas/gastos/${gasto.idGasto}/eliminar`) Eliminar
+        a.btn-secundario(href=`/vistas/gastos/${gasto._id}/editar`) Editar
+        a.btn-peligro(href=`/vistas/gastos/${gasto._id}/eliminar`) Eliminar
       a.btn-secundario(href="/vistas/gastos") Volver al listado

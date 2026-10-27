@@ -6,27 +6,41 @@ block content
     if currentUser && currentUser.role === 'admin'
       p.acciones-detalle
         a.btn-primario(href="/vistas/proyectos/nuevo") + Nuevo Proyecto
-    
+        if incluirBajas
+          a.btn-secundario(href="/vistas/proyectos") Ver solo activos
+        else
+          a.btn-secundario(href="/vistas/proyectos?incluirBajas=true") Ver también dadas de baja
+
     if proyectos && proyectos.length > 0
       table
         thead
           tr
-            th ID Proyecto
             th ORGANIZACIÓN
             th Nombre del Proyecto
             th Descripción
+            if incluirBajas
+              th Estado
             th.acciones Acciones
         tbody
           each proyecto in proyectos
-            tr
-              td= proyecto.idProyecto
-              td= proyecto.nombreOrganizacion || proyecto.idOrganizacion
+            - const dadaDeBaja = proyecto.activa === false
+            tr(class=(dadaDeBaja ? 'fila-baja' : ''))
+              td= proyecto.nombreOrganizacion || "-"
               td= proyecto.nomProyecto || "-"
               td= proyecto.descripcion || "-"
+              if incluirBajas
+                td
+                  if dadaDeBaja
+                    span.estado-baja Dada de baja
+                  else
+                    span.estado-activa Activa
               td.acciones
-                a(href=`/vistas/proyectos/${proyecto.idProyecto}`) Ver detalle
+                a(href=`/vistas/proyectos/${proyecto._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
-                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/editar`) Editar
-                  a(href=`/vistas/proyectos/${proyecto.idProyecto}/eliminar`) Eliminar
+                  if dadaDeBaja
+                    a(href=`/vistas/proyectos/${proyecto._id}/reactivar`) Reactivar
+                  else
+                    a(href=`/vistas/proyectos/${proyecto._id}/editar`) Editar
+                    a(href=`/vistas/proyectos/${proyecto._id}/eliminar`) Dar de baja
     else
       p No hay proyectos registrados.

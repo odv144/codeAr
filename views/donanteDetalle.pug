@@ -6,9 +6,6 @@ block content
 
     table.tabla-detalle
       tr
-        th ID Donante
-        td.num= donante.idDonante
-      tr
         th Nombre
         td= donante.nombre
       tr
@@ -32,6 +29,6 @@ block content
 
     p.acciones-detalle
       if currentUser && currentUser.role === 'admin'
-        a.btn-secundario(href=`/vistas/donantes/${donante.idDonante}/editar`) Editar
-        a.btn-peligro(href=`/vistas/donantes/${donante.idDonante}/eliminar`) Eliminar
+        a.btn-secundario(href=`/vistas/donantes/${donante._id}/editar`) Editar
+        a.btn-peligro(href=`/vistas/donantes/${donante._id}/eliminar`) Eliminar
       a.btn-secundario(href="/vistas/donantes") Volver al listado

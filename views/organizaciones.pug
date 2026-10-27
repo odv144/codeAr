@@ -6,33 +6,47 @@ block content
     if currentUser && currentUser.role === 'admin'
       p.acciones-detalle
         a.btn-primario(href="/vistas/organizaciones/nuevo") + Nueva Organización
+        if incluirBajas
+          a.btn-secundario(href="/vistas/organizaciones") Ver solo activas
+        else
+          a.btn-secundario(href="/vistas/organizaciones?incluirBajas=true") Ver también dadas de baja
     
     if organizaciones && organizaciones.length > 0
       table
         thead
-          tr
-            th ID
-            th Nombre
-            th Tipo
+         tr
+           th Nombre
+           th Tipo
             th.num CUIL
             th.num Teléfono
             th Email
             th Responsable
+             if incluirBajas
+              th Estado
             th.acciones Acciones
         tbody
           each org in organizaciones
-            tr
-              td= org.idOrganizacion
+            - const dadaDeBaja = org.activa === false
+            tr(class=(dadaDeBaja ? 'fila-baja' : ''))
               td= org.nombre
               td= org.tipo
               td.num= org.cuil
               td.num= org.telefono
               td= org.mail
               td= org.responsable
+              if incluirBajas
+                td
+                  if dadaDeBaja
+                    span.estado-baja Dada de baja
+                  else
+                    span.estado-activa Activa
               td.acciones
-                a(href=`/vistas/organizaciones/${org.idOrganizacion}`) Ver detalle
+                a(href=`/vistas/organizaciones/${org._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
-                  a(href=`/vistas/organizaciones/${org.idOrganizacion}/editar`) Editar
-                  a(href=`/vistas/organizaciones/${org.idOrganizacion}/eliminar`) Dar de baja
+                  if dadaDeBaja
+                    a(href=`/vistas/organizaciones/${org._id}/reactivar`) Reactivar
+                  else
+                    a(href=`/vistas/organizaciones/${org._id}/editar`) Editar
+                    a(href=`/vistas/organizaciones/${org._id}/eliminar`) Dar de baja
     else
       p No hay organizaciones registradas.

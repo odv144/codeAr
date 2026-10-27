@@ -3,37 +3,38 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Organización
-    p.subtitulo-detalle ID Organización: ##{organizacion.idOrganizacion} (solo lectura)
 
-    form(action=`/vistas/organizaciones/${organizacion.idOrganizacion}/editar` method="POST")
+    form(action=`/vistas/organizaciones/${organizacion._id}/editar` method="POST")
       div
         label(for="nombre") Nombre de la Organización
-        input(type="text" name="nombre" id="nombre" value=organizacion.nombre required)
+        input(type="text" name="nombre" id="nombre" value=organizacion.nombre required minlength="2" maxlength="100" data-error-servidor=(erroresCampo && erroresCampo.nombre))
 
       div
         label(for="tipo") Tipo (Ej. Fundación, Asociación Civil, ONG)
-        input(type="text" name="tipo" id="tipo" value=organizacion.tipo required)
+        input(type="text" name="tipo" id="tipo" value=organizacion.tipo required minlength="2" maxlength="50" data-error-servidor=(erroresCampo && erroresCampo.tipo))
 
       div
         label(for="cuil") CUIL (Ej. 30-71234567-8)
-        input(type="text" name="cuil" id="cuil" value=organizacion.cuil required)
+        input(type="text" name="cuil" id="cuil" value=organizacion.cuil required pattern="\\d{2}-\\d{8}-\\d" data-mensaje-formato="El CUIL debe tener el formato XX-XXXXXXXX-X (ej. 30-71234567-8)" data-error-servidor=(erroresCampo && erroresCampo.cuil))
 
       div
         label(for="telefono") Teléfono
-        input(type="text" name="telefono" id="telefono" value=organizacion.telefono required)
+        input(type="text" name="telefono" id="telefono" value=organizacion.telefono required pattern="[0-9+\\-\\(\\)\\s]{6,20}" data-mensaje-formato="El teléfono solo puede tener números, espacios, +, - y paréntesis (6 a 20 caracteres)" data-error-servidor=(erroresCampo && erroresCampo.telefono))
 
       div
         label(for="mail") Correo Electrónico
-        input(type="email" name="mail" id="mail" value=organizacion.mail required)
+        input(type="email" name="mail" id="mail" value=organizacion.mail required pattern="[^\\s@]+@[^\\s@]+\\.[^\\s@]+" data-mensaje-formato="El mail no tiene un formato válido" data-error-servidor=(erroresCampo && erroresCampo.mail))
 
       div
         label(for="direccion") Dirección
-        input(type="text" name="direccion" id="direccion" value=organizacion.direccion required)
+        input(type="text" name="direccion" id="direccion" value=organizacion.direccion required minlength="3" maxlength="150" data-error-servidor=(erroresCampo && erroresCampo.direccion))
 
       div
         label(for="responsable") Responsable a Cargo
-        input(type="text" name="responsable" id="responsable" value=organizacion.responsable required)
+        input(type="text" name="responsable" id="responsable" value=organizacion.responsable required minlength="2" maxlength="100" data-error-servidor=(erroresCampo && erroresCampo.responsable))
 
       .form-actions
         a.btn-secundario(href="/vistas/organizaciones") Cancelar
         button(type="submit") Guardar Cambios
+
+    script(src="/js/validacion-formulario.js")

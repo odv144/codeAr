@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // Patrones y longitudes compartidos con las validaciones de la capa de entrada
-// (utils/validacionesOrganizacion.js), así hay una única fuente de verdad.
+// (middlewares/validaciones.js), así hay una única fuente de verdad.
 export const PATRONES = {
   cuil: /^\d{2}-\d{8}-\d$/,              // 30-71234567-8
   mail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,    // algo@dominio.ext
@@ -25,8 +25,7 @@ const texto = (campo, etiqueta) => ({
 
 const organizacionSchema = new mongoose.Schema(
   {
-    // Clave de negocio numérica: la usan Proyectos y Donaciones (idOrganizacion)
-    idOrganizacion: { type: Number, required: true, unique: true, min: 1 },
+    // La identidad de la organización es su _id de MongoDB (ObjectId), generado automáticamente.
     nombre: texto("nombre", "El nombre"),
     tipo: texto("tipo", "El tipo"),
     cuil: {
@@ -52,22 +51,16 @@ const organizacionSchema = new mongoose.Schema(
     direccion: texto("direccion", "La dirección"),
     responsable: texto("responsable", "El responsable"),
 
-    // Baja lógica: la organización no se borra de la base, se marca como inactiva.
-    // Así se conserva el historial y los proyectos/donaciones que la referencian.
+     // Baja lógica: la organización no se borra de la base, se marca como inactiva.
+    // Así se conserva el historial.
     activa: { type: Boolean, default: true },
     fechaBaja: { type: Date, default: null }
   },
   {
     collection: "organizaciones",
-    versionKey: false,
-    toJSON: {
-      // No exponemos el _id interno de Mongo: la API trabaja con idOrganizacion
-      transform: (_doc, ret) => {
-        delete ret._id;
-        return ret;
-      }
-    }
+    versionKey: false
   }
 );
 
 export default mongoose.model("Organizacion", organizacionSchema);
+

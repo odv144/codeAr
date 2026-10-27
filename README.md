@@ -11,12 +11,12 @@ Proyecto desarrollado para la materia Desarrollo de Sistemas Web Backend (Tecnic
 
 ## Integrantes y Responsabilidades (Empresa CodeAr)
 
-- **Omar Virili:** Configuración del servidor Express, arquitectura y módulo de **Proyectos**.
+- **Omar Virili:** Creación/configuración de la base MongoDB Atlas, conexión mediante Mongoose y desarrollo del CRUD del módulo **Proyectos**.
 - **Jairo N. Calla Girón:** Módulo de **Donantes** (CRUD y persistencia en MongoDB Atlas).
 - **Mariana Borda:** Módulo de **Organizaciones** (CRUD y persistencia en MongoDB Atlas) y documentación.
 - **Analía Fernández:** Módulo de **Donaciones** (CRUD y persistencia en MongoDB Atlas).
 - **Cynthia Sotelo:** Módulo de **Gastos** (CRUD y persistencia en MongoDB Atlas).
-- **Cristian Suárez:** Diseño, maquetación e integración del motor de plantillas **Pug** (vistas web, rutas dinámicas y componentes de navegación).
+- **Cristian Suárez:** Diseño, maquetación e integración del motor de plantillas **Pug** (vistas web, rutas dinámicas y componentes de navegación). Implementación de la autenticación basada en sesiones.
 
 
 ## Cambios principales respecto a la versión CommonJS

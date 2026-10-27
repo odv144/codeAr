@@ -1,25 +1,6 @@
-/*class Donante {
-    constructor(idDonante, nombre, apellido, dni, telefono, email, monto, fecha) {
-        this.idDonante = idDonante;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.dni = dni;
-        this.telefono = telefono;
-        this.email = email;
-        this.monto = monto;
-        this.fecha = fecha;
-    }
-}
-export default Donante;*/
-
 import mongoose from "mongoose";
 
 const donanteSchema = new mongoose.Schema({
-    idDonante: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     nombre: {
         type: String,
         required: true

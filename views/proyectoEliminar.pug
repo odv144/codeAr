@@ -2,20 +2,20 @@ extends layout
 
 block content
   fieldset
-    legend Eliminar Proyecto
+    legend Dar de Baja Proyecto
 
     p
-      | ¿Confirma que desea eliminar el siguiente proyecto?
-      strong  Esta acción eliminará permanentemente el proyecto y no podrá deshacerse
-      |  (borrado físico del registro).
+      | ¿Confirma dar de baja el siguiente proyecto?
+      strong  El proyecto será dado de baja y dejará de estar activo. El registro y su historial no serán eliminados.
+      |  Es una baja lógica: se conservan los gastos y donaciones asociados.
 
     table.tabla-detalle
       tr
-        th ID Proyecto
-        td.num= proyecto.idProyecto
+        th ID
+        td.num= proyecto._id
       tr
         th Organización
-        td= organizacion ? `${organizacion.nombre} (#${proyecto.idOrganizacion})` : `(#${proyecto.idOrganizacion})`
+        td= organizacion ? organizacion.nombre : "-"
       tr
         th Nombre
         td= proyecto.nomProyecto
@@ -23,6 +23,6 @@ block content
         th Descripción
         td= proyecto.descripcion || "-"
 
-    form.form-actions(action=`/vistas/proyectos/${proyecto.idProyecto}/eliminar` method="POST")
+    form.form-actions(action=`/vistas/proyectos/${proyecto._id}/eliminar` method="POST")
       a.btn-secundario(href="/vistas/proyectos") Cancelar
-      button.btn-peligro(type="submit") Sí, eliminar
+      button.btn-peligro(type="submit") Sí, dar de baja

@@ -1,38 +1,30 @@
-import { connectDB } from "../config/db.js";
-import mongoose from "mongoose";
+import { isValidObjectId } from "mongoose";
 import Proyecto from "../models/Proyectos.js";
-import { existeOrganizacion } from "./serviceOrganizacion.js";
+import { obtenerOrganizacionPorId } from "./serviceOrganizacion.js";
+import { AppError } from "../utils/AppError.js";
 
 const SOLO_ACTIVAS = { activa: { $ne: false } };
 //Servicio para obtener un proyecto por su ID desde la base de datos MongoDB
 
-async function obtenerProyectos() {
-  try {
-    const proyectos = await Proyecto.find({ ...SOLO_ACTIVAS }).lean();
-    return proyectos;
-  } catch (error) {
-    console.error("Error al obtener los proyectos:", error);
-  } 
+async function obtenerProyectos({ incluirBajas = false } = {}) {
+  const filtro = incluirBajas ? {} : SOLO_ACTIVAS;
+  return Proyecto.find(filtro).lean();
 }
 
 async function proyectosBorrados(){
-  try {
-    const proyectosBorrados = await Proyecto.find({ activa: false }).lean();
-    console.log("Proyectos borrados encontrados:", proyectosBorrados);
-    return proyectosBorrados;
-  } catch (error) {
-    console.error("Error al obtener los proyectos borrados:", error);
-  }
+  return Proyecto.find({ activa: false }).lean();
 }
 
-//Servicio para obtener un proyecto por su ID desde la base de datos MongoDB
-async function obtenerProyectosId(id) {
+//Servicio para obtener un proyecto por su ID desde la base de datos MongoDB.
+// Por defecto solo devuelve proyectos activos; con incluirBajas también los
+// dados de baja (para ver su detalle y poder reactivarlos).
+async function obtenerProyectosId(id, { incluirBajas = false } = {}) {
   try {
-    const proyecto = await Proyecto.findOne({ idProyecto: Number(id) });
+    const proyecto = await Proyecto.findById(id);
     if (!proyecto) {
       throw new Error("Proyecto no encontrado");
     }
-    if (!proyecto.activa) {
+    if (!incluirBajas && !proyecto.activa) {
       throw new Error("Proyecto dado de baja logica");
     }
     return proyecto;
@@ -45,13 +37,21 @@ async function obtenerProyectosId(id) {
 //funcion para insertar datos en la base de datos y se manda por parametro la tabla y los datos a insertar
 async function insertarProyecto(datos) {
   const { idOrganizacion, nomProyecto, descripcion, saldo } = datos;
-
+  
   if (!idOrganizacion || !nomProyecto || !descripcion) {
     const err = new Error("Faltan campos obligatorios");
     err.status = 400;
     throw err;
   }
-  if (typeof saldo !== "number" && saldo < 0) {
+  if (!isValidObjectId(idOrganizacion)) {
+    const err = new Error("La organización indicada no es un _id válido de MongoDB");
+    err.status = 400;
+    throw err;
+  }
+  // Acepta números o strings numéricos (el formulario envía texto); vacío = 0
+  const saldoNum =
+    saldo === undefined || saldo === null || saldo === "" ? 0 : Number(saldo);
+  if (!Number.isFinite(saldoNum) || saldoNum < 0) {
     const err = new Error(
       "El campo saldo debe ser un número mayor o igual a cero",
     );
@@ -62,25 +62,20 @@ async function insertarProyecto(datos) {
   if (Proyecto.db.readyState !== 1) {
     throw new Error("MongoDB no está conectado (readyState !== 1)");
   }
-  const organizacionExiste = await existeOrganizacion(idOrganizacion);
+  const organizacionExiste = await obtenerOrganizacionPorId(idOrganizacion);
   if (!organizacionExiste) {
     const err = new Error("La organización no existe o está dada de baja");
     err.status = 400;
     throw err;
   }
-  const ultimo = await Proyecto.findOne()
-    .sort({ idProyecto: -1 })
-    .select("idProyecto")
-    .lean();
 
-  const idProyecto = ultimo ? ultimo.idProyecto + 1 : 1;
   const nuevo = await Proyecto.create({
-    idProyecto,
-    idOrganizacion: Number(idOrganizacion),
+    idOrganizacion,
     nomProyecto: String(nomProyecto).trim(),
     descripcion: String(descripcion).trim(),
-    saldo: [{ monto: Number(saldo) || 0, fecha: new Date() }],
+    saldo: [{ monto: saldoNum, fecha: new Date() }],
   });
+ 
   return nuevo.toObject();
 }
 
@@ -95,7 +90,7 @@ async function agregarSaldo(id, monto, fecha = new Date()) {
     }
     const proyecto = await Proyecto.findOneAndUpdate(
       {
-        idProyecto: id,
+        _id: id,
         activa: true, // solo permite agregar saldo a proyectos activos
       },
       {
@@ -152,15 +147,12 @@ async function actualizarProyecto(id, datos) {
     }
 
     // 3) Normalizar tipos según el schema
-    if (update.idOrganizacion !== undefined) {
-      update.idOrganizacion = Number(update.idOrganizacion);
-      if (Number.isNaN(update.idOrganizacion)) {
-        const err = new Error("idOrganizacion debe ser un número");
-        err.status = 400;
-        throw err;
-      }
+    if (!isValidObjectId(update.idOrganizacion)) {
+      const err = new Error("idOrganizacion debe ser un _id válido de MongoDB");
+      err.status = 400;
+      throw err;
     }
-
+    
     if (update.nomProyecto !== undefined) {
       update.nomProyecto = String(update.nomProyecto).trim();
     }
@@ -184,7 +176,7 @@ async function actualizarProyecto(id, datos) {
 
     // 4) Update con validación del schema
     const proyecto = await Proyecto.findOneAndUpdate(
-      { idProyecto: Number(id) },
+      { _id: id },
       { $set: update }, // $set = solo toca esos campos
       { returnDocument: "after", runValidators: true },
     );
@@ -212,7 +204,7 @@ async function actualizarProyecto(id, datos) {
 async function eliminarProyecto(id) {
   try {
     const proyecto = await Proyecto.findOneAndUpdate(
-      { idProyecto: Number(id), ...SOLO_ACTIVAS },
+      { _id:id, ...SOLO_ACTIVAS },
       { $set: { activa: false, fechaBaja: new Date() } },
       { returnDocument: "after" },
     );
@@ -229,10 +221,8 @@ async function eliminarProyecto(id) {
     throw error;
   }
 }
-async function reactivarProyectos(id) {
-  const idNumerico = Number(id);
-
-  const existente = await Proyecto.findOne({ idProyecto: idNumerico })
+async function reactivarProyectos(_id) {
+  const existente = await Proyecto.findById(_id)
     .select("activa")
     .lean();
   if (!existente) return null;
@@ -242,21 +232,20 @@ async function reactivarProyectos(id) {
   }
 
   const reactivada = await Proyecto.findOneAndUpdate(
-    { idProyecto: idNumerico, activa: false },
+    { _id, activa: false },
     { $set: { activa: true, fechaBaja: null } },
     { returnDocument: "after" },
   );
   return reactivada;
 }
 //obtener total de saldo de todos los proyectos activos
-async function saldoProyectosActivos(id) {
+async function saldoProyectosActivos(_id) {
   try {
     const filtro = { activa: true };
-    if (id) {
-      filtro.idProyecto = Number(id);
+    if (isValidObjectId(_id)) {
+      filtro._id = _id;
     }
     const proyectosActivos = await Proyecto.find(filtro).select("saldo");
-    console.log("Proyectos activos encontrados:", proyectosActivos);
     // 3. Sumá de forma segura
     const totalSaldo = proyectosActivos.reduce((total, proyecto) => {
       // Protección por si saldo no es un array
