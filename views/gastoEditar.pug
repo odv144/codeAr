@@ -3,15 +3,14 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Gasto
-    p.subtitulo-detalle ID Gasto: ##{gasto.idGasto} (solo lectura)
 
-    form(action=`/vistas/gastos/${gasto.idGasto}/editar` method="POST")
+    form(action=`/vistas/gastos/${gasto._id}/editar` method="POST")
       div
         label(for="idProyecto") Proyecto
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
           each proyecto in proyectos
-            option(value=proyecto.idProyecto selected=(proyecto.idProyecto === gasto.idProyecto))= proyecto.nomProyecto
+            option(value=proyecto._id selected=(String(proyecto._id) === String(gasto.idProyecto)))= proyecto.nomProyecto
 
       div
         label(for="descripcion") Descripción

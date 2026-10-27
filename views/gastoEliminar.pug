@@ -11,8 +11,8 @@ block content
 
     table.tabla-detalle
       tr
-        th ID Gasto
-        td.num= gasto.idGasto
+        th ID
+        td.num= gasto._id
       tr
         th Proyecto
         td= proyecto ? `${proyecto.nomProyecto} (#${gasto.idProyecto})` : `(#${gasto.idProyecto})`
@@ -26,6 +26,6 @@ block content
         th Fecha
         td= gasto.fecha.toISOString().slice(0, 10)
 
-    form.form-actions(action=`/vistas/gastos/${gasto.idGasto}/eliminar` method="POST")
+    form.form-actions(action=`/vistas/gastos/${gasto._id}/eliminar` method="POST")
       a.btn-secundario(href="/vistas/gastos") Cancelar
       button.btn-peligro(type="submit") Sí, eliminar

@@ -9,6 +9,8 @@ import {
     guardarEdicionProyecto,
     renderEliminarProyecto,
     eliminarProyectoVista,
+    renderReactivarProyecto,
+    reactivarProyectoVista,
     renderOrganizaciones,
     renderCrearOrganizacion,
     guardarOrganizacionDesdeVista,
@@ -44,7 +46,6 @@ import {
     renderDonanteEliminar,
     eliminarDonanteVista
 } from "../controllers/vistasController.js";
-import { validarId } from "../middlewares/validarId.js";
 import { validarObjectId } from "../middlewares/validarObjectId.js";
 import { isAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -52,7 +53,7 @@ const router = express.Router();
 
 router.get("/", renderHome);
 
-// PROYECTOS (IDs numéricos: idProyecto)
+// PROYECTOS (identificados por el _id de MongoDB; eliminar = baja lógica, reactivar la revierte)
 router.get("/proyectos", renderProyectos);
 router.get("/proyectos/nuevo", isAdmin, renderCrearProyecto);
 router.post("/proyectos", isAdmin, guardarProyectoDesdeVista);
@@ -61,6 +62,8 @@ router.get("/proyectos/:_id/editar", isAdmin, validarObjectId, renderEditarProye
 router.post("/proyectos/:_id/editar", isAdmin, validarObjectId, guardarEdicionProyecto);
 router.get("/proyectos/:_id/eliminar", isAdmin, validarObjectId, renderEliminarProyecto);
 router.post("/proyectos/:_id/eliminar", isAdmin, validarObjectId, eliminarProyectoVista);
+router.get("/proyectos/:_id/reactivar", isAdmin, validarObjectId, renderReactivarProyecto);
+router.post("/proyectos/:_id/reactivar", isAdmin, validarObjectId, reactivarProyectoVista);
 
 // ORGANIZACIONES (se identifican por el _id de MongoDB (:_id); eliminar = baja lógica, reactivar la revierte)
 router.get("/organizaciones", renderOrganizaciones);
@@ -78,23 +81,21 @@ router.get("/gastos", renderGastos);
 router.get("/gastos/nuevo", isAdmin, renderCrearGasto);
 router.post("/gastos", isAdmin, guardarGastoDesdeVista);
 // Detalle (autenticado) y ciclo de edición/baja (solo admin).
-// POST /vistas/gastos redirige al listado; el detalle accesible por :id
-router.get("/gastos/:id", isAuthenticated, validarId, renderGastoDetalle);
-router.get("/gastos/:id/editar", isAdmin, validarId, renderGastoEditar);
-router.post("/gastos/:id/editar", isAdmin, validarId, guardarEdicionGasto);
-router.get("/gastos/:id/eliminar", isAdmin, validarId, renderGastoEliminar);
-router.post("/gastos/:id/eliminar", isAdmin, validarId, eliminarGastoVista);
+// POST /vistas/gastos redirige al listado; el detalle accesible por :_id
+router.get("/gastos/:_id", isAuthenticated, validarObjectId, renderGastoDetalle);
+router.get("/gastos/:_id/editar", isAdmin, validarObjectId, renderGastoEditar);
+router.post("/gastos/:_id/editar", isAdmin, validarObjectId, guardarEdicionGasto);
+router.get("/gastos/:_id/eliminar", isAdmin, validarObjectId, renderGastoEliminar);
+router.post("/gastos/:_id/eliminar", isAdmin, validarObjectId, eliminarGastoVista);
 
 router.get("/donaciones", renderDonaciones);
 router.get("/donaciones/nuevo", isAdmin, renderCrearDonacion);
 router.post("/donaciones", isAdmin, guardarDonacionDesdeVista);
-//router.get("/donaciones/nuevo", renderCrearDonacion);
-//router.post("/donaciones", guardarDonacionDesdeVista);
-router.get("/donaciones/:id", isAuthenticated, validarId, renderDonacionDetalle);
-router.get("/donaciones/:id/editar", isAdmin, validarId, renderEditarDonacion);
-router.post("/donaciones/:id/editar", isAdmin, validarId, guardarEdicionDonacion);
-router.get("/donaciones/:id/eliminar", isAdmin, validarId, renderEliminarDonacion);
-router.post("/donaciones/:id/eliminar", isAdmin, validarId, eliminarDonacionVista);
+router.get("/donaciones/:_id", isAuthenticated, validarObjectId, renderDonacionDetalle);
+router.get("/donaciones/:_id/editar", isAdmin, validarObjectId, renderEditarDonacion);
+router.post("/donaciones/:_id/editar", isAdmin, validarObjectId, guardarEdicionDonacion);
+router.get("/donaciones/:_id/eliminar", isAdmin, validarObjectId, renderEliminarDonacion);
+router.post("/donaciones/:_id/eliminar", isAdmin, validarObjectId, eliminarDonacionVista);
 
 router.get("/donantes", renderDonantes);
 router.get("/donantes/nuevo", isAdmin, renderCrearDonante);

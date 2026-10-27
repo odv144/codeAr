@@ -12,7 +12,8 @@ import {
     insertarProyecto,
     obtenerProyectos,
     actualizarProyecto,
-    eliminarProyecto
+    eliminarProyecto,
+    reactivarProyectos
 } from "../services/serviceProyecto.js";
 import {
     obtenerOrganizaciones,
@@ -51,16 +52,19 @@ const renderHome = (req, res) => {
 
 const renderProyectos = async (req, res) => {
     try {
+        // Por defecto solo activos. Un admin puede pedir ver también los dados
+        // de baja (?incluirBajas=true) para poder reactivarlos desde el listado.
+        const incluirBajas = req.query.incluirBajas === "true" && esAdmin(res);
         const [proyectos, organizaciones] = await Promise.all([
-            obtenerProyectos(),
+            obtenerProyectos({ incluirBajas }),
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
-        const nombresOrg = new Map(organizaciones.map((o) => [o.idOrganizacion, o.nombre]));
+        const nombresOrg = new Map(organizaciones.map((o) => [String(o._id), o.nombre]));
         const filas = proyectos.map((p) => ({
             ...p,
-            nombreOrganizacion: nombresOrg.get(p.idOrganizacion) ?? null
+            nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null
         }));
-        res.render("proyectos", { proyectos: filas });
+        res.render("proyectos", { proyectos: filas, incluirBajas });
     } catch (error) {
         res.status(500).send("Error al cargar proyectos");
     }
@@ -71,14 +75,11 @@ const renderProyectos = async (req, res) => {
 // igual a la lista para conservar la precarga sin romper el guardado.
 const organizacionesParaFormulario = async (idActual) => {
     const activas = await obtenerOrganizaciones();
-    if (idActual === undefined || idActual === null) return activas;
-    const idNum = Number(idActual);
-    if (activas.some((o) => o.idOrganizacion === idNum)) return activas;
+    if (idActual === undefined || idActual === null || idActual === "") return activas;
+    if (activas.some((o) => String(o._id) === String(idActual))) return activas;
     const todas = await obtenerOrganizaciones({ incluirBajas: true });
-    const actual = todas.find((o) => o._id === idNum);
-    return actual
-        ? [...activas, actual].sort((a, b) => a._id - b._id)
-        : activas;
+    const actual = todas.find((o) => String(o._id) === String(idActual));
+    return actual ? [...activas, actual] : activas;
 };
 
 const renderCrearProyecto = async (req, res, next) => {
@@ -93,10 +94,8 @@ const renderCrearProyecto = async (req, res, next) => {
 const guardarProyectoDesdeVista = async (req, res) => {
     try {
         const {idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
-       // const idOrganizacion = Number(req.body.idOrganizacion);
 
-        // insertarProyecto calcula el idProyecto y arma el saldo inicial por su cuenta
-        console.log(req.body)
+        // insertarProyecto arma el saldo inicial por su cuenta
         await insertarProyecto({ idOrganizacion, nomProyecto, descripcion, saldo });
 
         res.redirect("/vistas/proyectos");
@@ -110,7 +109,7 @@ const guardarProyectoDesdeVista = async (req, res) => {
 
 const renderProyectoDetalle = async (req, res, next) => {
     try {
-        const proyecto = await obtenerProyectosId(req.params._id);
+        const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
         const organizacion = await organizacionDelProyecto(proyecto);
         res.render("proyectoDetalle", { proyecto, organizacion });
     } catch (error) {
@@ -122,14 +121,15 @@ const renderProyectoDetalle = async (req, res, next) => {
 // el nombre en detalle/baja aunque el registro ya no esté activo).
 const organizacionDelProyecto = async (proyecto) => {
     const organizaciones = await obtenerOrganizaciones({ incluirBajas: true });
-    return organizaciones.find((o) => o.idOrganizacion === proyecto.idOrganizacion) ?? null;
+    return organizaciones.find((o) => String(o._id) === String(proyecto.idOrganizacion)) ?? null;
 };
 
 // obtenerProyectosId lanza un Error simple sin status: acá lo convertimos en 404 real
 // para que errorHandler muestre "Proyecto no encontrado" y no un 500 genérico.
 const mapearProyectoNoEncontrado = (error) =>
-    error.message === "Proyecto no encontrado"
-        ? new AppError(404, "Proyecto no encontrado")
+    error.message === "Proyecto no encontrado" ||
+    error.message === "Proyecto dado de baja logica"
+        ? new AppError(404, error.message)
         : error;
 
 const renderEditarProyecto = async (req, res, next) => {
@@ -173,6 +173,31 @@ const eliminarProyectoVista = async (req, res, next) => {
         next(error.statusCode === 404
             ? new AppError(404, "Proyecto no encontrado")
             : error);
+    }
+};
+
+/* ===== PROYECTOS: reactivación (revierte la baja lógica) ===== */
+
+// Pantalla de confirmación (solo para proyectos dados de baja)
+const renderReactivarProyecto = async (req, res, next) => {
+    try {
+        const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
+        if (proyecto.activa !== false) throw new AppError(409, "El proyecto ya está activo");
+        const organizacion = await organizacionDelProyecto(proyecto);
+        res.render("proyectoReactivar", { proyecto, organizacion });
+    } catch (error) {
+        next(mapearProyectoNoEncontrado(error));
+    }
+};
+
+// Revierte la baja lógica (activa = true, fechaBaja = null) y vuelve al listado
+const reactivarProyectoVista = async (req, res, next) => {
+    try {
+        const reactivado = await reactivarProyectos(req.params._id);
+        if (!reactivado) throw new AppError(404, "Proyecto no encontrado");
+        res.redirect("/vistas/proyectos");
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -336,10 +361,10 @@ const reactivarOrganizacionVista = async (req, res, next) => {
 const renderGastos = async (req, res) => {
     try {
         const [gastos, proyectos] = await Promise.all([obtenerGastos(), obtenerProyectos()]);
-        const nombresProyecto = new Map(proyectos.map((p) => [p.idProyecto, p.nomProyecto]));
+        const nombresProyecto = new Map(proyectos.map((p) => [String(p._id), p.nomProyecto]));
         const filas = gastos.map((g) => ({
             ...g,
-            nombreProyecto: nombresProyecto.get(g.idProyecto) ?? null
+            nombreProyecto: nombresProyecto.get(String(g.idProyecto)) ?? null
         }));
         res.render("gastos", { gastos: filas });
     } catch (error) {
@@ -358,7 +383,7 @@ const renderCrearGasto = async (req, res, next) => {
 const guardarGastoDesdeVista = async (req, res) => {
     try {
         const { idProyecto, descripcion, monto, fecha } = req.body;
-        await crearGasto({ idProyecto: Number(idProyecto) , descripcion, monto: Number(monto) , fecha });
+        await crearGasto({ idProyecto, descripcion, monto: Number(monto), fecha });
         res.redirect("/vistas/gastos");
     } catch (error) {
         if (error instanceof AppError) {
@@ -374,7 +399,7 @@ const gastoNoEncontrado = () => new AppError(404, "Gasto no encontrado");
 
 const renderGastoDetalle = async (req, res, next) => {
     try {
-        const gasto = await obtenerGastoPorId(req.params.id);
+        const gasto = await obtenerGastoPorId(req.params._id);
         if (!gasto) throw gastoNoEncontrado();
         const proyecto = await proyectoDelGasto(gasto);
         res.render("gastoDetalle", { gasto, proyecto });
@@ -386,12 +411,12 @@ const renderGastoDetalle = async (req, res, next) => {
 // Proyecto de un gasto (sólo activos: el servicio de gastos valida ese mismo conjunto).
 const proyectoDelGasto = async (gasto) => {
     const proyectos = await obtenerProyectos();
-    return proyectos.find((p) => p.idProyecto === gasto.idProyecto) ?? null;
+    return proyectos.find((p) => String(p._id) === String(gasto.idProyecto)) ?? null;
 };
 
 const renderGastoEditar = async (req, res, next) => {
     try {
-        const gasto = await obtenerGastoPorId(req.params.id);
+        const gasto = await obtenerGastoPorId(req.params._id);
         if (!gasto) throw gastoNoEncontrado();
         const proyectos = await obtenerProyectos();
         res.render("gastoEditar", { gasto, proyectos });
@@ -404,8 +429,8 @@ const guardarEdicionGasto = async (req, res, next) => {
     try {
         const { idProyecto, descripcion, monto, fecha } = req.body;
         // El servicio valida proyecto existente/activo y tope de saldo disponible
-        const gasto = await actualizarGasto(req.params.id, {
-            idProyecto: Number(idProyecto),
+        const gasto = await actualizarGasto(req.params._id, {
+            idProyecto,
             descripcion,
             monto: Number(monto),
             fecha
@@ -419,7 +444,7 @@ const guardarEdicionGasto = async (req, res, next) => {
 
 const renderGastoEliminar = async (req, res, next) => {
     try {
-        const gasto = await obtenerGastoPorId(req.params.id);
+        const gasto = await obtenerGastoPorId(req.params._id);
         if (!gasto) throw gastoNoEncontrado();
         const proyecto = await proyectoDelGasto(gasto);
         res.render("gastoEliminar", { gasto, proyecto });
@@ -428,10 +453,10 @@ const renderGastoEliminar = async (req, res, next) => {
     }
 };
 
-// BORRADO FÍSICO: mismo criterio que DELETE /gastos/:id (serviceGastos.eliminarGasto)
+// BORRADO FÍSICO: mismo criterio que DELETE /gastos/:_id (serviceGastos.eliminarGasto)
 const eliminarGastoVista = async (req, res, next) => {
     try {
-        const eliminado = await eliminarGasto(req.params.id);
+        const eliminado = await eliminarGasto(req.params._id);
         if (!eliminado) throw gastoNoEncontrado();
         res.redirect("/vistas/gastos");
     } catch (error) {
@@ -450,14 +475,14 @@ const renderDonaciones = async (req, res) => {
             obtenerDonantes(),
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
-        const nombresProyecto = new Map(proyectos.map((p) => [p.idProyecto, p.nomProyecto]));
-        const nombresDonante = new Map(donantes.map((d) => [d.idDonante, `${d.nombre} ${d.apellido}`]));
-        const nombresOrg = new Map(organizaciones.map((o) => [o.idOrganizacion, o.nombre]));
+        const nombresProyecto = new Map(proyectos.map((p) => [String(p._id), p.nomProyecto]));
+        const nombresDonante = new Map(donantes.map((d) => [String(d._id), `${d.nombre} ${d.apellido}`]));
+        const nombresOrg = new Map(organizaciones.map((o) => [String(o._id), o.nombre]));
         const filas = donaciones.map((d) => ({
             ...d,
-            nombreProyecto: nombresProyecto.get(d.idProyecto) ?? null,
-            nombreDonante: nombresDonante.get(d.idDonante) ?? null,
-            nombreOrganizacion: nombresOrg.get(d.idOrganizacion) ?? null
+            nombreProyecto: nombresProyecto.get(String(d.idProyecto)) ?? null,
+            nombreDonante: nombresDonante.get(String(d.idDonante)) ?? null,
+            nombreOrganizacion: nombresOrg.get(String(d.idOrganizacion)) ?? null
         }));
         res.render("donaciones", { donaciones: filas });
     } catch (error) {
@@ -485,9 +510,9 @@ const guardarDonacionDesdeVista = async (req, res) => {
             monto: Number(monto),
             cbu,
             fecha,
-            idProyecto: Number(idProyecto),
-            idDonante: Number(idDonante),
-            idOrganizacion: Number(idOrganizacion)
+            idProyecto,
+            idDonante,
+            idOrganizacion
         });
         res.redirect("/vistas/donaciones");
     } catch (error) {
@@ -502,7 +527,7 @@ const donacionNoEncontrada = () => new AppError(404, "Donación no encontrada");
 
 const renderDonacionDetalle = async (req, res, next) => {
     try {
-        const donacion = await obtenerDonacionPorId(req.params.id);
+        const donacion = await obtenerDonacionPorId(req.params._id);
         if (!donacion) throw donacionNoEncontrada();
         const relaciones = await relacionesDeDonacion(donacion);
         res.render("donacionDetalle", { donacion, ...relaciones });
@@ -521,15 +546,15 @@ const relacionesDeDonacion = async (donacion) => {
         obtenerOrganizaciones({ incluirBajas: true })
     ]);
     return {
-        proyecto: proyectos.find((p) => p.idProyecto === donacion.idProyecto) ?? null,
-        donante: donantes.find((d) => d.idDonante === donacion.idDonante) ?? null,
-        organizacion: organizaciones.find((o) => o.idOrganizacion === donacion.idOrganizacion) ?? null
+        proyecto: proyectos.find((p) => String(p._id) === String(donacion.idProyecto)) ?? null,
+        donante: donantes.find((d) => String(d._id) === String(donacion.idDonante)) ?? null,
+        organizacion: organizaciones.find((o) => String(o._id) === String(donacion.idOrganizacion)) ?? null
     };
 };
 
 const renderEditarDonacion = async (req, res, next) => {
     try {
-        const donacion = await obtenerDonacionPorId(req.params.id);
+        const donacion = await obtenerDonacionPorId(req.params._id);
         if (!donacion) throw donacionNoEncontrada();
         const [proyectos, donantes, organizaciones] = await Promise.all([
             obtenerProyectos(),
@@ -545,13 +570,13 @@ const renderEditarDonacion = async (req, res, next) => {
 const guardarEdicionDonacion = async (req, res, next) => {
     try {
         const { monto, cbu, fecha, idProyecto, idDonante, idOrganizacion } = req.body;
-        const donacion = await actualizarDonacion(req.params.id, {
+        const donacion = await actualizarDonacion(req.params._id, {
             monto: Number(monto),
             cbu,
             fecha,
-            idProyecto: Number(idProyecto),
-            idDonante: Number(idDonante),
-            idOrganizacion: Number(idOrganizacion)
+            idProyecto,
+            idDonante,
+            idOrganizacion
         });
         if (!donacion) throw donacionNoEncontrada();
         res.redirect("/vistas/donaciones");
@@ -562,7 +587,7 @@ const guardarEdicionDonacion = async (req, res, next) => {
 
 const renderEliminarDonacion = async (req, res, next) => {
     try {
-        const donacion = await obtenerDonacionPorId(req.params.id);
+        const donacion = await obtenerDonacionPorId(req.params._id);
         if (!donacion) throw donacionNoEncontrada();
         const relaciones = await relacionesDeDonacion(donacion);
         res.render("donacionEliminar", { donacion, ...relaciones });
@@ -573,7 +598,7 @@ const renderEliminarDonacion = async (req, res, next) => {
 
 const eliminarDonacionVista = async (req, res, next) => {
     try {
-        const donacion = await eliminarDonacion(req.params.id);
+        const donacion = await eliminarDonacion(req.params._id);
         if (!donacion) throw donacionNoEncontrada();
         res.redirect("/vistas/donaciones");
     } catch (error) {
@@ -674,6 +699,8 @@ export {
     guardarEdicionProyecto,
     renderEliminarProyecto,
     eliminarProyectoVista,
+    renderReactivarProyecto,
+    reactivarProyectoVista,
     renderOrganizaciones,
     renderCrearOrganizacion,
     guardarOrganizacionDesdeVista,

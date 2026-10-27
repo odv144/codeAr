@@ -22,21 +22,21 @@ block content
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
           each proyecto in proyectos
-            option(value=proyecto.idProyecto)= proyecto.nomProyecto
+            option(value=proyecto._id)= proyecto.nomProyecto
 
       div
         label(for="idDonante") Donante
         select(name="idDonante" id="idDonante" required)
           option(value="") Seleccioná un donante...
           each donante in donantes
-            option(value=donante.idDonante)= `${donante.nombre} ${donante.apellido}`
+            option(value=donante._id)= `${donante.nombre} ${donante.apellido}`
 
       div
         label(for="idOrganizacion") Organización
         select(name="idOrganizacion" id="idOrganizacion" required)
           option(value="") Seleccioná una organización...
           each org in organizaciones
-            option(value=org.idOrganizacion)= org.nombre
+            option(value=org._id)= org.nombre
 
       .form-actions
         button.btn-secundario(type="reset") Limpiar

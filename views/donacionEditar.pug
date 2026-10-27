@@ -3,9 +3,8 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Donación
-    p.subtitulo-detalle ID Donación: ##{donacion.idDonacion} (solo lectura)
 
-    form(action=`/vistas/donaciones/${donacion.idDonacion}/editar` method="POST")
+    form(action=`/vistas/donaciones/${donacion._id}/editar` method="POST")
       div
         label(for="monto") Monto ($)
         input(type="number" step="0.01" name="monto" id="monto" value=donacion.monto required)
@@ -23,21 +22,21 @@ block content
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
           each proyecto in proyectos
-            option(value=proyecto.idProyecto selected=(proyecto.idProyecto === donacion.idProyecto))= proyecto.nomProyecto
+            option(value=proyecto._id selected=(String(proyecto._id) === String(donacion.idProyecto)))= proyecto.nomProyecto
 
       div
         label(for="idDonante") Donante
         select(name="idDonante" id="idDonante" required)
           option(value="") Seleccioná un donante...
           each donante in donantes
-            option(value=donante.idDonante selected=(donante.idDonante === donacion.idDonante))= `${donante.nombre} ${donante.apellido}`
+            option(value=donante._id selected=(String(donante._id) === String(donacion.idDonante)))= `${donante.nombre} ${donante.apellido}`
 
       div
         label(for="idOrganizacion") Organización
         select(name="idOrganizacion" id="idOrganizacion" required)
           option(value="") Seleccioná una organización...
           each org in organizaciones
-            option(value=org.idOrganizacion selected=(org.idOrganizacion === donacion.idOrganizacion))= org.nombre
+            option(value=org._id selected=(String(org._id) === String(donacion.idOrganizacion)))= org.nombre
 
       .form-actions
         a.btn-secundario(href="/vistas/donaciones") Cancelar

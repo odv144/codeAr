@@ -5,13 +5,11 @@ block content
     legend Detalle del Proyecto
 
     if proyecto
+      - const dadaDeBaja = proyecto.activa === false
       table.tabla-detalle
         tr
-          th ID
-          td.num= proyecto._id
-        tr
           th Organización
-          td= organizacion ? `${organizacion.nombre} (#${proyecto.idOrganizacion})` : `(#${proyecto.idOrganizacion})`
+          td= organizacion ? organizacion.nombre : "-"
         tr
           th Nombre
           td= proyecto.nomProyecto
@@ -25,11 +23,21 @@ block content
               | $ #{proyecto.saldo[proyecto.saldo.length - 1].monto}
             else
               | -
+        if dadaDeBaja
+          tr
+            th Estado
+            td
+              span.estado-baja Dada de baja
+              if proyecto.fechaBaja
+                |  el #{new Date(proyecto.fechaBaja).toLocaleDateString('es-AR')}
 
       p.acciones-detalle
         if currentUser && currentUser.role === 'admin'
-          a.btn-secundario(href=`/vistas/proyectos/${proyecto._id}/editar`) Editar
-          a.btn-peligro(href=`/vistas/proyectos/${proyecto._id}/eliminar`) Eliminar
+          if dadaDeBaja
+            a.btn-primario(href=`/vistas/proyectos/${proyecto._id}/reactivar`) Reactivar
+          else
+            a.btn-secundario(href=`/vistas/proyectos/${proyecto._id}/editar`) Editar
+            a.btn-peligro(href=`/vistas/proyectos/${proyecto._id}/eliminar`) Dar de baja
         a.btn-secundario(href="/vistas/proyectos") Volver al listado
     else
       p Proyecto no encontrado.

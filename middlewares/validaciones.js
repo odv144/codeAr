@@ -93,6 +93,20 @@ const fecha = ({ ejemplo = "2026-10-09" } = {}) => (campo, valor, errores, datos
 };
 
 /**
+ * _id de MongoDB (ObjectId): string de exactamente 24 caracteres hexadecimales.
+ * Se usa para las claves foráneas (idProyecto, idDonante, idOrganizacion).
+ */
+const objectId = () => (campo, valor, errores, datos) => {
+  if (esVacio(valor) || (typeof valor === "string" && valor.trim() === "")) {
+    errores.push(`El campo '${campo}' es obligatorio`);
+  } else if (typeof valor !== "string" || !/^[0-9a-fA-F]{24}$/.test(valor.trim())) {
+    errores.push(`El campo '${campo}' debe ser un _id válido de MongoDB (24 caracteres hexadecimales)`);
+  } else {
+    datos[campo] = valor.trim();
+  }
+};
+
+/**
  * Aplica un esquema { campo: regla } al body y devuelve:
  *  - errores: lista con todos los mensajes
  *  - datos: los datos ya limpios
@@ -129,13 +143,13 @@ const ESQUEMA_DONACION = {
   monto: numero(),
   cbu: texto({ patron: { regex: /^\d{22}$/, mensaje: MENSAJE_CBU }, mensajeTipo: MENSAJE_CBU }),
   fecha: fecha({ ejemplo: "2026-10-09" }),
-  idProyecto: entero(),
-  idDonante: entero(),
-  idOrganizacion: entero()
+  idProyecto: objectId(),
+  idDonante: objectId(),
+  idOrganizacion: objectId()
 };
 
 const ESQUEMA_GASTO = {
-  idProyecto: entero(),
+  idProyecto: objectId(),
   descripcion: texto({ min: 3, max: 200 }),
   monto: numero(),
   fecha: fecha({ ejemplo: "2026-10-08" })
@@ -143,7 +157,7 @@ const ESQUEMA_GASTO = {
 
 // Listo para usar en el módulo Proyectos (crear / modificar con todos los datos).
 const ESQUEMA_PROYECTO = {
-  idOrganizacion: entero(),
+  idOrganizacion: objectId(),
   nomProyecto: texto({ min: 2, max: 100 }),
   descripcion: texto({ min: 3, max: 500 }),
   saldo: numero({ minimo: 0, inclusivo: true, opcional: true })
