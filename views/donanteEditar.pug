@@ -3,7 +3,6 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Donante
-    p.subtitulo-detalle ID Donante: ##{donante._id} (solo lectura)
 
     form(action=`/vistas/donantes/${donante._id}/editar` method="POST")
       div

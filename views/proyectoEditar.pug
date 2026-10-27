@@ -3,7 +3,6 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Proyecto
-    p.subtitulo-detalle ID Proyecto: ##{proyecto._id} (solo lectura)
 
     form(action=`/vistas/proyectos/${proyecto._id}/editar` method="POST")
       div
@@ -11,7 +10,7 @@ block content
         select(name="idOrganizacion" id="idOrganizacion" required)
           option(value="") Seleccioná una organización...
           each org in organizaciones
-            option(value=org.idOrganizacion selected=(org.idOrganizacion === proyecto.idOrganizacion))= org.nombre
+            option(value=org._id selected=(String(org._id) === String(proyecto.idOrganizacion)))= org.nombre
 
       div
         label(for="nomProyecto") Nombre del Proyecto

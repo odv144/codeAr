@@ -6,9 +6,6 @@ block content
 
     table.tabla-detalle
       tr
-        th ID Donación
-        td.num= donacion.idDonacion
-      tr
         th Monto
         td.num $ #{donacion.monto}
       tr
@@ -19,16 +16,16 @@ block content
         td= donacion.fecha.toISOString().slice(0, 10)
       tr
         th Proyecto
-        td= proyecto ? `${proyecto.nomProyecto} (#${donacion.idProyecto})` : `(#${donacion.idProyecto})`
+        td= proyecto ? (proyecto.nombre || proyecto.nomProyecto) : "-"
       tr
         th Donante
-        td= donante ? `${donante.nombre} ${donante.apellido} (#${donacion.idDonante})` : `(#${donacion.idDonante})`
+        td= donante ? `${donante.nombre} ${donante.apellido}` : "-"
       tr
         th Organización
-        td= organizacion ? `${organizacion.nombre} (#${donacion.idOrganizacion})` : `(#${donacion.idOrganizacion})`
+        td= organizacion ? organizacion.nombre : "-"
 
     p.acciones-detalle
       if currentUser && currentUser.role === 'admin'
-        a.btn-secundario(href=`/vistas/donaciones/${donacion.idDonacion}/editar`) Editar
-        a.btn-peligro(href=`/vistas/donaciones/${donacion.idDonacion}/eliminar`) Eliminar
+        a.btn-secundario(href=`/vistas/donaciones/${donacion._id}/editar`) Editar
+        a.btn-peligro(href=`/vistas/donaciones/${donacion._id}/eliminar`) Eliminar
       a.btn-secundario(href="/vistas/donaciones") Volver al listado

@@ -3,8 +3,6 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Organización
-    p.subtitulo-detalle ID: #{organizacion._id} (solo lectura)
-
 
     form(action=`/vistas/organizaciones/${organizacion._id}/editar` method="POST")
       div

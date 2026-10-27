@@ -10,7 +10,7 @@ block content
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
           each proyecto in proyectos
-            option(value=proyecto.idProyecto)= proyecto.nomProyecto
+            option(value=proyecto._id)= proyecto.nomProyecto
 
       div
         label(for="descripcion") Descripción

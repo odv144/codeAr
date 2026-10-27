@@ -11,8 +11,8 @@ block content
 
     table.tabla-detalle
       tr
-        th ID Donación
-        td.num= donacion.idDonacion
+        th ID
+        td.num= donacion._id
       tr
         th Monto
         td.num $ #{donacion.monto}
@@ -32,6 +32,6 @@ block content
         th Organización
         td= organizacion ? `${organizacion.nombre} (#${donacion.idOrganizacion})` : `(#${donacion.idOrganizacion})`
 
-    form.form-actions(action=`/vistas/donaciones/${donacion.idDonacion}/eliminar` method="POST")
+    form.form-actions(action=`/vistas/donaciones/${donacion._id}/eliminar` method="POST")
       a.btn-secundario(href="/vistas/donaciones") Cancelar
       button.btn-peligro(type="submit") Sí, eliminar

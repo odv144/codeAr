@@ -11,7 +11,6 @@ block content
       table
         thead
           tr
-            th ID
             th Nombre
             th Apellido
             th.num DNI
@@ -23,14 +22,13 @@ block content
         tbody
           each donante in donantes
             tr
-              td= donante._id
               td= donante.nombre
               td= donante.apellido
               td.num= donante.dni
               td.num= donante.telefono
               td= donante.email
               td.num $#{donante.monto}
-              td= donante.fecha.toISOString().slice(0, 10)
+              td.nowrap= donante.fecha.toISOString().slice(0, 10)
               td.acciones
                 a(href=`/vistas/donantes/${donante._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
