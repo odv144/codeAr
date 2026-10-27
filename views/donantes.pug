@@ -23,7 +23,7 @@ block content
         tbody
           each donante in donantes
             tr
-              td= donante.idDonante
+              td= donante._id
               td= donante.nombre
               td= donante.apellido
               td.num= donante.dni
@@ -32,9 +32,9 @@ block content
               td.num $#{donante.monto}
               td= donante.fecha.toISOString().slice(0, 10)
               td.acciones
-                a(href=`/vistas/donantes/${donante.idDonante}`) Ver detalle
+                a(href=`/vistas/donantes/${donante._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'
-                  a(href=`/vistas/donantes/${donante.idDonante}/editar`) Editar
-                  a(href=`/vistas/donantes/${donante.idDonante}/eliminar`) Eliminar
+                  a(href=`/vistas/donantes/${donante._id}/editar`) Editar
+                  a(href=`/vistas/donantes/${donante._id}/eliminar`) Eliminar
     else
       p No hay donantes registrados.

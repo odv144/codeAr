@@ -3,9 +3,9 @@ extends layout
 block content
   article.formulario-card
     h3 Editar Donante
-    p.subtitulo-detalle ID Donante: ##{donante.idDonante} (solo lectura)
+    p.subtitulo-detalle ID Donante: ##{donante._id} (solo lectura)
 
-    form(action=`/vistas/donantes/${donante.idDonante}/editar` method="POST")
+    form(action=`/vistas/donantes/${donante._id}/editar` method="POST")
       div
         label(for="nombre") Nombre
         input(type="text" name="nombre" id="nombre" value=donante.nombre required)

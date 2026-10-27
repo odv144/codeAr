@@ -615,7 +615,7 @@ const mapearDonanteNoEncontrado = (error) =>
 
 const renderDonanteDetalle = async (req, res, next) => {
     try {
-        const donante = await obtenerDonantesId(req.params.id);
+        const donante = await obtenerDonantesId(req.params._id);
         res.render("donanteDetalle", { donante });
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
@@ -624,7 +624,7 @@ const renderDonanteDetalle = async (req, res, next) => {
 
 const renderDonanteEditar = async (req, res, next) => {
     try {
-        const donante = await obtenerDonantesId(req.params.id);
+        const donante = await obtenerDonantesId(req.params._id);
         res.render("donanteEditar", { donante });
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
@@ -635,7 +635,7 @@ const guardarEdicionDonante = async (req, res, next) => {
     try {
         const { nombre, apellido, dni, telefono, email, monto, fecha } = req.body;
         // El service normaliza strings/Number/Date según el schema del donante
-        const donante = await actualizarDonante(req.params.id, {
+        const donante = await actualizarDonante(req.params._id, {
             nombre, apellido, dni, telefono, email, monto: Number(monto), fecha
         });
         if (!donante) throw new AppError(404, "Donante no encontrado");
@@ -647,7 +647,7 @@ const guardarEdicionDonante = async (req, res, next) => {
 
 const renderDonanteEliminar = async (req, res, next) => {
     try {
-        const donante = await obtenerDonantesId(req.params.id);
+        const donante = await obtenerDonantesId(req.params._id);
         res.render("donanteEliminar", { donante });
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
@@ -657,7 +657,7 @@ const renderDonanteEliminar = async (req, res, next) => {
 // BORRADO FÍSICO: mismo criterio que DELETE /donantes/:id (serviceDonante.eliminarDonante)
 const eliminarDonanteVista = async (req, res, next) => {
     try {
-        await eliminarDonante(req.params.id);
+        await eliminarDonante(req.params._id);
         res.redirect("/vistas/donantes");
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));

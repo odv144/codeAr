@@ -13,10 +13,10 @@ async function obtenerDonantes() {
   }
 }
 
-// Servicio para obtener un donante por su ID (idDonante) desde MongoDB
+// Servicio para obtener un donante por su _id de MongoDB
 async function obtenerDonantesId(id) {
   try {
-    const donante = await Donante.findOne({ idDonante: Number(id) });
+    const donante = await Donante.findById(id);
     if (!donante) {
       throw new Error("Donante no encontrado");
     }
@@ -42,16 +42,7 @@ async function insertarDonante(datos) {
     throw new Error("MongoDB no está conectado (readyState !== 1)");
   }
 
-  // Lógica de Omar para autoincrementar el ID manteniendo la estructura antigua
-  const ultimo = await Donante.findOne()
-    .sort({ idDonante: -1 })
-    .select("idDonante")
-    .lean();
-
-  const idDonante = ultimo ? ultimo.idDonante + 1 : 1;
-
   const nuevo = await Donante.create({
-    idDonante,
     nombre: String(nombre).trim(),
     apellido: String(apellido).trim(),
     dni: String(dni).trim(),
@@ -61,14 +52,13 @@ async function insertarDonante(datos) {
     fecha: new Date(fecha),
   });
 
-  console.log("Donante guardado:", nuevo._id, "idDonante:", nuevo.idDonante);
+ console.log("Donante guardado:", nuevo._id);
   return nuevo.toObject();
 }
 
 // Función para actualizar un donante por su ID
 async function actualizarDonante(id, datos) {
   try {
-    // 1) Solo campos permitidos (evita que manden idDonante, _id, etc.)
     const permitidos = ["nombre", "apellido", "dni", "telefono", "email", "monto", "fecha"];
     const update = {};
 
@@ -107,7 +97,7 @@ async function actualizarDonante(id, datos) {
 
     // 4) Update con validación del schema
     const donante = await Donante.findOneAndUpdate(
-      { idDonante: Number(id) },
+      { _id: id },
       { $set: update },   // $set = solo toca esos campos
       { returnDocument: "after", runValidators: true }
     );
@@ -132,7 +122,7 @@ async function actualizarDonante(id, datos) {
 // Función para eliminar un donante por su ID
 async function eliminarDonante(id) {
   try {
-    const donante = await Donante.findOneAndDelete({ idDonante: Number(id) });
+    const donante = await Donante.findByIdAndDelete(id);
 
     if (!donante) {
       const error = new Error("Donante no encontrado");

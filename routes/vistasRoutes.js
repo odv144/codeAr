@@ -101,10 +101,9 @@ router.get("/donantes/nuevo", isAdmin, renderCrearDonante);
 router.post("/donantes", isAdmin, guardarDonanteDesdeVista);
 // Detalle (autenticado) y ciclo de edición/baja (solo admin). Borrado físico,
 // el mismo criterio que DELETE /donantes/:id
-router.get("/donantes/:id", isAuthenticated, validarId, renderDonanteDetalle);
-router.get("/donantes/:id/editar", isAdmin, validarId, renderDonanteEditar);
-router.post("/donantes/:id/editar", isAdmin, validarId, guardarEdicionDonante);
-router.get("/donantes/:id/eliminar", isAdmin, validarId, renderDonanteEliminar);
-router.post("/donantes/:id/eliminar", isAdmin, validarId, eliminarDonanteVista);
-
+router.get("/donantes/:_id", isAuthenticated, validarObjectId, renderDonanteDetalle);
+router.get("/donantes/:_id/editar", isAdmin, validarObjectId, renderDonanteEditar);
+router.post("/donantes/:_id/editar", isAdmin, validarObjectId, guardarEdicionDonante);
+router.get("/donantes/:_id/eliminar", isAdmin, validarObjectId, renderDonanteEliminar);
+router.post("/donantes/:_id/eliminar", isAdmin, validarObjectId, eliminarDonanteVista);
 export default router;
