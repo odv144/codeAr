@@ -668,3 +668,47 @@ tr.fila-baja td {
   color: #1f6b3a;
 }
 
+/* Contenedor relativo para posicionar el botón encima */
+.password-wrapper {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* El input debe ser un input normal de formulario, solo con espacio a la derecha */
+.password-wrapper input {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 0 !important;
+  padding-right: 2.75rem !important; /* Espacio para que el texto no toque el ojo */
+}
+
+/* El botón flota a la derecha adentro del campo */
+.password-wrapper .toggle-password {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.75rem !important;
+  transform: translateY(-50%) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  color: #64748b !important;
+  z-index: 5 !important;
+}
+
+.password-wrapper .toggle-password:hover {
+  color: #1e293b !important;
+}
+
+

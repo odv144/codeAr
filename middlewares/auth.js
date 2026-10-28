@@ -1,29 +1,50 @@
+import jwt from "jsonwebtoken";
 import { AppError } from "../utils/AppError.js";
 
-// Nombre y opciones de la cookie de sesión. Se comparten entre el montaje de
-// express-session (index.js) y el logout (controllers/authController.js) para
-// que clearCookie use exactamente las mismas opciones con las que se creó.
-// IMPORTANTE: no incluir maxAge acá (clearCookie debe expirar la cookie).
-export const SESSION_COOKIE_NAME = "sumarimpacto.sid";
-export const SESSION_COOKIE_OPTIONS = {
+export const JWT_COOKIE_NAME = "sumarimpacto.token";
+export const JWT_COOKIE_OPTIONS = {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/"
 };
 
-// isMountedOn: se decide por req.baseUrl, que Express completa según el lugar
-// donde se montó el router ("" para app.get("/..."), "/vistas", "/proyectos", ...).
-// Así un mismo middleware atiende a la navegación web y a la API JSON.
 const esNavegacionWeb = (req) => req.baseUrl === "" || req.baseUrl === "/vistas";
 
 /**
- * Exige una sesión activa.
- *  - Navegación web (/ y /vistas) -> redirect a /login
- *  - API JSON                      -> 401 (vía errorHandler: { mensaje, errores })
+ * Middleware global para extraer y verificar el JWT desde la cookie,
+ * inyectando req.user y res.locals.currentUser.
+ */
+export const checkAuth = (req, res, next) => {
+    req.user = null;
+    res.locals.currentUser = null;
+
+    const token = req.cookies?.[JWT_COOKIE_NAME];
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const secret = process.env.JWT_SECRET;
+        if (process.env.NODE_ENV === "production" && !secret) {
+            throw new Error("JWT_SECRET no definido en producción");
+        }
+        const jwtSecret = secret || "fallback_jwt_secret_dev";
+        const decoded = jwt.verify(token, jwtSecret);
+        req.user = decoded;
+        res.locals.currentUser = decoded;
+    } catch (error) {
+        res.clearCookie(JWT_COOKIE_NAME, JWT_COOKIE_OPTIONS);
+    }
+
+    next();
+};
+
+/**
+ * Exige una autenticación válida (JWT presente y correcto).
  */
 export const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.user) {
+    if (req.user) {
         return next();
     }
 
@@ -35,12 +56,10 @@ export const isAuthenticated = (req, res, next) => {
 };
 
 /**
- * Exige el rol 'admin'. Devuelve siempre 403: el errorHandler existente decide
- * el formato (render de error.pug para /vistas, JSON para la API).
- * El ocultamiento de botones en Pug es sólo cosmético: la autorización es ésta.
+ * Exige rol de administrador.
  */
 export const isAdmin = (req, res, next) => {
-    if (req.session && req.session.user && req.session.user.role === "admin") {
+    if (req.user && req.user.role === "admin") {
         return next();
     }
 

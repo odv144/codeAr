@@ -4,7 +4,6 @@ import path from "path";
 import crypto from "crypto";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,30 +11,29 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3200;
 
+// Trust proxy para entorno Vercel (cookies seguras tras proxy)
+app.set("trust proxy", 1);
+
 // ---------------------------------------------------------------------------
-// Secreto de sesión
-//   - Producción sin SESSION_SECRET: la aplicación NO arranca (process.exit).
+// Secreto JWT
+//   - Producción sin JWT_SECRET: la aplicación NO arranca (process.exit).
 //   - Desarrollo: fallback efímero, con advertencia explícita.
 // ---------------------------------------------------------------------------
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (process.env.NODE_ENV === "production" && !SESSION_SECRET) {
+if (process.env.NODE_ENV === "production" && !JWT_SECRET) {
     console.error(
-        "Falta SESSION_SECRET en el entorno de producción. No se puede iniciar el servidor."
+        "Falta JWT_SECRET en el entorno de producción. No se puede iniciar el servidor."
     );
     process.exit(1);
 }
 
-let sessionSecret = SESSION_SECRET;
-if (!sessionSecret) {
+if (!JWT_SECRET) {
     console.warn(
-        "[sesiones] SESSION_SECRET no definido: se usa un secreto de DESARROLLO efímero. Las sesiones se pierden al reiniciar el proceso."
+        "[jwt] JWT_SECRET no definido: se usa un secreto de DESARROLLO efímero."
     );
-    sessionSecret = crypto.randomBytes(32).toString("hex");
+    process.env.JWT_SECRET = crypto.randomBytes(32).toString("hex");
 }
-
-// Duración de la cookie de sesión (por defecto 8 horas)
-const SESSION_TTL_MINUTES = Number(process.env.SESSION_TTL_MINUTES) || 480;
 
 import proyectosRoutes from "./routes/proyectosRoutes.js";
 import organizacionesRoutes from "./routes/organizacionesRoutes.js";
@@ -44,7 +42,7 @@ import donacionesRoutes from "./routes/donacionesRoutes.js";
 import donantesRoutes from "./routes/donantesRoutes.js";
 import vistasRoutes from "./routes/vistasRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import { isAuthenticated, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "./middlewares/auth.js";
+import { isAuthenticated, checkAuth } from "./middlewares/auth.js";
 import { connectDB } from "./config/db.js";
 import { sembrarUsuarios } from "./scripts/seedUsers.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
@@ -61,40 +59,26 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-// Sesiones del servidor.
-// ATENCIÓN: el almacén por defecto (MemoryStore) es EXCLUSIVO para desarrollo y
-// pruebas: pierde todas las sesiones al reiniciar y no sirve para producción.
-app.use(
-    session({
-        name: SESSION_COOKIE_NAME,
-        secret: sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            ...SESSION_COOKIE_OPTIONS,
-            maxAge: SESSION_TTL_MINUTES * 60 * 1000
-        }
-    })
-);
+// Middleware global de autenticación JWT (inyecta req.user y res.locals.currentUser)
+app.use(checkAuth);
 
-// Expone el usuario de la sesión y la ruta actual a todas las vistas Pug.
+// Expone la ruta actual a todas las vistas Pug.
 app.use((req, res, next) => {
-    res.locals.currentUser = req.session.user || null;
     res.locals.rutaActual = req.path;
     next();
 });
 
-// Autenticación: /login y /logout son accesibles sin sesión.
+// Autenticación: /login, /registro y /logout son accesibles sin autenticación.
 app.use("/", authRoutes);
 
-// Usar rutas API JSON -> sin sesión responden 401 (JSON)
+// Usar rutas API JSON -> sin autenticación responden 401 (JSON)
 app.use("/proyectos", isAuthenticated, proyectosRoutes);
 app.use("/organizaciones", isAuthenticated, organizacionesRoutes);
 app.use("/gastos", isAuthenticated, gastosRoutes);
 app.use("/donaciones", isAuthenticated, donacionesRoutes);
 app.use("/donantes", isAuthenticated, donantesRoutes);
 
-// Usar rutas de vistas Pug -> sin sesión redirigen a /login
+// Usar rutas de vistas Pug -> sin autenticación redirigen a /login
 app.use("/vistas", isAuthenticated, vistasRoutes);
 
 // Ruta principal
@@ -103,27 +87,18 @@ app.get("/", isAuthenticated, (req, res) => {
 });
 
 // Middlewares finales: ruta inexistente (404) y manejo central de errores.
-// Tienen que ir DESPUÉS de todas las rutas.
 app.use(notFound);
 app.use(errorHandler);
 
-// Arranque: primero se conecta a MongoDB Atlas y recién después se acepta tráfico.
-// connectDB ya informa el error y corta el proceso (process.exit(1)) si no puede conectar,
-// por eso acá no hace falta un try/catch.
 await connectDB();
 
-// Auto-inicialización idempotente de usuarios de desarrollo: crea los usuarios
-// si la colección está vacía y sólo sincroniza password/role si difieren del .env.
-// Nunca duplica registros (verifica por email o userName antes de crear).
 await sembrarUsuarios({ exitOnFinish: false });
 
 const server = app.listen(PORT, () => {
     console.log("Servidor corriendo en puerto " + PORT);
 });
 
-// Errores del servidor HTTP (ej. puerto ocupado) no pasan por try/catch: llegan por este evento
 server.on("error", (error) => {
     console.error(`No se pudo iniciar el servidor: ${error.message}`);
     process.exit(1);
 });
-
