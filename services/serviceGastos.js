@@ -1,18 +1,21 @@
+import mongoose from "mongoose";
 import Gasto from "../models/Gastos.js";
 import Proyecto from "../models/Proyectos.js";
 import { AppError } from "../utils/AppError.js";
 import { saldoProyectosActivos } from "./serviceProyecto.js";
 
 async function obtenerGastos() {
-    return Gasto.find().select("-_id").sort({ idGasto: 1 }).lean();
+    return Gasto.find().sort({ _id: 1 }).lean();
 }
 
-async function obtenerGastoPorId(id) {
-    return Gasto.findOne({ idGasto: Number(id) }).select("-_id").lean();
+async function obtenerGastoPorId(_id) {
+    return Gasto.findById(_id).lean();
 }
 
-async function existeProyecto(id) {
-    return (await Proyecto.exists({ idProyecto: Number(id), activa: { $ne: false } })) !== null;
+// Un gasto solo puede imputarse a un proyecto que exista y esté activo
+async function existeProyecto(_id) {
+    if (!mongoose.isObjectIdOrHexString(_id)) return false;
+    return (await Proyecto.exists({ _id, activa: { $ne: false } })) !== null;
 }
 
 async function crearGasto(datos) {
@@ -23,58 +26,57 @@ async function crearGasto(datos) {
     if (datos.monto > disponible) {
         throw new AppError(400, "El monto del gasto supera el saldo disponible del proyecto");
     }
-    const ultimo = await Gasto.findOne().sort({ idGasto: -1 }).select("idGasto").lean();
-    const idGasto = ultimo ? ultimo.idGasto + 1 : 1;
-    const nuevo = await Gasto.create({ ...datos, idGasto });
+
+    const nuevo = await Gasto.create(datos);
     return nuevo.toJSON();
 }
 
-async function actualizarGasto(id, datos) {
-    const idNumerico = Number(id);
-
-    if (!(await Gasto.exists({ idGasto: idNumerico }))) return null;
+async function actualizarGasto(_id, datos) {
+    if (!(await Gasto.exists({ _id }))) return null;
 
     if (!(await existeProyecto(datos.idProyecto))) {
         throw new AppError(400, "El proyecto indicado no existe o está dado de baja");
     }
 
-    const disponible = await saldoDisponible(datos.idProyecto, idNumerico);
+    // Al editar se excluye el propio gasto del cálculo, para no contarlo dos veces
+    const disponible = await saldoDisponible(datos.idProyecto, _id);
     if (datos.monto > disponible) {
         throw new AppError(400, "El monto del gasto supera el saldo disponible del proyecto");
     }
-    
-    const actualizado = await Gasto.findOneAndUpdate(
-        { idGasto: idNumerico },
+
+    const actualizado = await Gasto.findByIdAndUpdate(
+        _id,
         { $set: datos },
         { returnDocument: "after", runValidators: true }
     );
     return actualizado ? actualizado.toJSON() : null;
 }
 
-async function eliminarGasto(id) {
-    const eliminado = await Gasto.findOneAndDelete({ idGasto: Number(id) });
+async function eliminarGasto(_id) {
+    const eliminado = await Gasto.findByIdAndDelete(_id);
     return eliminado ? eliminado.toJSON() : null;
 }
 
-async function totalGastado(idProyecto, excluirIdGasto = null) {
-  const filtro = { idProyecto: Number(idProyecto) };
-  if (excluirIdGasto !== null) filtro.idGasto = { $ne: Number(excluirIdGasto) };
+// Las agregaciones no convierten el texto a ObjectId: hay que hacerlo a mano
+async function totalGastado(idProyecto, excluirId = null) {
+    const filtro = { idProyecto: new mongoose.Types.ObjectId(idProyecto) };
+    if (excluirId !== null) filtro._id = { $ne: new mongoose.Types.ObjectId(excluirId) };
 
-  const resultado = await Gasto.aggregate([
-    { $match: filtro },
-    { $group: { _id: null, total: { $sum: "$monto" } } }
-  ]);
+    const resultado = await Gasto.aggregate([
+        { $match: filtro },
+        { $group: { _id: null, total: { $sum: "$monto" } } }
+    ]);
 
-  return resultado.length > 0 ? resultado[0].total : 0;
+    return resultado.length > 0 ? resultado[0].total : 0;
 }
 
-async function saldoDisponible(idProyecto, excluirIdGasto = null) {
+async function saldoDisponible(idProyecto, excluirId = null) {
     const donado = await saldoProyectosActivos(idProyecto);
-    const gastado = await totalGastado(idProyecto, excluirIdGasto);
+    const gastado = await totalGastado(idProyecto, excluirId);
     return donado - gastado;
 }
 
-export { 
+export {
     obtenerGastos,
     obtenerGastoPorId,
     crearGasto,

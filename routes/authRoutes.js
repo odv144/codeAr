@@ -1,11 +1,16 @@
 import express from "express";
-import { mostrarLogin, login, logout } from "../controllers/authController.js";
+import { mostrarLogin, mostrarRegistro, registrar, login, logout } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Rutas de autenticación: no llevan isAuthenticated (son el ingreso y la salida).
+// Rutas de autenticación
 router.get("/login", mostrarLogin);
 router.post("/login", login);
 router.get("/logout", logout);
+
+router.get("/vistas/registro", mostrarRegistro);
+router.post("/vistas/registro", registrar);
+router.get("/registro", mostrarRegistro);
+router.post("/registro", registrar);
 
 export default router;
