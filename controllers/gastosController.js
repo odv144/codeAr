@@ -15,7 +15,7 @@ const obtenerGastos = async (req, res, next) => {
 // GET /gasto/:id
 const obtenerGastoPorId = async (req, res, next) => {
     try {
-        const gasto = await servicio.obtenerGastoPorId(req.params.id);
+        const gasto = await servicio.obtenerGastoPorId(req.params._id);
 
         if (!gasto) {
             throw new AppError(404, "Gasto no encontrado");
@@ -40,7 +40,7 @@ const crearGasto = async (req, res, next) => {
 // PUT /gastos/:id
 const actualizarGasto = async (req, res, next) => {
     try {
-        const gasto = await servicio.actualizarGasto(req.params.id, req.datosGasto);
+        const gasto = await servicio.actualizarGasto(req.params._id, req.datosGasto);
 
         if (!gasto) {
             throw new AppError(404, "Gasto no encontrado");
@@ -55,7 +55,7 @@ const actualizarGasto = async (req, res, next) => {
 // DELETE /gastos/:id
 const eliminarGasto = async (req, res, next) => {
     try {
-        const gasto = await servicio.eliminarGasto(req.params.id);
+        const gasto = await servicio.eliminarGasto(req.params._id);
 
         if (!gasto) {
             throw new AppError(404, "Gasto no encontrado");
