@@ -44,3 +44,5 @@ html(lang="es" data-theme="light")
       p SumarImpacto &copy; 2026. Desarrollado por 
       .footer-logo
         img(src="/img/codear-logo.svg" alt="codeAr")
+    if currentUser
+      include components/chatbot.pug

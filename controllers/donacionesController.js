@@ -12,7 +12,7 @@ const obtenerDonaciones = async (req, res, next) => {
 
 const obtenerDonacionPorId = async (req, res, next) => {
     try {
-        const donacion = await servicio.obtenerDonacionPorId(req.params.id);
+        const donacion = await servicio.obtenerDonacionPorId(req.params._id);
         if (!donacion) throw new AppError(404, "Donación no encontrada");
         res.status(200).json(donacion);
     } catch (error) {
@@ -31,7 +31,7 @@ const crearDonacion = async (req, res, next) => {
 
 const actualizarDonacion = async (req, res, next) => {
     try {
-        const donacion = await servicio.actualizarDonacion(req.params.id, req.datosDonacion);
+        const donacion = await servicio.actualizarDonacion(req.params._id, req.datosDonacion);
         if (!donacion) throw new AppError(404, "Donación no encontrada");
         res.status(200).json(donacion);
     } catch (error) {
@@ -41,7 +41,7 @@ const actualizarDonacion = async (req, res, next) => {
 
 const eliminarDonacion = async (req, res, next) => {
     try {
-        const donacion = await servicio.eliminarDonacion(req.params.id);
+        const donacion = await servicio.eliminarDonacion(req.params._id);
         if (!donacion) throw new AppError(404, "Donación no encontrada");
         res.status(200).json({ mensaje: "Donación eliminada correctamente", donacion });
     } catch (error) {

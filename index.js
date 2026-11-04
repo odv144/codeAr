@@ -42,6 +42,7 @@ import donacionesRoutes from "./routes/donacionesRoutes.js";
 import donantesRoutes from "./routes/donantesRoutes.js";
 import vistasRoutes from "./routes/vistasRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import { isAuthenticated, checkAuth } from "./middlewares/auth.js";
 import { connectDB } from "./config/db.js";
 import { sembrarUsuarios } from "./scripts/seedUsers.js";
@@ -77,6 +78,7 @@ app.use("/organizaciones", isAuthenticated, organizacionesRoutes);
 app.use("/gastos", isAuthenticated, gastosRoutes);
 app.use("/donaciones", isAuthenticated, donacionesRoutes);
 app.use("/donantes", isAuthenticated, donantesRoutes);
+app.use("/api/chat", isAuthenticated, chatRoutes);
 
 // Usar rutas de vistas Pug -> sin autenticación redirigen a /login
 app.use("/vistas", isAuthenticated, vistasRoutes);

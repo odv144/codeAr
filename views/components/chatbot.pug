@@ -1,0 +1,266 @@
+#impacto-chatbot-widget
+  button#chatbot-toggle-btn(type="button" aria-label="Abrir asistente virtual")
+    svg(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+      path(d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z")
+
+  #chatbot-window.chatbot-hidden
+    header.chatbot-header
+      div.chatbot-title-area
+        div
+          h4 ImpactoBot
+          small Asistente IA SumarImpacto
+      div.chatbot-header-actions
+        button#chatbot-reset-btn(type="button" title="Reiniciar chat" aria-label="Reiniciar chat")
+          svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+            path(d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8")
+            path(d="M3 3v5h5")
+        button#chatbot-close-btn(type="button" aria-label="Cerrar chat") &times;
+
+    #chatbot-messages.chatbot-messages
+      div.chatbot-msg.bot
+        p ¡Hola! Soy ImpactoBot. ¿En qué puedo ayudarte hoy en SumarImpacto?
+    form#chatbot-form.chatbot-form(style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; width: 100% !important; margin: 0 !important; padding: 0.5rem !important; box-sizing: border-box !important;")
+      input#chatbot-input(type="text" placeholder="Escribí tu consulta aquí..." autocomplete="off" required style="flex: 1 1 auto !important; min-width: 0 !important; width: 100% !important; height: 42px !important; margin: 0 !important; padding: 0 12px !important; font-size: 0.9rem !important; box-sizing: border-box !important;")
+      button(type="submit" style="flex: 0 0 auto !important; width: auto !important; min-width: 85px !important; white-space: nowrap !important; height: 42px !important; margin: 0 !important; padding: 0 14px !important; font-size: 0.9rem !important;") Enviar
+
+style.
+  #impacto-chatbot-widget {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    font-family: inherit;
+  }
+  #chatbot-toggle-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--marca-principal, #183b4e);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    padding: 0;
+  }
+  #chatbot-toggle-btn:hover {
+    transform: scale(1.05);
+    background-color: var(--marca-principal-hover, #0f2531);
+  }
+  #chatbot-window {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    height: 500px;
+    background: var(--pico-background-color, #ffffff);
+    border: 1px solid var(--pico-muted-border-color, #dce3e7);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  #chatbot-window.chatbot-hidden {
+    display: none;
+  }
+  .chatbot-header {
+    background-color: var(--marca-principal, #183b4e);
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chatbot-title-area {
+    display: flex;
+    align-items: center;
+  }
+  .chatbot-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #ffffff;
+  }
+  .chatbot-header small {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.85;
+    color: #ffffff;
+  }
+  .chatbot-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  #chatbot-reset-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    border-radius: 4px;
+  }
+  #chatbot-reset-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  #chatbot-close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+  }
+  #chatbot-close-btn:hover {
+    opacity: 1;
+  }
+  .chatbot-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--pico-card-background-color, #fdfdfd);
+  }
+  .chatbot-msg {
+    max-width: 85%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+  }
+  .chatbot-msg.bot {
+    background: var(--pico-muted-background-color, #f1f5f9);
+    color: var(--pico-color, #334155);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+  .chatbot-msg.user {
+    background: var(--marca-principal, #183b4e);
+    color: #ffffff !important;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+  .chatbot-msg.user p {
+    color: #ffffff !important;
+  }
+  .chatbot-msg p {
+    margin: 0;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+  }
+  .chatbot-form {
+    background: var(--pico-background-color, #ffffff);
+    border-top: 1px solid var(--pico-muted-border-color, #dce3e7);
+  }
+
+script.
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('chatbot-toggle-btn');
+    const closeBtn = document.getElementById('chatbot-close-btn');
+    const resetBtn = document.getElementById('chatbot-reset-btn');
+    const windowEl = document.getElementById('chatbot-window');
+    const formEl = document.getElementById('chatbot-form');
+    const inputEl = document.getElementById('chatbot-input');
+    const messagesEl = document.getElementById('chatbot-messages');
+
+    if (!toggleBtn || !windowEl || !formEl) return;
+
+    toggleBtn.addEventListener('click', () => {
+      windowEl.classList.toggle('chatbot-hidden');
+      if (!windowEl.classList.contains('chatbot-hidden')) {
+        inputEl.focus();
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      windowEl.classList.add('chatbot-hidden');
+    });
+
+    const welcomeText = '¡Hola! Soy ImpactoBot. ¿En qué puedo ayudarte hoy en SumarImpacto?';
+
+    resetBtn.addEventListener('click', () => {
+      messagesEl.innerHTML = '';
+      appendMessage(welcomeText, 'bot');
+      inputEl.focus();
+    });
+
+    const appendMessage = (text, sender) => {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chatbot-msg ${sender}`;
+      const p = document.createElement('p');
+      p.textContent = text;
+      msgDiv.appendChild(p);
+      messagesEl.appendChild(msgDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      inputEl.value = '';
+      inputEl.disabled = true;
+
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'chatbot-msg bot loading';
+      const loadingP = document.createElement('p');
+      loadingP.textContent = 'ImpactoBot está pensando...';
+      loadingDiv.appendChild(loadingP);
+      messagesEl.appendChild(loadingDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensaje: text })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (messagesEl.contains(loadingDiv)) {
+          messagesEl.removeChild(loadingDiv);
+        }
+
+        if (res.ok && data.respuesta) {
+          appendMessage(data.respuesta, 'bot');
+        } else {
+          appendMessage(data.error || 'Ocurrió un error al procesar tu consulta.', 'bot');
+        }
+      } catch (error) {
+        if (messagesEl.contains(loadingDiv)) {
+          messagesEl.removeChild(loadingDiv);
+        }
+        appendMessage('No se pudo conectar con el servidor de inteligencia artificial.', 'bot');
+      } finally {
+        inputEl.disabled = false;
+        inputEl.focus();
+      }
+    });
+  });

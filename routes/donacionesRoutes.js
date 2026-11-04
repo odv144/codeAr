@@ -7,22 +7,16 @@ import {
     eliminarDonacion
 } from "../controllers/donacionesController.js";
 import { isAdmin } from "../middlewares/auth.js";
-/*
-import { validarId } from "../middlewares/validarId.js";
+import { validarObjectId } from "../middlewares/validarObjectId.js";
 import { validarBody } from "../middlewares/validarBody.js";
-import { validarDonacion } from "../middlewares/validarDonacion.js";
-*/
+import { validarDonacion } from "../middlewares/validaciones.js";
+
 const router = express.Router();
 
 router.get("/", obtenerDonaciones);
-router.get("/:id", obtenerDonacionPorId);
-router.post("/", isAdmin, crearDonacion);
-router.put("/:id", isAdmin, actualizarDonacion);
-router.delete("/:id", isAdmin, eliminarDonacion);
-/* ver que pasa con las validaciones
-router.get("/:id", validarId, obtenerDonacionPorId);
-router.post("/", validarBody, validarDonacion, crearDonacion);
-router.put("/:id", validarId, validarBody, validarDonacion, actualizarDonacion);
-router.delete("/:id", validarId, eliminarDonacion);
-*/
+router.get("/:_id", validarObjectId, obtenerDonacionPorId);
+router.post("/", isAdmin, validarBody, validarDonacion, crearDonacion);
+router.put("/:_id", isAdmin, validarObjectId, validarBody, validarDonacion, actualizarDonacion);
+router.delete("/:_id", isAdmin, validarObjectId, eliminarDonacion);
+
 export default router;

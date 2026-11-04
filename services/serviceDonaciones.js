@@ -1,15 +1,18 @@
+import mongoose from "mongoose";
 import Donacion from "../models/Donaciones.js";
 import Proyecto from "../models/Proyectos.js";
 import Donante from "../models/Donantes.js";
 import { AppError } from "../utils/AppError.js";
 import { existeOrganizacion } from "./serviceOrganizacion.js";
 
-async function existeProyectoActivo(idProyecto) {
-    return (await Proyecto.exists({ idProyecto: Number(idProyecto), activa: { $ne: false } })) !== null;
+async function existeProyectoActivo(_id) {
+    if (!mongoose.isObjectIdOrHexString(_id)) return false;
+    return (await Proyecto.exists({ _id, activa: { $ne: false } })) !== null;
 }
 
-async function existeDonante(idDonante) {
-    return (await Donante.exists({ idDonante: Number(idDonante) })) !== null;
+async function existeDonante(_id) {
+    if (!mongoose.isObjectIdOrHexString(_id)) return false;
+    return (await Donante.exists({ _id })) !== null;
 }
 
 async function validarReferencias({ idProyecto, idDonante, idOrganizacion }) {
@@ -25,41 +28,36 @@ async function validarReferencias({ idProyecto, idDonante, idOrganizacion }) {
 }
 
 async function obtenerDonaciones() {
-    return Donacion.find().select("-_id").sort({ idDonacion: 1 }).lean();
+    return Donacion.find().sort({ _id: 1 }).lean();
 }
 
-async function obtenerDonacionPorId(id) {
-    return Donacion.findOne({ idDonacion: Number(id) }).select("-_id").lean();
+async function obtenerDonacionPorId(_id) {
+    return Donacion.findById(_id).lean();
 }
 
 async function crearDonacion(datos) {
     await validarReferencias(datos);
 
-    const ultima = await Donacion.findOne().sort({ idDonacion: -1 }).select("idDonacion").lean();
-    const idDonacion = ultima ? ultima.idDonacion + 1 : 1;
-
-    const nueva = await Donacion.create({ ...datos, idDonacion });
+    const nueva = await Donacion.create(datos);
 
     return nueva.toJSON();
 }
 
-async function actualizarDonacion(id, datos) {
-    const idNumerico = Number(id);
-
-    if (!(await Donacion.exists({ idDonacion: idNumerico }))) return null;
+async function actualizarDonacion(_id, datos) {
+    if (!(await Donacion.exists({ _id }))) return null;
 
     await validarReferencias(datos);
 
-    const actualizada = await Donacion.findOneAndUpdate(
-        { idDonacion: idNumerico },
+    const actualizada = await Donacion.findByIdAndUpdate(
+        _id,
         { $set: datos },
         { returnDocument: "after", runValidators: true }
     );
     return actualizada ? actualizada.toJSON() : null;
 }
 
-async function eliminarDonacion(id) {
-    const eliminada = await Donacion.findOneAndDelete({ idDonacion: Number(id) });
+async function eliminarDonacion(_id) {
+    const eliminada = await Donacion.findByIdAndDelete(_id);
     return eliminada ? eliminada.toJSON() : null;
 }
 
