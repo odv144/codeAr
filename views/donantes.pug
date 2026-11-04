@@ -1,12 +1,14 @@
+
 extends layout
 
 block content
   fieldset
     legend Listado de Donantes
+
     if currentUser && currentUser.role === 'admin'
       p.acciones-detalle
         a.btn-primario(href="/vistas/donantes/nuevo") + Nuevo Donante
-    
+
     if donantes && donantes.length > 0
       table
         thead
@@ -16,9 +18,10 @@ block content
             th.num DNI
             th.num Teléfono
             th Email
-            th.num Monto
-            th Fecha
+            th.num Total Donado
+            th.num Aportes
             th.acciones Acciones
+
         tbody
           each donante in donantes
             tr
@@ -27,12 +30,17 @@ block content
               td.num= donante.dni
               td.num= donante.telefono
               td= donante.email
-              td.num $#{donante.monto}
-              td.nowrap= donante.fecha.toISOString().slice(0, 10)
+
+              td.num= '$ ' + donante.totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              td.num= donante.cantidadDonaciones
+
               td.acciones
                 a(href=`/vistas/donantes/${donante._id}`) Ver detalle
+
                 if currentUser && currentUser.role === 'admin'
                   a(href=`/vistas/donantes/${donante._id}/editar`) Editar
                   a(href=`/vistas/donantes/${donante._id}/eliminar`) Eliminar
+
     else
       p No hay donantes registrados.
+
