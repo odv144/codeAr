@@ -16,8 +16,6 @@ block content
             th.num DNI
             th.num Teléfono
             th Email
-            th.num Monto
-            th Fecha
             th.acciones Acciones
         tbody
           each donante in donantes
@@ -27,8 +25,6 @@ block content
               td.num= donante.dni
               td.num= donante.telefono
               td= donante.email
-              td.num $#{donante.monto}
-              td.nowrap= donante.fecha.toISOString().slice(0, 10)
               td.acciones
                 a(href=`/vistas/donantes/${donante._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'

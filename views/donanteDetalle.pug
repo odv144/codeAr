@@ -22,10 +22,10 @@ block content
         td= donante.email
       tr
         th Monto
-        td.num $ #{donante.monto}
+        td= donante.monto != null ? `$${donante.monto}` : '-'
       tr
         th Fecha
-        td= donante.fecha.toISOString().slice(0, 10)
+        td= donante.fecha ? new Date(donante.fecha).toISOString().slice(0, 10) : '-'
 
     p.acciones-detalle
       if currentUser && currentUser.role === 'admin'
