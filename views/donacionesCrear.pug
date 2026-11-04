@@ -29,7 +29,10 @@ block content
         select(name="idDonante" id="idDonante" required)
           option(value="") Seleccioná un donante...
           each donante in donantes
-            option(value=donante._id)= `${donante.nombre} ${donante.apellido}`
+            option(
+              value=donante._id
+              selected=String(donante._id) === String(donanteSeleccionado || "")
+            )= `${donante.nombre} ${donante.apellido}`
 
       div
         label(for="idOrganizacion") Organización

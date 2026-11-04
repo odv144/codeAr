@@ -1,6 +1,7 @@
 import {
     obtenerDonantes,
     obtenerDonantesId,
+    obtenerTotalesDonantes,
     insertarDonante,
     actualizarDonante,
     eliminarDonante
@@ -500,6 +501,7 @@ const renderDonaciones = async (req, res) => {
     }
 };
 
+
 const renderCrearDonacion = async (req, res, next) => {
     try {
         const [proyectos, donantes, organizaciones] = await Promise.all([
@@ -507,15 +509,43 @@ const renderCrearDonacion = async (req, res, next) => {
             obtenerDonantes(),
             obtenerOrganizaciones()
         ]);
-        res.render("donacionesCrear", { proyectos, donantes, organizaciones });
+
+        // Obtener el donante enviado desde la URL
+        const donanteSeleccionado = req.query.donante || "";
+
+        // Verificar que el donante exista en la lista
+        const donanteValido = donantes.some(
+            donante =>
+                String(donante._id) === String(donanteSeleccionado)
+        );
+
+        res.render("donacionesCrear", {
+            proyectos,
+            donantes,
+            organizaciones,
+            donanteSeleccionado: donanteValido
+                ? donanteSeleccionado
+                : ""
+        });
+
     } catch (error) {
         next(error);
     }
 };
 
+
+
 const guardarDonacionDesdeVista = async (req, res) => {
     try {
-        const { monto, cbu, fecha, idProyecto, idDonante, idOrganizacion } = req.body;
+        const {
+            monto,
+            cbu,
+            fecha,
+            idProyecto,
+            idDonante,
+            idOrganizacion
+        } = req.body;
+
         await crearDonacion({
             monto: Number(monto),
             cbu,
@@ -524,14 +554,25 @@ const guardarDonacionDesdeVista = async (req, res) => {
             idDonante,
             idOrganizacion
         });
+
         res.redirect("/vistas/donaciones");
+
     } catch (error) {
+
+        // Mostrar el error real en la terminal
+        console.error("ERROR AL GUARDAR DONACIÓN:");
+        console.error(error);
+
         if (error instanceof AppError) {
-            return res.status(error.status).render("error", { mensaje: error.message });
+            return res.status(error.status).render("error", {
+                mensaje: error.message
+            });
         }
+
         res.status(500).send("Error al guardar la donación");
     }
 };
+
 
 const donacionNoEncontrada = () => new AppError(404, "Donación no encontrada");
 
@@ -616,30 +657,62 @@ const eliminarDonacionVista = async (req, res, next) => {
     }
 };
 
+
 const renderDonantes = async (req, res) => {
     try {
-        const donantes = await obtenerDonantes();
-        res.render("donantes", { donantes });
+        const [donantes, totales] = await Promise.all([
+            obtenerDonantes(),
+            obtenerTotalesDonantes()
+        ]);
+
+        // Relacionar cada donante con sus aportes
+        const mapaTotales = new Map(
+            totales.map(item => [
+                String(item._id),
+                {
+                    totalDonado: item.totalDonado,
+                    cantidadDonaciones: item.cantidadDonaciones
+                }
+            ])
+        );
+
+        const donantesConTotales = donantes.map(donante => {
+            const datos = donante.toObject();
+            const resumen = mapaTotales.get(String(datos._id));
+
+            return {
+                ...datos,
+                totalDonado: resumen?.totalDonado ?? 0,
+                cantidadDonaciones: resumen?.cantidadDonaciones ?? 0
+            };
+        });
+
+        res.render("donantes", {
+            donantes: donantesConTotales
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error al cargar donantes:", error);
         res.status(500).send("Error al cargar donantes");
     }
 };
+
 
 const renderCrearDonante = (req, res) => {
     res.render("donantesCrear");
 };
 
-const guardarDonanteDesdeVista = async (req, res) => {
+
+const guardarDonanteDesdeVista = async (req, res, next) => {
     try {
-      await insertarDonante(req.body);
+        await insertarDonante(req.body);
         res.redirect("/vistas/donantes");
     } catch (error) {
-        //---------
-        console.error("ERROR AL GUARDAR DONANTE:", error);
-        res.status(500).send("Error al guardar el donante");
+        console.error("Error al guardar donante:", error);
+        next(error);
     }
 };
+
 
 // obtenerDonantesId lanza un Error simple sin status: acá lo convertimos en 404 real
 // para que errorHandler muestre "Donante no encontrado" y no un 500 genérico.
@@ -648,14 +721,28 @@ const mapearDonanteNoEncontrado = (error) =>
         ? new AppError(404, "Donante no encontrado")
         : error;
 
+
 const renderDonanteDetalle = async (req, res, next) => {
     try {
         const donante = await obtenerDonantesId(req.params._id);
-        res.render("donanteDetalle", { donante });
+
+        const totales = await obtenerTotalesDonantes();
+
+        const resumen = totales.find(
+            item => String(item._id) === String(donante._id)
+        );
+
+        res.render("donanteDetalle", {
+            donante,
+            totalDonado: resumen?.totalDonado ?? 0,
+            cantidadDonaciones: resumen?.cantidadDonaciones ?? 0
+        });
+
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
     }
 };
+
 
 const renderDonanteEditar = async (req, res, next) => {
     try {
@@ -668,17 +755,26 @@ const renderDonanteEditar = async (req, res, next) => {
 
 const guardarEdicionDonante = async (req, res, next) => {
     try {
-        const { nombre, apellido, dni, telefono, email, monto, fecha } = req.body;
-        // El service normaliza strings/Number/Date según el schema del donante
+        const { nombre, apellido, dni, telefono, email } = req.body;
+
         const donante = await actualizarDonante(req.params._id, {
-            nombre, apellido, dni, telefono, email, monto: Number(monto), fecha
+            nombre,
+            apellido,
+            dni,
+            telefono,
+            email
         });
-        if (!donante) throw new AppError(404, "Donante no encontrado");
+
+        if (!donante) {
+            throw new AppError(404, "Donante no encontrado");
+        }
+
         res.redirect("/vistas/donantes");
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
     }
 };
+
 
 const renderDonanteEliminar = async (req, res, next) => {
     try {
