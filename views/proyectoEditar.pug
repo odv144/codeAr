@@ -22,7 +22,7 @@ block content
 
       div
         label(for="saldo") Nuevo Saldo ($)
-        input(type="number" step="0.01" name="saldo" id="saldo")
+        input(type="number" step="0.01" min="0" name="saldo" id="saldo")
         small.ayuda Opcional: dejarlo vacío para conservar el saldo actual. Si se informa un monto, reemplaza el historial de saldo por ese único movimiento.
 
       .form-actions

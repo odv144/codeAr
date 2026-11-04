@@ -7,11 +7,11 @@ block content
     form(action="/vistas/donaciones" method="POST")
       div
         label(for="monto") Monto ($)
-        input(type="number" step="0.01" name="monto" id="monto" required)
+        input(type="number" step="0.01" min="1" name="monto" id="monto" required)
 
       div
         label(for="cbu") CBU / Cuenta
-        input(type="text" name="cbu" id="cbu" required)
+        input(type="text" name="cbu" id="cbu" required pattern="[0-9]{22}" minlength="22" maxlength="22" inputmode="numeric" title="El CBU debe contener exactamente 22 dígitos numéricos")
 
       div
         label(for="fecha") Fecha (YYYY-MM-DD)
@@ -29,7 +29,10 @@ block content
         select(name="idDonante" id="idDonante" required)
           option(value="") Seleccioná un donante...
           each donante in donantes
-            option(value=donante._id)= `${donante.nombre} ${donante.apellido}`
+            option(
+              value=donante._id
+              selected=String(donante._id) === String(donanteSeleccionado || "")
+            )= `${donante.nombre} ${donante.apellido}`
 
       div
         label(for="idOrganizacion") Organización

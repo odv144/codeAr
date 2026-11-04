@@ -61,10 +61,26 @@ async function eliminarDonacion(_id) {
     return eliminada ? eliminada.toJSON() : null;
 }
 
+// Total de donaciones de UN proyecto: agregación estricta sobre la colección
+// donaciones filtrando por idProyecto (ObjectId). Sin ID válido o sin
+// donaciones retorna 0 (nunca NaN ni null).
+async function totalDonado(idProyecto) {
+    if (!mongoose.isObjectIdOrHexString(idProyecto)) return 0;
+
+    const resultado = await Donacion.aggregate([
+        { $match: { idProyecto: new mongoose.Types.ObjectId(idProyecto) } },
+        { $group: { _id: null, total: { $sum: "$monto" } } }
+    ]);
+
+    const total = resultado.length > 0 ? Number(resultado[0].total) : 0;
+    return Number.isFinite(total) ? total : 0;
+}
+
 export {
     obtenerDonaciones,
     obtenerDonacionPorId,
     crearDonacion,
     actualizarDonacion,
-    eliminarDonacion
+    eliminarDonacion,
+    totalDonado
 };

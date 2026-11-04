@@ -1,3 +1,4 @@
+
 extends layout
 
 block content
@@ -20,15 +21,28 @@ block content
       tr
         th Email
         td= donante.email
-      tr
-        th Monto
-        td.num $ #{donante.monto}
-      tr
-        th Fecha
-        td= donante.fecha.toISOString().slice(0, 10)
 
+      tr
+        th Total donado
+        td.num= '$ ' + totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+      tr
+        th Cantidad de aportes
+        td.num= cantidadDonaciones
+
+      tr
+        th Fecha de registro
+        td
+          if donante.createdAt
+            = new Date(donante.createdAt).toLocaleDateString('es-AR', { timeZone: 'UTC' })
+          else
+            | No disponible
+
+    
     p.acciones-detalle
       if currentUser && currentUser.role === 'admin'
+        a.btn-primario(href=`/vistas/donaciones/nuevo?donante=${donante._id}`) + Nueva donación
         a.btn-secundario(href=`/vistas/donantes/${donante._id}/editar`) Editar
         a.btn-peligro(href=`/vistas/donantes/${donante._id}/eliminar`) Eliminar
+
       a.btn-secundario(href="/vistas/donantes") Volver al listado

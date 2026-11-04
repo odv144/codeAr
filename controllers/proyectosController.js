@@ -8,6 +8,7 @@ import {
   saldoProyectosActivos,
   proyectosBorrados,
 } from "../services/serviceProyecto.js";
+import { saldoIndividualProyecto } from "../services/saldoService.js";
 import { AppError } from "../utils/AppError.js";
 
 // Los servicios lanzan Errores simples sin status: acá se convierten en 404 real
@@ -29,10 +30,18 @@ const obtenerProyectosBorrados = async (req, res, next) => {
 };
 
 // GET ALL
+// Cada proyecto lleva su saldoActual individual (donaciones/gastos filtrados
+// por su propio ObjectId): nunca se expone un saldo consolidado global.
 const obtenerTodos = async (req, res, next) => {
   try {
     const proyectos = await obtenerProyectos({ incluirBajas: true });
-    res.json(proyectos);
+    const proyectosConSaldo = await Promise.all(
+      proyectos.map(async (p) => ({
+        ...p,
+        saldoActual: await saldoIndividualProyecto(p._id),
+      })),
+    );
+    res.json(proyectosConSaldo);
   } catch (error) {
     next(error);
   }
@@ -42,7 +51,8 @@ const obtenerTodos = async (req, res, next) => {
 const obtenerProyectoPorId = async (req, res, next) => {
   try {
     const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
-    res.json(proyecto);
+    const saldoActual = await saldoIndividualProyecto(proyecto._id);
+    res.json({ ...proyecto.toObject(), saldoActual });
   } catch (error) {
     next(mapearProyectoNoEncontrado(error));
   }
