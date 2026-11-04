@@ -16,7 +16,7 @@ block content
 
       div
         label(for="dni") DNI
-        input(type="text" name="dni" id="dni" value=donante.dni required)
+        input(type="text" name="dni" id="dni" value=donante.dni required pattern="[0-9]{7,8}" minlength="7" maxlength="8" inputmode="numeric")
 
       div
         label(for="telefono") Teléfono

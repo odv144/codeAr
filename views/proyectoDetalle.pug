@@ -19,8 +19,8 @@ block content
         tr
           th Saldo actual
           td.num
-            if proyecto.saldo && proyecto.saldo.length > 0
-              | $ #{proyecto.saldo[proyecto.saldo.length - 1].monto}
+            if proyecto.saldoActual !== undefined && proyecto.saldoActual !== null
+              | $ #{proyecto.saldoActual}
             else
               | -
         if dadaDeBaja

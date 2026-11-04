@@ -7,11 +7,11 @@ block content
     form(action=`/vistas/donaciones/${donacion._id}/editar` method="POST")
       div
         label(for="monto") Monto ($)
-        input(type="number" step="0.01" name="monto" id="monto" value=donacion.monto required)
+        input(type="number" step="0.01" min="1" name="monto" id="monto" value=donacion.monto required)
 
       div
         label(for="cbu") CBU / Cuenta
-        input(type="text" name="cbu" id="cbu" value=donacion.cbu required)
+        input(type="text" name="cbu" id="cbu" value=donacion.cbu required pattern="[0-9]{22}" minlength="22" maxlength="22" inputmode="numeric" title="El CBU debe contener exactamente 22 dígitos numéricos")
 
       div
         label(for="fecha") Fecha (YYYY-MM-DD)
