@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 import Gasto from "../models/Gastos.js";
 import Proyecto from "../models/Proyectos.js";
 import { AppError } from "../utils/AppError.js";
-import { saldoProyectosActivos } from "./serviceProyecto.js";
+import {
+    redondear,
+    totalGastado,
+    ingresosProyecto
+} from "./saldoService.js";
 
 async function obtenerGastos() {
     return Gasto.find().sort({ _id: 1 }).lean();
@@ -57,23 +61,15 @@ async function eliminarGasto(_id) {
     return eliminado ? eliminado.toJSON() : null;
 }
 
-// Las agregaciones no convierten el texto a ObjectId: hay que hacerlo a mano
-async function totalGastado(idProyecto, excluirId = null) {
-    const filtro = { idProyecto: new mongoose.Types.ObjectId(idProyecto) };
-    if (excluirId !== null) filtro._id = { $ne: new mongoose.Types.ObjectId(excluirId) };
-
-    const resultado = await Gasto.aggregate([
-        { $match: filtro },
-        { $group: { _id: null, total: { $sum: "$monto" } } }
-    ]);
-
-    return resultado.length > 0 ? resultado[0].total : 0;
-}
-
+// Saldo disponible para imputar un gasto:
+//   Ingresos del proyecto (monto base + donaciones filtradas por idProyecto)
+//   menos Total Gastos del proyecto (con exclusión opcional de un gasto).
+// Filtrado estricto por ObjectId: nunca mezcla gastos ni ingresos de otros
+// proyectos. Sin datos retorna 0.
 async function saldoDisponible(idProyecto, excluirId = null) {
-    const donado = await saldoProyectosActivos(idProyecto);
+    const ingresos = await ingresosProyecto(idProyecto);
     const gastado = await totalGastado(idProyecto, excluirId);
-    return donado - gastado;
+    return redondear(ingresos - gastado);
 }
 
 export {

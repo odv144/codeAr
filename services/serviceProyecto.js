@@ -2,6 +2,7 @@ import { isValidObjectId } from "mongoose";
 import Proyecto from "../models/Proyectos.js";
 import { obtenerOrganizacionPorId } from "./serviceOrganizacion.js";
 import { AppError } from "../utils/AppError.js";
+import { saldoIndividualProyecto } from "./saldoService.js";
 
 const SOLO_ACTIVAS = { activa: { $ne: false } };
 //Servicio para obtener un proyecto por su ID desde la base de datos MongoDB
@@ -238,35 +239,28 @@ async function reactivarProyectos(_id) {
   );
   return reactivada;
 }
-//obtener total de saldo de todos los proyectos activos
+// Saldo individual de UN proyecto activo.
+// BLINDAJE contra el bug de saldo consolidado:
+//   - Exige un _id válido; si no lo es, retorna 0 (antes caía en un filtro
+//     { activa: true } que sumaba TODOS los proyectos activos entre sí).
+//   - Nunca consulta Donaciones/Gastos globales: delega en
+//     saldoIndividualProyecto, que filtra estrictamente por ObjectId.
 async function saldoProyectosActivos(_id) {
   try {
-    const filtro = { activa: true };
-    if (isValidObjectId(_id)) {
-      filtro._id = _id;
+    if (!isValidObjectId(_id)) {
+      return 0;
     }
-    const proyectosActivos = await Proyecto.find(filtro).select("saldo");
-    // 3. Sumá de forma segura
-    const totalSaldo = proyectosActivos.reduce((total, proyecto) => {
-      // Protección por si saldo no es un array
-      if (!Array.isArray(proyecto.saldo)) {
-        console.warn("saldo no es array en el proyecto:", proyecto._id);
-        return total;
-      }
-
-      const saldoProyecto = proyecto.saldo.reduce((acc, item) => {
-        // Protección por si item.monto no existe o no es número
-        const monto = Number(item?.monto) || 0;
-        return acc + monto;
-      }, 0);
-
-      return total + saldoProyecto;
-    }, 0);
-
-    return totalSaldo;
+    const existeActivo = await Proyecto.exists({
+      _id,
+      activa: { $ne: false },
+    });
+    if (!existeActivo) {
+      return 0;
+    }
+    return await saldoIndividualProyecto(_id);
   } catch (error) {
     console.error(
-      "Error al obtener el total de saldo de proyectos activos:",
+      "Error al obtener el saldo del proyecto activo:",
       error,
     );
     throw error;

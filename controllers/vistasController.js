@@ -39,6 +39,7 @@ import {
     actualizarDonacion,
     eliminarDonacion
 } from "../services/serviceDonaciones.js";
+import { saldoIndividualProyecto } from "../services/saldoService.js";
 
 
 /* ===================== HOME ===================== */
@@ -60,10 +61,12 @@ const renderProyectos = async (req, res) => {
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
         const nombresOrg = new Map(organizaciones.map((o) => [String(o._id), o.nombre]));
-        const filas = proyectos.map((p) => ({
+        // saldoActual individual por proyecto (filtrado por su ObjectId)
+        const filas = await Promise.all(proyectos.map(async (p) => ({
             ...p,
-            nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null
-        }));
+            nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null,
+            saldoActual: await saldoIndividualProyecto(p._id)
+        })));
         res.render("proyectos", { proyectos: filas, incluirBajas });
     } catch (error) {
         res.status(500).send("Error al cargar proyectos");
@@ -111,7 +114,14 @@ const renderProyectoDetalle = async (req, res, next) => {
     try {
         const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
         const organizacion = await organizacionDelProyecto(proyecto);
-        res.render("proyectoDetalle", { proyecto, organizacion });
+        // Saldo individual del proyecto: (monto base + donaciones) - gastos,
+        // todo filtrado por el ObjectId de ESTE proyecto. Se expone como
+        // proyecto.saldoActual para la plantilla (0 si no tiene movimientos).
+        const saldoActual = await saldoIndividualProyecto(proyecto._id);
+        res.render("proyectoDetalle", {
+            proyecto: { ...proyecto.toObject(), saldoActual },
+            organizacion
+        });
     } catch (error) {
         next(mapearProyectoNoEncontrado(error));
     }
