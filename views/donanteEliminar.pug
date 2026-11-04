@@ -1,37 +1,56 @@
+
 extends layout
 
 block content
   fieldset
     legend Eliminar Donante
 
-    p
-      | ¿Confirma que desea eliminar el siguiente donante?
-      strong  Esta acción eliminará permanentemente el donante y no podrá deshacerse
-      |  (borrado físico del registro).
+    if !puedeEliminar
+      p
+        strong No se puede eliminar este donante.
+      p
+        | El donante tiene donaciones registradas.
+        |  Para conservar su historial, no está permitida su eliminación.
+    else
+      p
+        | ¿Confirma que desea eliminar el siguiente donante?
+      p
+        strong Esta acción eliminará permanentemente el registro y no podrá deshacerse.
 
     table.tabla-detalle
       tr
         th ID Donante
-        td.num= donante._id 
+        td.num= donante._id
+
       tr
         th Nombre
         td= donante.nombre
+
       tr
         th Apellido
         td= donante.apellido
+
       tr
         th DNI
         td.num= donante.dni
+
       tr
         th Email
         td= donante.email
-      tr
-        th Monto
-        td.num $ #{donante.monto}
-      tr
-        th Fecha
-        td= donante.fecha.toISOString().slice(0, 10)
 
-    form.form-actions(action=`/vistas/donantes/${donante._id  }/eliminar` method="POST")
-      a.btn-secundario(href="/vistas/donantes") Cancelar
-      button.btn-peligro(type="submit") Sí, eliminar
+      tr
+        th Total donado
+        td.num= '$ ' + totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+      tr
+        th Cantidad de aportes
+        td.num= cantidadDonaciones
+
+    if puedeEliminar
+      form.form-actions(action=`/vistas/donantes/${donante._id}/eliminar` method="POST")
+        a.btn-secundario(href="/vistas/donantes") Cancelar
+        button.btn-peligro(type="submit") Sí, eliminar
+    else
+      p.acciones-detalle
+        a.btn-secundario(href="/vistas/donantes") Volver al listado
+        a.btn-primario(href=`/vistas/donantes/${donante._id}`) Ver detalle
