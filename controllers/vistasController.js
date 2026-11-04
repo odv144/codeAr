@@ -766,24 +766,54 @@ const guardarEdicionDonante = async (req, res, next) => {
 };
 
 
+
 const renderDonanteEliminar = async (req, res, next) => {
     try {
         const donante = await obtenerDonantesId(req.params._id);
-        res.render("donanteEliminar", { donante });
+        const totales = await obtenerTotalesDonantes();
+
+        const resumen = totales.find(
+            item => String(item._id) === String(donante._id)
+        );
+
+        const totalDonado = resumen?.totalDonado ?? 0;
+        const cantidadDonaciones = resumen?.cantidadDonaciones ?? 0;
+
+        res.render("donanteEliminar", {
+            donante,
+            totalDonado,
+            cantidadDonaciones,
+            puedeEliminar: cantidadDonaciones === 0
+        });
+
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
     }
 };
 
+
 // BORRADO FÍSICO: mismo criterio que DELETE /donantes/:id (serviceDonante.eliminarDonante)
+
 const eliminarDonanteVista = async (req, res, next) => {
     try {
         await eliminarDonante(req.params._id);
+
         res.redirect("/vistas/donantes");
+
     } catch (error) {
+
+        // Donante con donaciones registradas
+        if (error.status === 409 || error.statusCode === 409) {
+            return res.status(409).render("error", {
+                mensaje: error.message
+            });
+        }
+
+        // Otros errores
         next(mapearDonanteNoEncontrado(error));
     }
 };
+
 
 export {
     renderHome,

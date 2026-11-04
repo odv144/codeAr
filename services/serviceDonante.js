@@ -115,21 +115,40 @@ async function actualizarDonante(id, datos) {
 }
 
 // Función para eliminar un donante por su ID
+
 async function eliminarDonante(id) {
   try {
+    // Verificar si el donante tiene donaciones asociadas
+    const tieneDonaciones = await Donacion.exists({
+      idDonante: id
+    });
+
+    if (tieneDonaciones) {
+      const error = new Error(
+        "No se puede eliminar el donante porque tiene donaciones registradas."
+      );
+      error.status = 409;
+      error.statusCode = 409;
+      throw error;
+    }
+
+    // Eliminar solamente si no tiene donaciones
     const donante = await Donante.findByIdAndDelete(id);
 
     if (!donante) {
       const error = new Error("Donante no encontrado");
+      error.status = 404;
       error.statusCode = 404;
       throw error;
     }
 
     return donante;
+
   } catch (error) {
     console.error("Error al eliminar el donante:", error);
     throw error;
   }
 }
+
 
 export { obtenerDonantesId, insertarDonante, obtenerDonantes, actualizarDonante, eliminarDonante,obtenerTotalesDonantes };
