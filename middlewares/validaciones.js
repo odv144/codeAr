@@ -144,8 +144,7 @@ const ESQUEMA_DONACION = {
   cbu: texto({ patron: { regex: /^\d{22}$/, mensaje: MENSAJE_CBU }, mensajeTipo: MENSAJE_CBU }),
   fecha: fecha({ ejemplo: "2026-10-09" }),
   idProyecto: objectId(),
-  idDonante: objectId(),
-  idOrganizacion: objectId()
+  idDonante: objectId()
 };
 
 const ESQUEMA_GASTO = {

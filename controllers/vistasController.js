@@ -600,8 +600,7 @@ const guardarDonacionDesdeVista = async (req, res) => {
             cbu,
             fecha,
             idProyecto,
-            idDonante,
-            idOrganizacion
+            idDonante
         } = req.body;
 
         await crearDonacion({
@@ -609,8 +608,7 @@ const guardarDonacionDesdeVista = async (req, res) => {
             cbu,
             fecha,
             idProyecto,
-            idDonante,
-            idOrganizacion
+            idDonante
         });
 
         res.redirect("/vistas/donaciones");
@@ -678,14 +676,13 @@ const renderEditarDonacion = async (req, res, next) => {
 
 const guardarEdicionDonacion = async (req, res, next) => {
     try {
-        const { monto, cbu, fecha, idProyecto, idDonante, idOrganizacion } = req.body;
+        const { monto, cbu, fecha, idProyecto, idDonante } = req.body;
         const donacion = await actualizarDonacion(req.params._id, {
             monto: Number(monto),
             cbu,
             fecha,
             idProyecto,
-            idDonante,
-            idOrganizacion
+            idDonante
         });
         if (!donacion) throw donacionNoEncontrada();
         res.redirect("/vistas/donaciones");

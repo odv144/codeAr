@@ -3,7 +3,6 @@ import Donacion from "../models/Donaciones.js";
 import Proyecto from "../models/Proyectos.js";
 import Donante from "../models/Donantes.js";
 import { AppError } from "../utils/AppError.js";
-import { existeOrganizacion } from "./serviceOrganizacion.js";
 
 async function proyectoActivo(idProyecto) {
     if (!mongoose.isObjectIdOrHexString(idProyecto)) return null;
@@ -17,17 +16,14 @@ async function existeDonante(_id) {
 }
 
 // Valida las referencias y devuelve la organización DEL PROYECTO: la donación
-// siempre se guarda con la org de su proyecto, nunca con la del select.
-async function validarReferencias({ idProyecto, idDonante, idOrganizacion }) {
+// siempre se guarda con la org de su proyecto.
+async function validarReferencias({ idProyecto, idDonante }) {
     const proyecto = await proyectoActivo(idProyecto);
     if (!proyecto) {
         throw new AppError(400, "El proyecto indicado no existe o está dado de baja");
     }
     if (!(await existeDonante(idDonante))) {
         throw new AppError(400, "El donante indicado no existe");
-    }
-    if (!(await existeOrganizacion(idOrganizacion))) {
-        throw new AppError(400, "La organización indicada no existe o está dada de baja");
     }
     return proyecto.idOrganizacion;
 }

@@ -66,6 +66,47 @@ const obtenerSaldoProyectosActivos = async (req, res, next) => {
   }
 };
 
+// CREATE
+const crearProyecto = async (req, res, next) => {
+  try {
+    const nuevoProyecto = await insertarProyecto(req.datosProyecto);
+    res.status(201).json({
+      mensaje: "Proyecto creado exitosamente",
+      proyecto: nuevoProyecto,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// UPDATE
+const updateProyecto = async (req, res, next) => {
+  try {
+    const proyecto = await actualizarProyecto(req.params._id, req.datosProyecto);
+    res.json({
+      mensaje: "Proyecto actualizado",
+      proyecto,
+    });
+  } catch (error) {
+    next(mapearProyectoNoEncontrado(error));
+  }
+};
+
+// DELETE (baja lógica: no borra el documento, lo marca como inactivo)
+const deleteProyecto = async (req, res, next) => {
+  try {
+    const proyecto = await eliminarProyecto(req.params._id);
+    res.status(200).json({
+      mensaje: "Proyecto dado de baja correctamente",
+      proyecto,
+    });
+  } catch (error) {
+    next(error.statusCode === 404
+      ? new AppError(404, "Proyecto no encontrado")
+      : error);
+  }
+};
+
 export {
   obtenerTodos,
   obtenerProyectoPorId,
