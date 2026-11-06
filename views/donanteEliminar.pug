@@ -40,11 +40,14 @@ block content
 
       tr
         th Total donado
-        td.num= '$ ' + totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
+        td.num= moneda(totalDonado)
       tr
-        th Cantidad de aportes
-        td.num= cantidadDonaciones
+        th Fecha de registro
+        td
+          if donante.createdAt
+            = new Date(donante.createdAt).toLocaleDateString('es-AR', { timeZone: 'UTC' })
+          else
+            | No disponible
 
     if puedeEliminar
       form.form-actions(action=`/vistas/donantes/${donante._id}/eliminar` method="POST")

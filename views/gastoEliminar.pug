@@ -15,13 +15,13 @@ block content
         td.num= gasto._id
       tr
         th Proyecto
-        td= proyecto ? `${proyecto.nomProyecto} (#${gasto.idProyecto})` : `(#${gasto.idProyecto})`
+        td= proyecto ? proyecto.nomProyecto : "-"
       tr
         th Descripción
         td= gasto.descripcion
       tr
         th Monto
-        td.num $ #{gasto.monto}
+        td.num= moneda(gasto.monto)
       tr
         th Fecha
         td= gasto.fecha.toISOString().slice(0, 10)
