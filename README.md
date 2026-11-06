@@ -1,40 +1,51 @@
-# SumarImpacto - Backend (CodeAr)
+# SumarImpacto - Backend (CodeAr) - Versión ES Modules (ESM)
 
 Proyecto desarrollado para la materia Desarrollo de Sistemas Web Backend (Tecnicatura Superior en Desarrollo de Software - IFTS 29).
 
+En esta versión la autenticación se migró de sesiones a JWT y se incorporó ImpactoBot, un asistente virtual con IA integrado a la interfaz web.
+
 ## Sobre la Organización
 
- **SumarImpacto** es una iniciativa tecnológica concebida para actuar como nexo estratégico entre organizaciones de la sociedad civil, donantes (particulares o corporativos) y proyectos comunitarios de alto impacto social. La plataforma nace para dar respuesta a una problemática recurrente en el tercer sector: la falta de transparencia, trazabilidad y automatización en la gestión de fondos destinados a causas benéficas.
-
+SumarImpacto es una iniciativa tecnológica concebida para actuar como nexo estratégico entre organizaciones de la sociedad civil, donantes (particulares o corporativos) y proyectos comunitarios de alto impacto social. La plataforma nace para dar respuesta a una problemática recurrente en el tercer sector: la falta de transparencia, trazabilidad y automatización en la gestión de fondos destinados a causas benéficas.
 
 ## Integrantes y Responsabilidades (Empresa CodeAr)
 
-- **Omar Virili:** Creación/configuración de la base MongoDB Atlas, conexión mediante Mongoose y desarrollo del CRUD del módulo **Proyectos**. Integración conjunta del cálculo de **saldos**, el **historial de movimientos**, el **formato de moneda** y los **scripts de verificación** de negocio.
-- **Jairo N. Calla Girón:** Módulo de **Donantes** (CRUD y persistencia en MongoDB Atlas).
-- **Mariana Borda:** Módulo de **Organizaciones** (CRUD y persistencia en MongoDB Atlas) y documentación.
-- **Analía Fernández:** Módulo de **Donaciones** (CRUD y persistencia en MongoDB Atlas).
-- **Cynthia Sotelo:** Módulo de **Gastos** (CRUD y persistencia en MongoDB Atlas).
-- **Cristian Suárez:** Diseño, maquetación e integración del motor de plantillas **Pug** (vistas web, rutas dinámicas y componentes de navegación) e implementación de la autenticación basada en sesiones. Integración conjunta con Omar Virili del cálculo de **saldos**, el **historial de movimientos**, el **formato de moneda** y los **scripts de verificación** de negocio.
+- **Omar Virili:** Módulo de **Proyectos**. Integración conjunta con Cristian Suárez del cálculo de **saldos**, el **historial de movimientos**, el **formato de moneda** y los **scripts de verificación** de negocio.
+- **Mariana Borda:** Módulo de **Organizaciones** y documentación.
+- **Jairo N. Calla Girón:** Módulo de **Donantes**.
+- **Analía Fernández:** Módulo de **Donaciones**.
+- **Cynthia Sotelo:** Módulo de **Gastos**.
+- **Cristian Suárez:** Módulo de **Autenticación/Usuarios** (JWT, cookies seguras, middleware de roles), asistente virtual **ImpactoBot** (integración Groq API, endpoint POST /api/chat y widget frontend), plantillas **Pug** y cálculo dinámico/verificación de saldos (conjunto con Omar Virili).
 
+Cada módulo incluye CRUD con persistencia en MongoDB (Mongoose), rutas de API, controlador, servicio y vistas Pug.
+
+## Cambios principales respecto a la versión anterior
+
+La versión anterior usaba sesiones de servidor (express-session) e identificadores numéricos propios para cada entidad. Esta versión introduce:
+
+- **Autenticación con JWT en lugar de sesiones:** se reemplazó express-session por jsonwebtoken. El token viaja en la cookie HttpOnly `sumarimpacto.token` (antes `sumarimpacto.sid`) y el middleware global `checkAuth` lo verifica en cada request. Las variables `SESSION_SECRET` y `SESSION_TTL_MINUTES` pasaron a ser `JWT_SECRET` y `JWT_EXPIRES_IN`.
+- **Identificación por `_id` de MongoDB (ObjectId):** se eliminaron los identificadores numéricos (`idOrganizacion`, `idProyecto`, `idDonante`, `idDonacion`, `idGasto`). Ahora cada documento se identifica por su `_id` y las relaciones entre entidades son referencias ObjectId. Las rutas pasaron de `:id` a `:_id` y el middleware `validarId` fue reemplazado por `validarObjectId`.
+- **Validaciones unificadas:** `middlewares/validaciones.js` reemplaza a los archivos separados por módulo (`validarOrganizacion.js`, `validarDonacion.js`, `validarGasto.js` y `utils/validaciones*.js`). Define un esquema por entidad, devuelve todos los errores juntos y ahora también cubre Proyectos.
+- **Registro de usuarios:** nueva pantalla `/registro` y nuevo rol **operador** (rol por defecto de las cuentas registradas). El login suma la opción de mostrar/ocultar la contraseña y un enlace al registro.
+- **ImpactoBot:** asistente virtual con IA (Groq) disponible en todas las pantallas una vez iniciada la sesión, con endpoint propio `POST /api/chat`.
+- **Reactivación desde la interfaz web:** Organizaciones y Proyectos se pueden reactivar desde las vistas (`/:_id/reactivar`). Antes solo existía el `PATCH` de la API para Organizaciones.
+- **Validación de formularios en el navegador:** nuevo script `public/js/validacion-formulario.js`.
+
+Se mantienen de la versión anterior: la migración a ES Modules (`"type": "module"`, import/export, extensión `.js` en las importaciones relativas y `__dirname`/`__filename` reconstruidos con `import.meta.url`), la baja lógica de Organizaciones y Proyectos, y el manejo centralizado de errores con `AppError` y `errorHandler`.
 
 ## Características Principales
 
 - **Gestión de Entidades:** CRUD completo para Organizaciones, Proyectos, Donantes, Donaciones y Gastos.
-- **Validaciones Integradas:** Middlewares personalizados para validar IDs, cuerpos de peticiones (`body`) y relaciones entre entidades (ej. validar existencia de Organización).
-- **Manejo Centralizado de Errores:** Middleware global `errorHandler` para captura y respuesta uniforme ante fallos.
-- **Registro de Peticiones:** Middleware `requestLogger` para auditoría y log de peticiones HTTP.
-- **Base de Datos Escalable:** Persistencia en MongoDB Atlas administrada a través de esquemas de Mongoose.
-- **Autenticación con Sesiones:** Login/logout con cookie de sesión `sumarimpacto.sid` (HttpOnly, SameSite=Lax) y control de acceso por rol.
-- **Saldos y Historial de Movimientos:** Saldo individual por proyecto (fórmula: monto base + donaciones − gastos), aislado estricto por ObjectId, con historial de movimientos (apertura, donaciones y gastos) y guardia que impide dar de baja un proyecto con saldo pendiente.
-- **Formato Monetario Unificado:** Helpers de moneda (`utils/formato.js`) registrados en `app.locals` para todo el renderizado de importes en formato es-AR.
-- **Asistente Virtual:** ImpactoBot, chatbot con IA (Groq API) disponible en todas las vistas — ver [ImpactoBot](#impactobot).
+- **Autenticación JWT:** login/logout con cookie `sumarimpacto.token` (HttpOnly, SameSite=Lax, secure en producción) y control de acceso por rol.
+- **Asistente virtual (ImpactoBot):** responde consultas sobre el uso de los cinco módulos del sistema.
+- **Validaciones Integradas:** validación de IDs, del cuerpo de las peticiones y de las relaciones entre entidades (existencia de organización, proyecto y donante).
+- **Manejo Centralizado de Errores:** middleware global `errorHandler`; responde JSON en la API y la vista `error.pug` en la interfaz web.
+- **Registro de Peticiones:** middleware `requestLogger` (método, URL, estado y duración).
+- **Base de Datos Escalable:** persistencia en MongoDB mediante esquemas de Mongoose.
 
+## Base de Datos y Modelos (MongoDB Atlas)
 
-## Base de Datos (MongoDB Atlas)
-
-- **Motor:** MongoDB Atlas (en producción y desarrollo remoto) o MongoDB local (`mongodb://localhost:27017`) para desarrollo sin nube.
-- **ODM:** Mongoose. La conexión se realiza en `config/db.js` a partir de las variables `MONGO_URI` y `DBNAME`.
-- **Modelos y colecciones** (archivos en `models/`):
+La persistencia está en **MongoDB Atlas** (o una instancia local), administrada mediante **Mongoose** y conectada desde `config/db.js` con las variables `MONGO_URI` y `DBNAME`.
 
 | Modelo (archivo) | Colección | Descripción |
 |------------------|-----------|-------------|
@@ -43,47 +54,41 @@ Proyecto desarrollado para la materia Desarrollo de Sistemas Web Backend (Tecnic
 | `Donantes.js` | `donantes` | Personas o empresas que donan (borrado físico). |
 | `Donaciones.js` | `donaciones` | Ingresos imputados a un proyecto (borrado físico). |
 | `Gastos.js` | `gastos` | Egresos imputados a un proyecto (borrado físico). |
-| `User.js` | `users` | Usuarios de la plataforma con rol `admin` o `usuario`. |
-
+| `User.js` | `users` | Usuarios de la plataforma (roles `admin`, `usuario` y `operador`). |
 
 ## Configuración de variables de entorno
 
-El proyecto utiliza variables de entorno para configurar el puerto, la conexión con MongoDB, la autenticación y el asistente virtual. **No commitees nunca el archivo `.env`** (está en `.gitignore`); usa siempre `.env.example` como modelo:
+Crear un archivo `.env` en la raíz del proyecto (podés partir del modelo incluido: `cp .env.example .env`; el `.env` está en `.gitignore` y no debe subirse al repositorio):
 
-```bash
-cp .env.example .env
+```env
+PORT=3000
+DBNAME=nombre_de_tu_base_de_datos
+MONGO_URI=mongodb+srv://USUARIO:CONTRASEÑA@CLUSTER.mongodb.net/
+GROQ_API_KEY=tu_clave_de_groq_aqui
+
+# Configuración de JWT
+JWT_SECRET=tu_jwt_secret_super_seguro
+JWT_EXPIRES_IN=1h
 ```
 
 | Variable | Descripción |
 |----------|-------------|
-| `PORT` | Puerto del servidor (por defecto `3200` si no está definida). |
-| `MONGO_URI` | URI de conexión a MongoDB. Local: `mongodb://localhost:27017/sumarImpacto` — Producción (Atlas): `mongodb+srv://USUARIO:CONTRASEÑA@CLUSTER.mongodb.net/`. |
-| `DBNAME` | Nombre de la base de datos (ej. `sumarImpacto`). |
-| `JWT_SECRET` | Secreto para firmar tokens. **Obligatorio en producción:** sin él el servidor no arranca (`index.js`). En desarrollo se genera un secreto efímero con advertencia en consola. |
-| `JWT_EXPIRES_IN` | Vigencia del token (ej. `1h`). |
-| `GROQ_API_KEY` | Clave de la API de Groq. Requerida para el asistente **ImpactoBot** (`POST /api/chat`). |
-| `NODE_ENV` | `production` en el entorno de producción. |
+| `PORT` | Puerto del servidor (por defecto 3200 si no se define). |
+| `MONGO_URI` | Cadena de conexión a MongoDB (Atlas o local: `mongodb://localhost:27017/...`). |
+| `DBNAME` | Nombre de la base de datos. |
+| `GROQ_API_KEY` | Clave de la API de Groq para ImpactoBot. Sin ella el servidor arranca igual, pero el chat responde con error. |
+| `JWT_SECRET` | Secreto con el que se firman los tokens. **Obligatorio en producción** (`NODE_ENV=production`): si falta, el servidor no arranca. En desarrollo, si falta, se genera uno efímero con una advertencia en consola (los tokens dejan de ser válidos al reiniciar). |
+| `JWT_EXPIRES_IN` | Duración del token (por defecto 8h). La cookie dura como máximo 8 horas. |
 
-Estructura mínima del `.env`:
+Variables opcionales para el seed de usuarios: `ADMIN_USER`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `OPERADOR_USER`, `OPERADOR_EMAIL`, `OPERADOR_PASSWORD`.
 
-```env
-PORT=3000
-MONGO_URI=mongodb+srv://USUARIO:CONTRASEÑA@CLUSTER.mongodb.net/
-DBNAME=sumarImpacto
-JWT_SECRET=tu_jwt_secret_super_seguro
-JWT_EXPIRES_IN=1h
-GROQ_API_KEY=tu_clave_de_groq_aqui
-NODE_ENV=production
-```
-
-
-## Instalación y Ejecución (local)
+## Instalación y Ejecución
 
 1. Instalar dependencias:
    ```bash
    npm install
    ```
-2. Crear el archivo `.env` a partir de `.env.example` (ver sección anterior).
+2. Configurar el archivo `.env` (ver sección anterior).
 3. Iniciar el servidor en modo desarrollo (con Nodemon):
    ```bash
    npm run dev
@@ -97,203 +102,147 @@ NODE_ENV=production
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm run dev` | Arranque en desarrollo con Nodemon (recarga automática). |
-| `npm start` | Arranque en producción con Node (`node index.js`). |
-| `npm run seed` | Siembra manual de los usuarios de prueba (`scripts/seedUsers.js`). El servidor además lo ejecuta automáticamente en cada arranque. |
-| `npm run verificar-saldos` | Script de verificación de negocio (`scripts/verificarSaldos.js`): valida el cálculo de saldos individuales por proyecto (aislamiento por ObjectId, proyectos sin movimientos, proyectos de baja e IDs inválidos). Crea y limpia sus propios datos de prueba en cada corrida. |
-
+| `npm run dev` | Desarrollo con Nodemon (recarga automática). |
+| `npm start` | Producción con Node (`node index.js`). |
+| `npm run seed` | Siembra manual de usuarios de prueba (el servidor además la ejecuta solo en cada arranque). |
+| `npm run verificar-saldos` | Verificación de negocio (`scripts/verificarSaldos.js`): valida el cálculo de saldos individuales por proyecto (aislamiento por ObjectId, proyectos sin movimientos, proyectos de baja e IDs inválidos). Crea y limpia sus propios datos de prueba en cada corrida. |
 
 ## Deploy en Producción (Vercel)
 
-- **Plataforma:** [Vercel](https://vercel.com).
+- **Plataforma:** [Vercel](https://vercel.com)
 - **URL activa:** **https://code-ar-tau.vercel.app**
 
-### Variables de entorno en producción
-
-Configurar en el panel de Vercel:
+### Variables de entorno en producción (panel de Vercel)
 
 | Variable | Valor |
 |----------|-------|
 | `NODE_ENV` | `production` |
 | `MONGO_URI` | URI de **MongoDB Atlas** (con usuario y contraseña) |
 | `DBNAME` | Nombre de la base de datos en Atlas |
-| `JWT_SECRET` | Secreto fuerte y estable (**obligatorio**: sin él el servidor no inicia en producción) |
-| `GROQ_API_KEY` | Clave de Groq para ImpactoBot (opcional: sin ella el chatbot responde con error controlado) |
+| `JWT_SECRET` | Secreto fuerte y estable (**obligatorio**: sin él el servidor no inicia) |
+| `GROQ_API_KEY` | Clave de Groq para ImpactoBot (opcional: sin ella el chat responde con error controlado) |
 
 ### Cookies seguras tras el proxy
 
-Express corre con `app.set("trust proxy", 1)` (`index.js`), necesario en Vercel para que la cookie de sesión `sumarimpacto.sid` se marque **Secure** detrás del proxy HTTPS y funcione correctamente el login con sesión en el dominio de producción.
+Express corre con `app.set("trust proxy", 1)` (`index.js`): es necesario en Vercel para que la cookie `sumarimpacto.token` se marque **Secure** detrás del proxy HTTPS y el login con JWT funcione correctamente en el dominio de producción.
 
 ### Local vs producción
 
 | | Local | Producción (Vercel) |
 |---|-------|---------------------|
 | Comando | `npm run dev` / `npm start` | Despliegue automático desde el repositorio |
-| MongoDB | Local (`mongodb://localhost`) o Atlas | Atlas |
+| MongoDB | Atlas o instancia local | Atlas |
 | `NODE_ENV` | sin definir (desarrollo) | `production` |
-| `JWT_SECRET` | opcional (se genera efímero) | **obligatorio** |
-
+| `JWT_SECRET` | opcional (efímero con advertencia) | **obligatorio** |
 
 ## Autenticación y usuarios
 
-- El sistema cuenta con dos roles: **admin** y **usuario**.
-- El login se realiza en `/login`; la sesión se guarda en una cookie firmada (`sumarimpacto.sid`).
-- Las rutas de **escritura de la API** (POST/PUT/DELETE/PATCH) y las **acciones administrativas de las vistas** (alta, edición y baja) requieren rol **admin**.
-- Los listados y las vistas de detalle están disponibles con simplemente tener sesión iniciada.
+- El sistema cuenta con tres roles: **admin**, **usuario** y **operador**.
+- El login se realiza en `/login` (con email o nombre de usuario). Si las credenciales son correctas, el servidor firma un JWT y lo guarda en la cookie `sumarimpacto.token`.
+- El middleware global `checkAuth` verifica el token en cada petición y deja los datos del usuario en `req.user`. Si el token es inválido o expiró, se limpia la cookie.
+- Sin sesión válida, las vistas redirigen a `/login` y la API responde 401.
+- Las rutas de escritura de la API (POST/PUT/DELETE/PATCH) y las acciones administrativas de las vistas (alta, edición, baja y reactivación) requieren rol **admin**; si no, responden 403.
+- Los listados y las vistas de detalle están disponibles con solo tener sesión iniciada, sin importar el rol.
+- `GET /logout` elimina la cookie y vuelve al login.
+
+## Registro de usuarios
+
+- Cualquier persona puede crear una cuenta en `/registro` (nombre de usuario, email, contraseña, nombre y apellido).
+- Las cuentas nuevas se crean con rol **operador** (solo consulta). Las contraseñas se guardan hasheadas con bcryptjs.
+- El nombre de usuario y el email son únicos.
 
 ### Usuarios por defecto
 
-Al iniciar la base de datos se siembran dos usuarios de prueba:
+Al iniciar el servidor se siembran dos usuarios de prueba:
 
-| Rol | Email | Password |
-|-----|-------|----------|
-| admin | admin@sumarimpacto.com | Admin1234! |
-| usuario | usuario@sumarimpacto.com | Usuario1234! |
+| Rol | Usuario | Email | Password |
+|-----|---------|-------|----------|
+| admin | admin | admin@sumarimpacto.com | Admin1234! |
+| usuario | operador | usuario@sumarimpacto.com | Usuario1234! |
+
+Son credenciales de desarrollo: no deben usarse en producción. Se pueden cambiar con las variables de entorno opcionales indicadas más arriba.
 
 ### Seed de usuarios
 
-- El servidor ejecuta el seed automáticamente en cada arranque (`scripts/seedUsers.js`), creando los usuarios si no existen.
-- También puede ejecutarse manualmente:
-  ```bash
-  npm run seed
-  ```
+El servidor ejecuta el seed automáticamente en cada arranque (`scripts/seedUsers.js`): crea los usuarios si no existen y, si ya existen, sincroniza contraseña y rol con lo definido en el entorno.
+También puede ejecutarse manualmente:
+
+```bash
+npm run seed
+```
+
+## Asistente virtual (ImpactoBot)
+
+- Widget flotante de chat presente en todas las pantallas de la interfaz web (solo con sesión iniciada). Su vista está en `views/components/chatbot.pug`.
+- Usa la API de Groq (`groq-sdk`) con el modelo `openai/gpt-oss-20b`.
+- Está configurado para responder únicamente sobre los cinco módulos del sistema (Organizaciones, Proyectos, Donantes, Donaciones y Gastos), sin inventar funcionalidades que no existen.
+- Endpoint: `POST /api/chat` (requiere sesión).
+- Body: `{ "mensaje": "¿Cómo doy de alta un proyecto?" }`
+- Respuesta: `{ "respuesta": "..." }`
+- Errores: 400 si falta el mensaje o no es texto; 500 si falla la conexión con Groq o falta `GROQ_API_KEY`.
+- La lógica vive en `services/chatService.js` y el controlador en `controllers/chatController.js`.
 
 ## Interfaz Web (Pug)
 
-Acceso: `/vistas` (requiere sesión iniciada).
+Acceso: `/vistas` (requiere sesión iniciada). La ruta `/` muestra el panel principal.
 
 - **Panel principal:** links de navegación a los cinco módulos.
-- **Por módulo:** listado, detalle, alta, edición y baja con paso de confirmación (Proyectos y Organizaciones agregan reactivación).
-- **Formularios:** presentados en tarjeta (`.formulario-card`) con validación de campos y mensajes de error.
+- **Por módulo:** listado, detalle, alta, edición y baja con paso de confirmación.
+- **Baja lógica y reactivación:** disponibles en Organizaciones y Proyectos. En Donantes, Donaciones y Gastos la baja es física.
+- **Formularios:** presentados en tarjeta (`.formulario-card`) con validación en el navegador (`public/js/validacion-formulario.js`) y en el servidor, con mensajes de error por campo.
 - **Tablas:** listados con columnas alineadas y tablas de detalle clave-valor (`.tabla-detalle`).
-- **Roles:** el rol **usuario** puede consultar; el rol **admin** puede crear, editar y dar de baja.
-
-
-## Endpoints
-
-### API REST (JSON)
-
-Todas las rutas de la API requieren sesión iniciada: sin sesión responden **401 JSON**. Las operaciones de escritura requieren rol **admin**.
-
-| Método | Ruta | Rol | Descripción |
-|--------|------|-----|-------------|
-| GET | `/proyectos` | sesión | Listado de proyectos. |
-| GET | `/proyectos/:_id` | sesión | Detalle de proyecto. |
-| POST | `/proyectos` | admin | Alta de proyecto. |
-| PUT | `/proyectos/:_id` | admin | Edición de proyecto. |
-| DELETE | `/proyectos/:_id` | admin | Baja lógica (valida saldo pendiente). |
-| GET | `/organizaciones` | sesión | Listado de organizaciones (incluye bajas). |
-| GET | `/organizaciones/:_id` | sesión | Detalle de organización. |
-| POST | `/organizaciones` | admin | Alta de organización. |
-| PUT | `/organizaciones/:_id` | admin | Edición de organización. |
-| DELETE | `/organizaciones/:_id` | admin | Baja lógica. |
-| PATCH | `/organizaciones/:_id/reactivar` | admin | Reactivación de organización. |
-| GET | `/gastos` | sesión | Listado de gastos. |
-| GET | `/gastos/:_id` | sesión | Detalle de gasto. |
-| POST | `/gastos` | admin | Alta de gasto (valida saldo disponible del proyecto). |
-| PUT | `/gastos/:_id` | admin | Edición de gasto. |
-| DELETE | `/gastos/:_id` | admin | Borrado físico. |
-| GET | `/donaciones` | sesión | Listado de donaciones. |
-| GET | `/donaciones/:_id` | sesión | Detalle de donación. |
-| POST | `/donaciones` | admin | Alta de donación. |
-| PUT | `/donaciones/:_id` | admin | Edición de donación. |
-| DELETE | `/donaciones/:_id` | admin | Borrado físico. |
-| GET | `/donantes` | sesión | Listado de donantes. |
-| GET | `/donantes/:_id` | sesión | Detalle de donante. |
-| POST | `/donantes` | admin | Alta de donante. |
-| PUT | `/donantes/:_id` | admin | Edición de donante. |
-| DELETE | `/donantes/:_id` | admin | Borrado físico. |
-
-### Autenticación
-
-| Método | Ruta | Rol | Descripción |
-|--------|------|-----|-------------|
-| GET | `/login` | pública | Formulario de login. |
-| POST | `/login` | pública | Inicio de sesión. |
-| GET | `/logout` | pública | Cierre de sesión. |
-| GET | `/registro` | pública | Formulario de registro (alias: `/vistas/registro`). |
-| POST | `/registro` | pública | Registro de usuario (alias: `/vistas/registro`). |
-
-### Asistente IA
-
-| Método | Ruta | Rol | Descripción |
-|--------|------|-----|-------------|
-| POST | `/api/chat` | sesión | Recibe `{ "mensaje": "..." }` y responde con ImpactoBot (Groq API). |
-
-### Interfaz web bajo `/vistas`
-
-Todas requieren sesión; las acciones de escritura requieren rol **admin**. Sin sesión redirigen a `/login`.
-
-| Método | Ruta | Rol | Descripción |
-|--------|------|-----|-------------|
-| GET | `/vistas` | sesión | Panel principal con links a los módulos. |
-| GET | `/vistas/proyectos` | sesión | Listado de proyectos. |
-| GET | `/vistas/proyectos/nuevo` · POST `/vistas/proyectos` | admin | Formulario y alta. |
-| GET | `/vistas/proyectos/:_id` | sesión | Detalle (con saldo actual e historial de movimientos). |
-| GET · POST | `/vistas/proyectos/:_id/editar` | admin | Edición. |
-| GET · POST | `/vistas/proyectos/:_id/eliminar` | admin | Confirmación y baja lógica. |
-| GET · POST | `/vistas/proyectos/:_id/reactivar` | admin | Reactivación. |
-| GET | `/vistas/organizaciones` | sesión | Listado de organizaciones. |
-| GET | `/vistas/organizaciones/nuevo` · POST `/vistas/organizaciones` | admin | Formulario y alta. |
-| GET | `/vistas/organizaciones/:_id` | sesión | Detalle. |
-| GET · POST | `/vistas/organizaciones/:_id/editar` | admin | Edición. |
-| GET · POST | `/vistas/organizaciones/:_id/eliminar` | admin | Confirmación y baja lógica. |
-| GET · POST | `/vistas/organizaciones/:_id/reactivar` | admin | Reactivación. |
-| GET | `/vistas/gastos` | sesión | Listado de gastos. |
-| GET | `/vistas/gastos/nuevo` · POST `/vistas/gastos` | admin | Formulario y alta. |
-| GET | `/vistas/gastos/:_id` | sesión | Detalle. |
-| GET · POST | `/vistas/gastos/:_id/editar` | admin | Edición. |
-| GET · POST | `/vistas/gastos/:_id/eliminar` | admin | Confirmación y borrado físico. |
-| GET | `/vistas/donaciones` | sesión | Listado de donaciones. |
-| GET | `/vistas/donaciones/nuevo` · POST `/vistas/donaciones` | admin | Formulario y alta. |
-| GET | `/vistas/donaciones/:_id` | sesión | Detalle. |
-| GET · POST | `/vistas/donaciones/:_id/editar` | admin | Edición. |
-| GET · POST | `/vistas/donaciones/:_id/eliminar` | admin | Confirmación y borrado físico. |
-| GET | `/vistas/donantes` | sesión | Listado de donantes. |
-| GET | `/vistas/donantes/nuevo` · POST `/vistas/donantes` | admin | Formulario y alta. |
-| GET | `/vistas/donantes/:_id` | sesión | Detalle. |
-| GET · POST | `/vistas/donantes/:_id/editar` | admin | Edición. |
-| GET · POST | `/vistas/donantes/:_id/eliminar` | admin | Confirmación y borrado físico. |
-
-
-## ImpactoBot
-
-Asistente virtual integrado en la interfaz (widget presente en todas las vistas vía `views/components/chatbot.pug`).
-
-- **Motor:** API de [Groq](https://console.groq.com) (`services/chatService.js`).
-- **Ruta:** `POST /api/chat` con cuerpo `{ "mensaje": "..." }` (requiere sesión).
-- **Configuración:** variable de entorno `GROQ_API_KEY`.
-- **Alcance:** responde consultas sobre el funcionamiento del sistema (módulos, campos y saldos). Sin la clave configurada devuelve un error controlado.
-
+- **Roles:** los roles **usuario** y **operador** pueden consultar; el rol **admin** puede crear, editar y dar de baja.
+- **Encabezado:** muestra el usuario y su rol, y el link para cerrar sesión.
+- **Ingreso y registro:** `/login` (con opción de mostrar/ocultar la contraseña) y `/registro`.
 
 ## Estructura del proyecto
 
 ```
-├── config/           Conexión a MongoDB (db.js)
-├── controllers/      Controladores de la API y de las vistas
-├── middlewares/      Autenticación, validaciones, logger y manejo de errores
-├── models/           Esquemas de Mongoose (Organizaciones, Proyectos, Donantes, Donaciones, Gastos, User)
-├── public/           CSS, imágenes, favicon y JavaScript
-│   ├── css/          styles.css
-│   ├── img/          logo y favicon
-│   └── js/           filtrar-proyectos.js, validacion-formulario.js
-├── routes/           Definición de rutas (API, vistas, auth y chat)
-├── scripts/          Seed de usuarios (seedUsers.js) y verificación de saldos (verificarSaldos.js)
-├── services/         Capa de acceso a datos y lógica de negocio (incluye saldoService.js)
-├── utils/            AppError y helpers de formato monetario (formato.js)
-├── views/            Plantillas Pug (layout, login, módulos y components/)
-├── .env.example      Modelo de variables de entorno
-└── index.js          Punto de entrada de la aplicación Express
+├── config/         Conexión a MongoDB (db.js)
+├── controllers/    Controladores de la API, de las vistas, de autenticación y del chat
+├── middlewares/    Autenticación JWT, validaciones, logger y manejo de errores
+├── models/         Esquemas de Mongoose (Organizaciones, Proyectos, Donantes, Donaciones, Gastos, User)
+├── public/         CSS, JS del navegador (validacion-formulario.js, filtrar-proyectos.js), imágenes y favicon
+├── routes/         Definición de rutas (API, vistas, autenticación y chat)
+├── scripts/        Seed de usuarios (seedUsers.js) y verificación de saldos (verificarSaldos.js)
+├── services/       Capa de acceso a datos y lógica de negocio (incluye chatService y saldoService)
+├── utils/          AppError (errores con código HTTP) y formato de moneda (formato.js)
+└── views/          Plantillas Pug (layout, login, registro, módulos y components/chatbot)
 ```
 
+## Endpoints
 
-## Requisitos
+### Autenticación
 
-- Node.js 20.19.0 o superior
-- npm
-- MongoDB Atlas (o MongoDB local para desarrollo)
-- Cuenta en Vercel (solo para el despliegue en producción)
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET / POST | `/login` | Pantalla de ingreso / inicio de sesión (devuelve la cookie con el JWT). |
+| GET / POST | `/registro` | Pantalla de registro / alta de usuario (rol operador). |
+| GET | `/logout` | Cierra la sesión y redirige al login. |
 
+### API REST (JSON) — requiere sesión; escritura solo admin
+
+| Módulo | Ruta base | Operaciones |
+|--------|-----------|-------------|
+| Proyectos | `/proyectos` | `GET /`, `GET /:_id`, `POST /`, `PUT /:_id`, `DELETE /:_id` (baja lógica) |
+| Organizaciones | `/organizaciones` | `GET /` (`?incluirBajas=true` incluye las dadas de baja), `GET /:_id`, `POST /`, `PUT /:_id`, `DELETE /:_id` (baja lógica), `PATCH /:_id/reactivar` |
+| Donantes | `/donantes` | `GET /`, `GET /:_id`, `POST /`, `PUT /:_id`, `DELETE /:_id` |
+| Donaciones | `/donaciones` | `GET /`, `GET /:_id`, `POST /`, `PUT /:_id`, `DELETE /:_id` |
+| Gastos | `/gastos` | `GET /`, `GET /:_id`, `POST /`, `PUT /:_id`, `DELETE /:_id` |
+| Chat | `/api/chat` | `POST /` |
+
+### Interfaz Web (Pug) — requiere sesión
+
+- `/vistas`: panel principal.
+- `/vistas/{proyectos|organizaciones|donantes|donaciones|gastos}`: listado, `/nuevo`, `/:_id`, `/:_id/editar` y `/:_id/eliminar` (acciones solo admin). En Proyectos y Organizaciones también `/:_id/reactivar`.
+
+### Formato de errores (API)
+
+```json
+{ "mensaje": "Datos inválidos", "errores": ["El campo 'monto' es obligatorio"] }
+```
+
+Códigos usados: 400 datos inválidos, 401 no autenticado, 403 sin permisos, 404 no encontrado, 409 conflicto (duplicados o estado), 503 base de datos no disponible, 500 error interno.
 
 ## Uso de Inteligencia Artificial
 
@@ -304,3 +253,50 @@ Durante el desarrollo del proyecto se utilizó IA como herramienta de apoyo en t
 - Resolución de dudas puntuales de sintaxis y buenas prácticas.
 
 El código final fue escrito, revisado y validado por el equipo. La IA se usó como asistente, no como generador automático del proyecto.
+
+Además, el sistema incluye ImpactoBot, una funcionalidad de IA integrada al producto (ver sección [Asistente virtual](#asistente-virtual-impactobot)), que es independiente del uso de IA durante el desarrollo.
+
+### Ejemplos de prompts
+
+A modo de referencia, estos son ejemplos de prompts representativos del tipo de consultas que se pueden hacer a una IA como apoyo para desarrollar esta versión. Siempre se pidió explicación y se revisó el resultado antes de incorporarlo.
+
+**Migración de sesiones a JWT**
+
+> Tengo una app Express 5 con ES Modules que usa sesiones con cookie. Quiero migrarla a JWT
+> guardado en una cookie HttpOnly. Explicame qué middlewares tengo que cambiar y cómo
+> verificar el token en cada request sin romper las rutas de vistas Pug, que deberían
+> redirigir a /login, y las de la API, que deberían responder 401 en JSON.
+
+**Migración de IDs numéricos a ObjectId**
+
+> Mi proyecto Express con Mongoose usa IDs numéricos propios (idProyecto, idDonante, etc.)
+> que calculo sumando 1 al último. Quiero pasar a usar el _id de MongoDB y referencias
+> ObjectId entre colecciones. ¿Qué tengo que cambiar en los modelos, en los servicios y en
+> las rutas, y cómo valido que el parámetro :_id tenga formato válido?
+
+**Integración del chatbot con Groq**
+
+> Quiero agregar un chatbot a mi app Node con Express usando la API de Groq (groq-sdk).
+> Necesito un servicio que reciba el mensaje del usuario y devuelva la respuesta, un
+> controlador con validación del campo "mensaje" y una ruta POST /api/chat protegida por
+> autenticación. ¿Cómo organizo el código en services, controllers y routes?
+
+**Validaciones**
+
+> Quiero unificar las validaciones de entrada de cinco entidades en un solo archivo, con un
+> esquema por entidad, que devuelva todos los errores juntos y no solo el primero. ¿Cómo lo
+> estructuro para poder reutilizarlo desde la API y desde los formularios web?
+
+**Revisión de código**
+
+> Revisá este controlador y su servicio. Decime si hay errores, casos borde sin contemplar
+> (por ejemplo, el _id no existe o el proyecto está dado de baja) o malas prácticas. No me
+> reescribas todo: indicame qué cambiarías y por qué.
+
+## Requisitos
+
+- Node.js 20.19.0 o superior
+- MongoDB (Atlas o instancia local)
+- npm
+- Clave de API de Groq (para ImpactoBot)
+- Cuenta en Vercel (solo para el despliegue en producción)
