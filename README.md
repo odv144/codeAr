@@ -182,6 +182,18 @@ npm run seed
 - Errores: 400 si falta el mensaje o no es texto; 500 si falla la conexión con Groq o falta `GROQ_API_KEY`.
 - La lógica vive en `services/chatService.js` y el controlador en `controllers/chatController.js`.
 
+## Asistente virtual (ImpactoBot)
+
+- Widget flotante de chat presente en todas las pantallas de la interfaz web (solo con sesión iniciada). Su vista está en `views/components/chatbot.pug`.
+- Usa la API de **Groq** (`groq-sdk`) con el modelo `openai/gpt-oss-20b`.
+- Está configurado para responder **únicamente** sobre los cinco módulos del sistema (Organizaciones, Proyectos, Donantes, Donaciones y Gastos), sin inventar funcionalidades que no existen.
+- Endpoint: `POST /api/chat` (requiere sesión).
+  - Body: `{ "mensaje": "¿Cómo doy de alta un proyecto?" }`
+  - Respuesta: `{ "respuesta": "..." }`
+  - Errores: `400` si falta el mensaje o no es texto; `500` si falla la conexión con Groq o falta `GROQ_API_KEY`.
+- La lógica vive en `services/chatService.js` y el controlador en `controllers/chatController.js`.
+
+
 ## Interfaz Web (Pug)
 
 Acceso: `/vistas` (requiere sesión iniciada). La ruta `/` muestra el panel principal.
@@ -232,7 +244,6 @@ Acceso: `/vistas` (requiere sesión iniciada). La ruta `/` muestra el panel prin
 | Chat | `/api/chat` | `POST /` |
 
 ### Interfaz Web (Pug) — requiere sesión
-
 - `/vistas`: panel principal.
 - `/vistas/{proyectos|organizaciones|donantes|donaciones|gastos}`: listado, `/nuevo`, `/:_id`, `/:_id/editar` y `/:_id/eliminar` (acciones solo admin). En Proyectos y Organizaciones también `/:_id/reactivar`.
 
