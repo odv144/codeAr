@@ -48,10 +48,14 @@ import { connectDB } from "./config/db.js";
 import { sembrarUsuarios } from "./scripts/seedUsers.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
+import { moneda, monedaMovimiento } from "./utils/formato.js";
 
 // Configuración del motor de plantillas Pug
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
+
+app.locals.moneda = moneda;
+app.locals.monedaMovimiento = monedaMovimiento;
 
 app.use(requestLogger);
 app.use(express.static(path.join(__dirname, "public")));

@@ -202,8 +202,21 @@ async function actualizarProyecto(id, datos) {
   }
 }
 //Funcion para eliminar un proyecto por su ID en la base de datos MongoDB
+// Baja lógica: solo si el saldo actual es 0 (si no, 409).
 async function eliminarProyecto(id) {
   try {
+    const existeActivo = await Proyecto.exists({ _id: id, ...SOLO_ACTIVAS });
+    if (!existeActivo) {
+      const error = new Error("Proyecto no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const saldo = await saldoIndividualProyecto(id);
+    if (saldo > 0) {
+      throw new AppError(409, "El proyecto tiene saldo remanente: no se puede dar de baja");
+    }
+
     const proyecto = await Proyecto.findOneAndUpdate(
       { _id:id, ...SOLO_ACTIVAS },
       { $set: { activa: false, fechaBaja: new Date() } },
@@ -239,12 +252,8 @@ async function reactivarProyectos(_id) {
   );
   return reactivada;
 }
-// Saldo individual de UN proyecto activo.
-// BLINDAJE contra el bug de saldo consolidado:
-//   - Exige un _id válido; si no lo es, retorna 0 (antes caía en un filtro
-//     { activa: true } que sumaba TODOS los proyectos activos entre sí).
-//   - Nunca consulta Donaciones/Gastos globales: delega en
-//     saldoIndividualProyecto, que filtra estrictamente por ObjectId.
+// Saldo de un proyecto activo: exige _id válido (si no, 0) y delega en
+// saldoIndividualProyecto (filtro estricto por ObjectId).
 async function saldoProyectosActivos(_id) {
   try {
     if (!isValidObjectId(_id)) {

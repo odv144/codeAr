@@ -7,7 +7,7 @@ block content
     table.tabla-detalle
       tr
         th Monto
-        td.num $ #{donacion.monto}
+        td.num= moneda(donacion.monto)
       tr
         th CBU
         td= donacion.cbu

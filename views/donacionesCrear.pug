@@ -6,23 +6,18 @@ block content
 
     form(action="/vistas/donaciones" method="POST")
       div
-        label(for="monto") Monto ($)
-        input(type="number" step="0.01" min="1" name="monto" id="monto" required)
-
-      div
-        label(for="cbu") CBU / Cuenta
-        input(type="text" name="cbu" id="cbu" required pattern="[0-9]{22}" minlength="22" maxlength="22" inputmode="numeric" title="El CBU debe contener exactamente 22 dígitos numéricos")
-
-      div
-        label(for="fecha") Fecha (YYYY-MM-DD)
-        input(type="date" name="fecha" id="fecha" required)
+        label(for="idOrganizacion") Organización
+        select(name="idOrganizacion" id="idOrganizacion" required)
+          option(value="") Seleccioná una organización...
+          each org in organizaciones
+            option(value=org._id)= org.nombre
 
       div
         label(for="idProyecto") Proyecto
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
           each proyecto in proyectos
-            option(value=proyecto._id)= proyecto.nomProyecto
+            option(value=proyecto._id data-org=proyecto.idOrganizacion)= proyecto.nomProyecto
 
       div
         label(for="idDonante") Donante
@@ -35,13 +30,20 @@ block content
             )= `${donante.nombre} ${donante.apellido}`
 
       div
-        label(for="idOrganizacion") Organización
-        select(name="idOrganizacion" id="idOrganizacion" required)
-          option(value="") Seleccioná una organización...
-          each org in organizaciones
-            option(value=org._id)= org.nombre
+        label(for="monto") Monto ($)
+        input(type="number" step="0.01" min="1" name="monto" id="monto" required)
+
+      div
+        label(for="cbu") CBU / Cuenta
+        input(type="text" name="cbu" id="cbu" required pattern="[0-9]{22}" minlength="22" maxlength="22" inputmode="numeric" title="El CBU debe contener exactamente 22 dígitos numéricos")
+
+      div
+        label(for="fecha") Fecha (YYYY-MM-DD)
+        input(type="date" name="fecha" id="fecha" required)
 
       .form-actions
         button.btn-secundario(type="reset") Limpiar
         a.btn-secundario(href="/vistas/donaciones") Cancelar
         button(type="submit") Guardar Donación
+
+    script(src="/js/filtrar-proyectos.js")

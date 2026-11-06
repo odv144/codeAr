@@ -26,11 +26,15 @@ block content
         th Email
         td= donante.email
       tr
-        th Monto
-        td.num $ #{donante.monto}
+        th Total donado
+        td.num= moneda(totalDonado)
       tr
-        th Fecha
-        td= donante.fecha.toISOString().slice(0, 10)
+        th Fecha de registro
+        td
+          if donante.createdAt
+            = new Date(donante.createdAt).toLocaleDateString('es-AR', { timeZone: 'UTC' })
+          else
+            | No disponible
 
     form.form-actions(action=`/vistas/donantes/${donante._id  }/eliminar` method="POST")
       a.btn-secundario(href="/vistas/donantes") Cancelar

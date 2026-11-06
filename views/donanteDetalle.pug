@@ -24,7 +24,7 @@ block content
 
       tr
         th Total donado
-        td.num= '$ ' + totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        td.num= moneda(totalDonado)
 
       tr
         th Cantidad de aportes

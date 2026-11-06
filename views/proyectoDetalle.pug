@@ -18,11 +18,7 @@ block content
           td= proyecto.descripcion || "-"
         tr
           th Saldo actual
-          td.num
-            if proyecto.saldoActual !== undefined && proyecto.saldoActual !== null
-              | $ #{proyecto.saldoActual}
-            else
-              | -
+          td.num= moneda(proyecto.saldoActual)
         if dadaDeBaja
           tr
             th Estado
@@ -30,6 +26,34 @@ block content
               span.estado-baja Dada de baja
               if proyecto.fechaBaja
                 |  el #{new Date(proyecto.fechaBaja).toLocaleDateString('es-AR')}
+
+      if aviso
+        p.aviso-bloqueo= aviso
+
+      h4 Movimientos del proyecto
+      if movimientos && movimientos.length > 0
+        table
+          thead
+            tr
+              th FECHA
+              th TIPO
+              th CONCEPTO
+              th.num MONTO
+          tbody
+            each mov in movimientos
+              tr
+                td= new Date(mov.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })
+                td
+                  if mov.tipo === 'donacion'
+                    span.badge-donacion Donación
+                  else if mov.tipo === 'apertura'
+                    span.badge-apertura Apertura
+                  else
+                    span.badge-gasto Gasto
+                td= mov.concepto
+                td.num(class=(mov.tipo === 'gasto' ? 'estado-error' : 'estado-ok'))= monedaMovimiento(mov)
+      else
+        p No hay movimientos registrados para este proyecto.
 
       p.acciones-detalle
         if currentUser && currentUser.role === 'admin'

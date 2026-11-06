@@ -21,12 +21,12 @@ block content
         tbody
           each donacion in donaciones
             tr
-              td $#{donacion.monto}
+              td.num= moneda(donacion.monto)
               td= donacion.cbu
               td.nowrap= donacion.fecha.toISOString().slice(0, 10)
-              td= donacion.nombreProyecto || donacion.idProyecto
-              td= donacion.nombreDonante || donacion.idDonante
-              td= donacion.nombreOrganizacion || donacion.idOrganizacion
+              td= donacion.nombreProyecto || "-"
+              td= donacion.nombreDonante || "-"
+              td= donacion.nombreOrganizacion || "-"
               td.acciones
                 a(href=`/vistas/donaciones/${donacion._id}`) Ver detalle
                 if currentUser && currentUser.role === 'admin'

@@ -31,7 +31,7 @@ block content
               td.num= donante.telefono
               td= donante.email
 
-              td.num= '$ ' + donante.totalDonado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              td.num= moneda(donante.totalDonado)
               td.num= donante.cantidadDonaciones
 
               td.acciones
