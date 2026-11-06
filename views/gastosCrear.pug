@@ -9,8 +9,12 @@ block content
         label(for="idProyecto") Proyecto
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
-          each proyecto in proyectos
-            option(value=proyecto._id)= proyecto.nomProyecto
+          each org in organizaciones
+            - const propios = proyectos.filter(p => String(p.idOrganizacion) === String(org._id))
+            if propios.length
+              optgroup(label=org.nombre)
+                each proyecto in propios
+                  option(value=proyecto._id)= proyecto.nomProyecto
 
       div
         label(for="descripcion") Descripción

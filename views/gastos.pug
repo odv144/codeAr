@@ -19,9 +19,9 @@ block content
         tbody
           each gasto in gastos
             tr
-              td= gasto.nombreProyecto || gasto.idProyecto
+              td= gasto.nombreProyecto || "-"
               td= gasto.descripcion
-              td.num $#{gasto.monto}
+              td.num= moneda(gasto.monto)
               td.nowrap= gasto.fecha.toISOString().slice(0, 10)
               td.acciones
                 a(href=`/vistas/gastos/${gasto._id}`) Ver detalle

@@ -711,4 +711,42 @@ tr.fila-baja td {
   color: #1e293b !important;
 }
 
+.badge-donacion,
+.badge-gasto,
+.badge-apertura {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-donacion {
+  background: #e3f4e8;
+  color: #1f6b3a;
+}
+
+.badge-apertura {
+  background: #e0edfb;
+  color: #1f4e79;
+}
+
+.badge-gasto {
+  background: #f8e3e3;
+  color: #8b1e1e;
+}
+
+.aviso-bloqueo {
+  display: block;
+  margin: 0.75rem 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid #e4b4b4;
+  border-left: 4px solid #8b1e1e;
+  border-radius: 6px;
+  background: #fdf1f1;
+  color: #8b1e1e;
+  font-size: 0.9rem;
+}
+
 

@@ -6,6 +6,34 @@ block content
 
     form(action=`/vistas/donaciones/${donacion._id}/editar` method="POST")
       div
+        label(for="idOrganizacion") Organización
+        select(name="idOrganizacion" id="idOrganizacion" required)
+          option(value="") Seleccioná una organización...
+          each org in organizaciones
+            option(value=org._id selected=(String(org._id) === String(donacion.idOrganizacion)))= org.nombre
+
+      div
+        label(for="idProyecto") Proyecto
+        select(name="idProyecto" id="idProyecto" required)
+          option(value="") Seleccioná un proyecto...
+          each proyecto in proyectos
+            option(
+              value=proyecto._id
+              data-org=proyecto.idOrganizacion
+              selected=(String(proyecto._id) === String(donacion.idProyecto))
+            )= proyecto.nomProyecto
+
+      div
+        label(for="idDonante") Donante
+        select(name="idDonante" id="idDonante" required)
+          option(value="") Seleccioná un donante...
+          each donante in donantes
+            option(
+              value=donante._id
+              selected=(String(donante._id) === String(donacion.idDonante))
+            )= `${donante.nombre} ${donante.apellido}`
+
+      div
         label(for="monto") Monto ($)
         input(type="number" step="0.01" min="1" name="monto" id="monto" value=donacion.monto required)
 
@@ -17,27 +45,8 @@ block content
         label(for="fecha") Fecha (YYYY-MM-DD)
         input(type="date" name="fecha" id="fecha" value=donacion.fecha.toISOString().slice(0, 10) required)
 
-      div
-        label(for="idProyecto") Proyecto
-        select(name="idProyecto" id="idProyecto" required)
-          option(value="") Seleccioná un proyecto...
-          each proyecto in proyectos
-            option(value=proyecto._id selected=(String(proyecto._id) === String(donacion.idProyecto)))= proyecto.nomProyecto
-
-      div
-        label(for="idDonante") Donante
-        select(name="idDonante" id="idDonante" required)
-          option(value="") Seleccioná un donante...
-          each donante in donantes
-            option(value=donante._id selected=(String(donante._id) === String(donacion.idDonante)))= `${donante.nombre} ${donante.apellido}`
-
-      div
-        label(for="idOrganizacion") Organización
-        select(name="idOrganizacion" id="idOrganizacion" required)
-          option(value="") Seleccioná una organización...
-          each org in organizaciones
-            option(value=org._id selected=(String(org._id) === String(donacion.idOrganizacion)))= org.nombre
-
       .form-actions
         a.btn-secundario(href="/vistas/donaciones") Cancelar
         button(type="submit") Guardar Cambios
+
+    script(src="/js/filtrar-proyectos.js")
