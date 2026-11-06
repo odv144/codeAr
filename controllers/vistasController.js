@@ -28,6 +28,7 @@ import { validarDatosOrganizacion } from "../middlewares/validaciones.js";
 import { AppError } from "../utils/AppError.js";
 import {
     obtenerGastos,
+    obtenerGastosPorProyecto,
     obtenerGastoPorId,
     crearGasto,
     actualizarGasto,
@@ -35,6 +36,7 @@ import {
 } from "../services/serviceGastos.js";
 import {
     obtenerDonaciones,
+    obtenerDonacionesPorProyecto,
     obtenerDonacionPorId,
     crearDonacion,
     actualizarDonacion,
@@ -62,7 +64,6 @@ const renderProyectos = async (req, res) => {
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
         const nombresOrg = new Map(organizaciones.map((o) => [String(o._id), o.nombre]));
-        // saldoActual individual por proyecto (filtrado por su ObjectId)
         const filas = await Promise.all(proyectos.map(async (p) => ({
             ...p,
             nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null,
@@ -111,17 +112,78 @@ const guardarProyectoDesdeVista = async (req, res) => {
     }
 };
 
+// Catálogo cerrado de avisos: solo claves conocidas (?aviso=...)
+const AVISOS_BAJA = {
+    "saldo-pendiente": "No se puede dar de baja: el proyecto tiene saldo remanente. Registre los gastos pendientes o ajuste el saldo antes de continuar."
+};
+
+// Apertura + donaciones + gastos del proyecto, ordenados por fecha desc.
+const movimientosDelProyecto = async (proyecto) => {
+    const idProyecto = proyecto._id;
+    const [donaciones, gastos] = await Promise.all([
+        obtenerDonacionesPorProyecto(idProyecto),
+        obtenerGastosPorProyecto(idProyecto)
+    ]);
+
+    const saldoArray = Array.isArray(proyecto.saldo) ? proyecto.saldo : [];
+    const saldoBaseMonto = saldoArray.reduce((acc, item) => {
+        const monto = Number(item?.monto);
+        return acc + (Number.isFinite(monto) ? monto : 0);
+    }, 0);
+
+    const movimientos = [];
+
+    if (saldoBaseMonto > 0) {
+        movimientos.push({
+            _id: `apertura-${idProyecto}`,
+            fecha: proyecto.createdAt || saldoArray[0]?.fecha || new Date(),
+            tipo: "apertura",
+            concepto: "Saldo Inicial / Apertura",
+            monto: saldoBaseMonto
+        });
+    }
+
+    movimientos.push(
+        ...donaciones.map((d) => ({
+            _id: d._id,
+            fecha: d.fecha,
+            tipo: "donacion",
+            concepto: d.idDonante?.nombre
+                ? `${d.idDonante.nombre} ${d.idDonante.apellido}`
+                : "Donante no disponible",
+            monto: Number(d.monto) || 0
+        })),
+        ...gastos.map((g) => ({
+            _id: g._id,
+            fecha: g.fecha,
+            tipo: "gasto",
+            concepto: g.descripcion,
+            monto: Number(g.monto) || 0
+        }))
+    );
+
+    // Fecha desc; desempate por _id desc para orden estable
+    movimientos.sort((a, b) => {
+        const diff = new Date(b.fecha) - new Date(a.fecha);
+        return diff !== 0 ? diff : String(b._id).localeCompare(String(a._id));
+    });
+    return movimientos;
+};
+
 const renderProyectoDetalle = async (req, res, next) => {
     try {
         const proyecto = await obtenerProyectosId(req.params._id, { incluirBajas: true });
         const organizacion = await organizacionDelProyecto(proyecto);
-        // Saldo individual del proyecto: (monto base + donaciones) - gastos,
-        // todo filtrado por el ObjectId de ESTE proyecto. Se expone como
-        // proyecto.saldoActual para la plantilla (0 si no tiene movimientos).
-        const saldoActual = await saldoIndividualProyecto(proyecto._id);
+        const [saldoActual, movimientos] = await Promise.all([
+            saldoIndividualProyecto(proyecto._id),
+            movimientosDelProyecto(proyecto)
+        ]);
+        const aviso = AVISOS_BAJA[req.query.aviso] ?? null;
         res.render("proyectoDetalle", {
             proyecto: { ...proyecto.toObject(), saldoActual },
-            organizacion
+            organizacion,
+            movimientos,
+            aviso
         });
     } catch (error) {
         next(mapearProyectoNoEncontrado(error));
@@ -169,6 +231,10 @@ const guardarEdicionProyecto = async (req, res, next) => {
 const renderEliminarProyecto = async (req, res, next) => {
     try {
         const proyecto = await obtenerProyectosId(req.params._id);
+        const saldo = await saldoIndividualProyecto(proyecto._id);
+        if (saldo > 0) {
+            return res.redirect(`/vistas/proyectos/${proyecto._id}?aviso=saldo-pendiente`);
+        }
         const organizacion = await organizacionDelProyecto(proyecto);
         res.render("proyectoEliminar", { proyecto, organizacion });
     } catch (error) {
@@ -181,6 +247,10 @@ const eliminarProyectoVista = async (req, res, next) => {
         await eliminarProyecto(req.params._id);
         res.redirect("/vistas/proyectos");
     } catch (error) {
+        // 409 (saldo): redirect al detalle con aviso en vez de pantalla de error
+        if (error.status === 409) {
+            return res.redirect(`/vistas/proyectos/${req.params._id}?aviso=saldo-pendiente`);
+        }
         next(error.statusCode === 404
             ? new AppError(404, "Proyecto no encontrado")
             : error);
@@ -371,7 +441,7 @@ const reactivarOrganizacionVista = async (req, res, next) => {
 
 const renderGastos = async (req, res) => {
     try {
-        const [gastos, proyectos] = await Promise.all([obtenerGastos(), obtenerProyectos()]);
+        const [gastos, proyectos] = await Promise.all([obtenerGastos(), obtenerProyectos({ incluirBajas: true })]);
         const nombresProyecto = new Map(proyectos.map((p) => [String(p._id), p.nomProyecto]));
         const filas = gastos.map((g) => ({
             ...g,
@@ -384,8 +454,11 @@ const renderGastos = async (req, res) => {
 };
 const renderCrearGasto = async (req, res, next) => {
     try {
-        const proyectos = await obtenerProyectos();
-        res.render("gastosCrear", { proyectos });
+        const [proyectos, organizaciones] = await Promise.all([
+            obtenerProyectos(),
+            obtenerOrganizaciones({ incluirBajas: true })
+        ]);
+        res.render("gastosCrear", { proyectos, organizaciones });
     } catch (error) {
         next(error);
     }
@@ -419,9 +492,10 @@ const renderGastoDetalle = async (req, res, next) => {
     }
 };
 
-// Proyecto de un gasto (sólo activos: el servicio de gastos valida ese mismo conjunto).
+// Proyecto de un gasto (incluye bajas: el gasto conserva su nombre aunque
+// el proyecto ya no esté activo).
 const proyectoDelGasto = async (gasto) => {
-    const proyectos = await obtenerProyectos();
+    const proyectos = await obtenerProyectos({ incluirBajas: true });
     return proyectos.find((p) => String(p._id) === String(gasto.idProyecto)) ?? null;
 };
 
@@ -429,8 +503,11 @@ const renderGastoEditar = async (req, res, next) => {
     try {
         const gasto = await obtenerGastoPorId(req.params._id);
         if (!gasto) throw gastoNoEncontrado();
-        const proyectos = await obtenerProyectos();
-        res.render("gastoEditar", { gasto, proyectos });
+        const [proyectos, organizaciones] = await Promise.all([
+            obtenerProyectos(),
+            obtenerOrganizaciones({ incluirBajas: true })
+        ]);
+        res.render("gastoEditar", { gasto, proyectos, organizaciones });
     } catch (error) {
         next(error);
     }
@@ -482,7 +559,7 @@ const renderDonaciones = async (req, res) => {
     try {
         const [donaciones, proyectos, donantes, organizaciones] = await Promise.all([
             obtenerDonaciones(),
-            obtenerProyectos(),
+            obtenerProyectos({ incluirBajas: true }),
             obtenerDonantes(),
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
@@ -587,12 +664,12 @@ const renderDonacionDetalle = async (req, res, next) => {
     }
 };
 
-// Proyecto, donante y organización de una donación. Las organizaciones se
-// traen incluyendo bajas para conservar el nombre; si no existe el registro
-// la vista cae en el fallback "#(id)".
+// Proyecto, donante y organización de una donación. Los proyectos y las
+// organizaciones se traen incluyendo bajas para conservar el nombre; si el
+// registro no existe la vista muestra "-".
 const relacionesDeDonacion = async (donacion) => {
     const [proyectos, donantes, organizaciones] = await Promise.all([
-        obtenerProyectos(),
+        obtenerProyectos({ incluirBajas: true }),
         obtenerDonantes(),
         obtenerOrganizaciones({ incluirBajas: true })
     ]);
@@ -779,7 +856,14 @@ const guardarEdicionDonante = async (req, res, next) => {
 const renderDonanteEliminar = async (req, res, next) => {
     try {
         const donante = await obtenerDonantesId(req.params._id);
-        res.render("donanteEliminar", { donante });
+        const totales = await obtenerTotalesDonantes();
+        const resumen = totales.find(
+            item => String(item._id) === String(donante._id)
+        );
+        res.render("donanteEliminar", {
+            donante,
+            totalDonado: resumen?.totalDonado ?? 0
+        });
     } catch (error) {
         next(mapearDonanteNoEncontrado(error));
     }

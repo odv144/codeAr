@@ -12,6 +12,15 @@ async function obtenerGastos() {
     return Gasto.find().sort({ _id: 1 }).lean();
 }
 
+// Gastos de un proyecto, ordenados por fecha desc; ID inválido => [].
+async function obtenerGastosPorProyecto(idProyecto) {
+    if (!mongoose.isObjectIdOrHexString(idProyecto)) return [];
+
+    return Gasto.find({ idProyecto: new mongoose.Types.ObjectId(idProyecto) })
+        .sort({ fecha: -1, _id: -1 })
+        .lean();
+}
+
 async function obtenerGastoPorId(_id) {
     return Gasto.findById(_id).lean();
 }
@@ -61,11 +70,8 @@ async function eliminarGasto(_id) {
     return eliminado ? eliminado.toJSON() : null;
 }
 
-// Saldo disponible para imputar un gasto:
-//   Ingresos del proyecto (monto base + donaciones filtradas por idProyecto)
-//   menos Total Gastos del proyecto (con exclusión opcional de un gasto).
-// Filtrado estricto por ObjectId: nunca mezcla gastos ni ingresos de otros
-// proyectos. Sin datos retorna 0.
+// Saldo disponible para imputar un gasto: ingresos del proyecto menos sus
+// gastos (con exclusión opcional de un gasto al editar).
 async function saldoDisponible(idProyecto, excluirId = null) {
     const ingresos = await ingresosProyecto(idProyecto);
     const gastado = await totalGastado(idProyecto, excluirId);
@@ -74,6 +80,7 @@ async function saldoDisponible(idProyecto, excluirId = null) {
 
 export {
     obtenerGastos,
+    obtenerGastosPorProyecto,
     obtenerGastoPorId,
     crearGasto,
     actualizarGasto,

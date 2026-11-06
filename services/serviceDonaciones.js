@@ -5,9 +5,10 @@ import Donante from "../models/Donantes.js";
 import { AppError } from "../utils/AppError.js";
 import { existeOrganizacion } from "./serviceOrganizacion.js";
 
-async function existeProyectoActivo(_id) {
-    if (!mongoose.isObjectIdOrHexString(_id)) return false;
-    return (await Proyecto.exists({ _id, activa: { $ne: false } })) !== null;
+async function proyectoActivo(idProyecto) {
+    if (!mongoose.isObjectIdOrHexString(idProyecto)) return null;
+    const proyecto = await Proyecto.findById(idProyecto).select("idOrganizacion activa").lean();
+    return proyecto && proyecto.activa !== false ? proyecto : null;
 }
 
 async function existeDonante(_id) {
@@ -15,8 +16,11 @@ async function existeDonante(_id) {
     return (await Donante.exists({ _id })) !== null;
 }
 
+// Valida las referencias y devuelve la organización DEL PROYECTO: la donación
+// siempre se guarda con la org de su proyecto, nunca con la del select.
 async function validarReferencias({ idProyecto, idDonante, idOrganizacion }) {
-    if (!(await existeProyectoActivo(idProyecto))) {
+    const proyecto = await proyectoActivo(idProyecto);
+    if (!proyecto) {
         throw new AppError(400, "El proyecto indicado no existe o está dado de baja");
     }
     if (!(await existeDonante(idDonante))) {
@@ -25,10 +29,21 @@ async function validarReferencias({ idProyecto, idDonante, idOrganizacion }) {
     if (!(await existeOrganizacion(idOrganizacion))) {
         throw new AppError(400, "La organización indicada no existe o está dada de baja");
     }
+    return proyecto.idOrganizacion;
 }
 
 async function obtenerDonaciones() {
     return Donacion.find().sort({ _id: 1 }).lean();
+}
+
+// Donaciones de un proyecto, ordenadas por fecha desc; ID inválido => [].
+async function obtenerDonacionesPorProyecto(idProyecto) {
+    if (!mongoose.isObjectIdOrHexString(idProyecto)) return [];
+
+    return Donacion.find({ idProyecto: new mongoose.Types.ObjectId(idProyecto) })
+        .populate("idDonante", "nombre apellido")
+        .sort({ fecha: -1, _id: -1 })
+        .lean();
 }
 
 async function obtenerDonacionPorId(_id) {
@@ -36,9 +51,9 @@ async function obtenerDonacionPorId(_id) {
 }
 
 async function crearDonacion(datos) {
-    await validarReferencias(datos);
+    const idOrganizacion = await validarReferencias(datos);
 
-    const nueva = await Donacion.create(datos);
+    const nueva = await Donacion.create({ ...datos, idOrganizacion });
 
     return nueva.toJSON();
 }
@@ -46,11 +61,11 @@ async function crearDonacion(datos) {
 async function actualizarDonacion(_id, datos) {
     if (!(await Donacion.exists({ _id }))) return null;
 
-    await validarReferencias(datos);
+    const idOrganizacion = await validarReferencias(datos);
 
     const actualizada = await Donacion.findByIdAndUpdate(
         _id,
-        { $set: datos },
+        { $set: { ...datos, idOrganizacion } },
         { returnDocument: "after", runValidators: true }
     );
     return actualizada ? actualizada.toJSON() : null;
@@ -61,9 +76,7 @@ async function eliminarDonacion(_id) {
     return eliminada ? eliminada.toJSON() : null;
 }
 
-// Total de donaciones de UN proyecto: agregación estricta sobre la colección
-// donaciones filtrando por idProyecto (ObjectId). Sin ID válido o sin
-// donaciones retorna 0 (nunca NaN ni null).
+// Total donado de un proyecto (agregación estricta por idProyecto); sin datos => 0.
 async function totalDonado(idProyecto) {
     if (!mongoose.isObjectIdOrHexString(idProyecto)) return 0;
 
@@ -78,6 +91,7 @@ async function totalDonado(idProyecto) {
 
 export {
     obtenerDonaciones,
+    obtenerDonacionesPorProyecto,
     obtenerDonacionPorId,
     crearDonacion,
     actualizarDonacion,

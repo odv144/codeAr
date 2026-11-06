@@ -30,8 +30,7 @@ const obtenerProyectosBorrados = async (req, res, next) => {
 };
 
 // GET ALL
-// Cada proyecto lleva su saldoActual individual (donaciones/gastos filtrados
-// por su propio ObjectId): nunca se expone un saldo consolidado global.
+// Saldo individual por proyecto: nunca un consolidado global.
 const obtenerTodos = async (req, res, next) => {
   try {
     const proyectos = await obtenerProyectos({ incluirBajas: true });
