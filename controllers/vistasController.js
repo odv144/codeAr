@@ -64,11 +64,10 @@ const renderProyectos = async (req, res) => {
             obtenerOrganizaciones({ incluirBajas: true })
         ]);
         const nombresOrg = new Map(organizaciones.map((o) => [String(o._id), o.nombre]));
-        const filas = await Promise.all(proyectos.map(async (p) => ({
+        const filas = proyectos.map((p) => ({
             ...p,
-            nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null,
-            saldoActual: await saldoIndividualProyecto(p._id)
-        })));
+            nombreOrganizacion: nombresOrg.get(String(p.idOrganizacion)) ?? null
+        }));
         res.render("proyectos", { proyectos: filas, incluirBajas });
     } catch (error) {
         res.status(500).send("Error al cargar proyectos");
@@ -98,10 +97,9 @@ const renderCrearProyecto = async (req, res, next) => {
 
 const guardarProyectoDesdeVista = async (req, res) => {
     try {
-        const {idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+        const { idOrganizacion, nomProyecto, descripcion } = req.body;
 
-        // insertarProyecto arma el saldo inicial por su cuenta
-        await insertarProyecto({ idOrganizacion, nomProyecto, descripcion, saldo });
+        await insertarProyecto({ idOrganizacion, nomProyecto, descripcion });
 
         res.redirect("/vistas/proyectos");
     } catch (error) {
@@ -114,10 +112,10 @@ const guardarProyectoDesdeVista = async (req, res) => {
 
 // Catálogo cerrado de avisos: solo claves conocidas (?aviso=...)
 const AVISOS_BAJA = {
-    "saldo-pendiente": "No se puede dar de baja: el proyecto tiene saldo remanente. Registre los gastos pendientes o ajuste el saldo antes de continuar."
+    "saldo-pendiente": "No se puede dar de baja: el proyecto tiene saldo remanente. Registre los gastos pendientes para dejarlo en cero."
 };
 
-// Apertura + donaciones + gastos del proyecto, ordenados por fecha desc.
+// Donaciones y gastos del proyecto, ordenados por fecha desc.
 const movimientosDelProyecto = async (proyecto) => {
     const idProyecto = proyecto._id;
     const [donaciones, gastos] = await Promise.all([
@@ -125,23 +123,7 @@ const movimientosDelProyecto = async (proyecto) => {
         obtenerGastosPorProyecto(idProyecto)
     ]);
 
-    const saldoArray = Array.isArray(proyecto.saldo) ? proyecto.saldo : [];
-    const saldoBaseMonto = saldoArray.reduce((acc, item) => {
-        const monto = Number(item?.monto);
-        return acc + (Number.isFinite(monto) ? monto : 0);
-    }, 0);
-
     const movimientos = [];
-
-    if (saldoBaseMonto > 0) {
-        movimientos.push({
-            _id: `apertura-${idProyecto}`,
-            fecha: proyecto.createdAt || saldoArray[0]?.fecha || new Date(),
-            tipo: "apertura",
-            concepto: "Saldo Inicial / Apertura",
-            monto: saldoBaseMonto
-        });
-    }
 
     movimientos.push(
         ...donaciones.map((d) => ({
@@ -217,10 +199,9 @@ const renderEditarProyecto = async (req, res, next) => {
 
 const guardarEdicionProyecto = async (req, res, next) => {
     try {
-        const { idOrganizacion, nomProyecto, descripcion, saldo } = req.body;
+        const { idOrganizacion, nomProyecto, descripcion } = req.body;
 
-        // Si "saldo" viene vacío, actualizarProyecto lo omite y conserva el historial
-        await actualizarProyecto(req.params._id, { idOrganizacion, nomProyecto, descripcion, saldo });
+        await actualizarProyecto(req.params._id, { idOrganizacion, nomProyecto, descripcion });
 
         res.redirect("/vistas/proyectos");
     } catch (error) {

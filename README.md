@@ -50,7 +50,7 @@ La persistencia está en **MongoDB Atlas** (o una instancia local), administrada
 | Modelo (archivo) | Colección | Descripción |
 |------------------|-----------|-------------|
 | `Organizaciones.js` | `organizaciones` | Entidades emisoras de proyectos (baja lógica + reactivación). |
-| `Proyectos.js` | `proyectos` | Iniciativas sociales con saldo y movimientos (baja lógica + reactivación). |
+| `Proyectos.js` | `proyectos` | Iniciativas sociales con saldo calculado (donaciones − gastos) y movimientos (baja lógica + reactivación). |
 | `Donantes.js` | `donantes` | Personas o empresas que donan (borrado físico). |
 | `Donaciones.js` | `donaciones` | Ingresos imputados a un proyecto (borrado físico). |
 | `Gastos.js` | `gastos` | Egresos imputados a un proyecto (borrado físico). |

@@ -159,8 +159,7 @@ const ESQUEMA_GASTO = {
 const ESQUEMA_PROYECTO = {
   idOrganizacion: objectId(),
   nomProyecto: texto({ min: 2, max: 100 }),
-  descripcion: texto({ min: 3, max: 500 }),
-  saldo: numero({ minimo: 0, inclusivo: true, opcional: true })
+  descripcion: texto({ min: 3, max: 500 })
 };
 
 // Listo para usar en el módulo Donantes (crear / modificar con todos los datos).
