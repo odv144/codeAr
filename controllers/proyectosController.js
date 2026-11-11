@@ -4,7 +4,6 @@ import {
   obtenerProyectos,
   actualizarProyecto,
   eliminarProyecto,
-  agregarSaldo,
   saldoProyectosActivos,
   proyectosBorrados,
 } from "../services/serviceProyecto.js";
@@ -67,18 +66,6 @@ const obtenerSaldoProyectosActivos = async (req, res, next) => {
   }
 };
 
-//agregar saldo a un proyecto (para pruebas)
-const agregarSaldoAProyecto = async (req, res, next) => {
-  try {
-    const { idProyecto, monto, fecha } = req.body;
-    const fechaFinal = fecha ? new Date(fecha) : undefined;
-    const proyectoActualizado = await agregarSaldo(idProyecto, monto, fechaFinal);
-    res.json({ mensaje: "Saldo agregado correctamente", proyecto: proyectoActualizado });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // CREATE
 const crearProyecto = async (req, res, next) => {
   try {
@@ -126,7 +113,6 @@ export {
   crearProyecto,
   updateProyecto,
   deleteProyecto,
-  agregarSaldoAProyecto,
   obtenerSaldoProyectosActivos,
   obtenerProyectosBorrados
 };

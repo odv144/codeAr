@@ -37,7 +37,7 @@ async function obtenerProyectosId(id, { incluirBajas = false } = {}) {
 
 //funcion para insertar datos en la base de datos y se manda por parametro la tabla y los datos a insertar
 async function insertarProyecto(datos) {
-  const { idOrganizacion, nomProyecto, descripcion, saldo } = datos;
+  const { idOrganizacion, nomProyecto, descripcion } = datos;
   
   if (!idOrganizacion || !nomProyecto || !descripcion) {
     const err = new Error("Faltan campos obligatorios");
@@ -46,16 +46,6 @@ async function insertarProyecto(datos) {
   }
   if (!isValidObjectId(idOrganizacion)) {
     const err = new Error("La organización indicada no es un _id válido de MongoDB");
-    err.status = 400;
-    throw err;
-  }
-  // Acepta números o strings numéricos (el formulario envía texto); vacío = 0
-  const saldoNum =
-    saldo === undefined || saldo === null || saldo === "" ? 0 : Number(saldo);
-  if (!Number.isFinite(saldoNum) || saldoNum < 0) {
-    const err = new Error(
-      "El campo saldo debe ser un número mayor o igual a cero",
-    );
     err.status = 400;
     throw err;
   }
@@ -74,50 +64,11 @@ async function insertarProyecto(datos) {
     idOrganizacion,
     nomProyecto: String(nomProyecto).trim(),
     descripcion: String(descripcion).trim(),
-    saldo: [{ monto: saldoNum, fecha: new Date() }],
   });
  
   return nuevo.toObject();
 }
 
-async function agregarSaldo(id, monto, fecha = new Date()) {
-  try {
-    // Validaciones básicas
-    if (!id) {
-      throw new Error("El idProyecto es obligatorio");
-    }
-    if (monto === undefined || monto === null || isNaN(monto)) {
-      throw new Error("El monto debe ser un número válido");
-    }
-    const proyecto = await Proyecto.findOneAndUpdate(
-      {
-        _id: id,
-        activa: true, // solo permite agregar saldo a proyectos activos
-      },
-      {
-        $push: {
-          saldo: {
-            monto: Number(monto),
-            fecha: fecha , 
-          },
-        },
-      },
-      {
-        returnDocument: "after", // devuelve el documento ya actualizado
-        runValidators: true,
-      },
-    );
-    if (!proyecto) {
-      throw new Error(
-        `No se encontró un proyecto activo con idProyecto: ${id}`,
-      );
-    }
-    return proyecto;
-  } catch (error) {
-    console.error("Error al agregar saldo:", error.message);
-    throw error;
-  }
-}
 //Funcion para actualizar un proyecto por su ID en la base de datos MongoDB
 async function actualizarProyecto(id, datos) {
   try {
@@ -126,7 +77,6 @@ async function actualizarProyecto(id, datos) {
       "idOrganizacion",
       "nomProyecto",
       "descripcion",
-      "saldo",
     ];
     const update = {};
 
@@ -160,19 +110,6 @@ async function actualizarProyecto(id, datos) {
 
     if (update.descripcion !== undefined) {
       update.descripcion = String(update.descripcion).trim();
-    }
-
-    // saldo: si te llega un número, lo convertís al formato del schema
-    if (update.saldo !== undefined) {
-      if (
-        typeof update.saldo === "number" ||
-        typeof update.saldo === "string"
-      ) {
-        update.saldo = [
-          { monto: Number(update.saldo) || 0, fecha: new Date() },
-        ];
-      }
-      // si ya viene como array [{ monto, fecha }], lo dejás igual
     }
 
     // 4) Update con validación del schema
@@ -283,7 +220,6 @@ export {
   actualizarProyecto,
   eliminarProyecto,
   reactivarProyectos,
-  agregarSaldo,
   saldoProyectosActivos,
   proyectosBorrados
 };

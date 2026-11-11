@@ -18,7 +18,7 @@ import { saldoProyectosActivos } from "../services/serviceProyecto.js";
 
 // ---------------------------------------------------------------------------
 // Verificación del cálculo de saldo INDIVIDUAL por proyecto.
-// Fórmula: Saldo = (Monto base + Total Donaciones del proyecto) - Total Gastos
+// Fórmula: Saldo = Total Donaciones - Total Gastos
 // Todo filtrado estrictamente por ObjectId: dos proyectos nunca comparten saldo.
 //
 // Uso:  node scripts/verificarSaldos.js   (o npm run verificar-saldos)
@@ -76,38 +76,32 @@ async function sembrarDatosDePrueba() {
 
     const donanteId = await donanteDePrueba();
 
-    const base = (monto) => [{ monto, fecha: new Date() }];
-
-    // Proyecto A: base 100.000 + donaciones 70.000 - gastos 30.000 = 140.000
+    // Proyecto A: donaciones 70.000 - gastos 30.000 = 40.000
     const proyectoA = await Proyecto.create({
         idOrganizacion: organizacion._id,
         nomProyecto: `${MARCA} Proyecto A`,
-        descripcion: "Prueba de aislamiento de saldo A",
-        saldo: base(100000)
+        descripcion: "Prueba de aislamiento de saldo A"
     });
 
-    // Proyecto B: base 50.000 + donacion 20.000 - gastos 10.000 = 60.000
+    // Proyecto B: donacion 20.000 - gastos 10.000 = 10.000
     const proyectoB = await Proyecto.create({
         idOrganizacion: organizacion._id,
         nomProyecto: `${MARCA} Proyecto B`,
-        descripcion: "Prueba de aislamiento de saldo B",
-        saldo: base(50000)
+        descripcion: "Prueba de aislamiento de saldo B"
     });
 
     // Proyecto C: sin donaciones ni gastos => saldo 0 (no NaN ni null)
     const proyectoC = await Proyecto.create({
         idOrganizacion: organizacion._id,
         nomProyecto: `${MARCA} Proyecto C`,
-        descripcion: "Proyecto sin movimientos",
-        saldo: []
+        descripcion: "Proyecto sin movimientos"
     });
 
-    // Proyecto D: dado de baja, con movimientos (base 10.000 + donacion 5.000)
+    // Proyecto D: dado de baja, con movimientos (donacion 5.000)
     const proyectoD = await Proyecto.create({
         idOrganizacion: organizacion._id,
         nomProyecto: `${MARCA} Proyecto D`,
         descripcion: "Proyecto dado de baja",
-        saldo: base(10000),
         activa: false
     });
 
@@ -155,7 +149,7 @@ async function verificarSaldos({ proyectoA, proyectoB, proyectoC, proyectoD }) {
     // 1) Ingresos y gastos por proyecto, filtrados por su ObjectId
     assert.equal(await totalDonado(proyectoA._id), 70000, "A: total donado");
     assert.equal(await totalGastado(proyectoA._id), 30000, "A: total gastado");
-    assert.equal(await ingresosProyecto(proyectoA._id), 170000, "A: ingresos");
+    assert.equal(await ingresosProyecto(proyectoA._id), 70000, "A: ingresos");
 
     assert.equal(await totalDonado(proyectoB._id), 20000, "B: total donado");
     assert.equal(await totalGastado(proyectoB._id), 10000, "B: total gastado");
@@ -163,18 +157,18 @@ async function verificarSaldos({ proyectoA, proyectoB, proyectoC, proyectoD }) {
     // 2) AISLAMIENTO: cada proyecto tiene su saldo propio (nunca el consolidado)
     assert.equal(
         await saldoIndividualProyecto(proyectoA._id),
-        140000,
-        "A: saldo individual (100000 + 70000 - 30000)"
+        40000,
+        "A: saldo individual (70000 - 30000)"
     );
     assert.equal(
         await saldoIndividualProyecto(proyectoB._id),
-        60000,
-        "B: saldo individual (50000 + 20000 - 10000)"
+        10000,
+        "B: saldo individual (20000 - 10000)"
     );
-    // Anti-bug: A no debe devolver la suma global (A + B = 200.000)
+    // Anti-bug: A no debe devolver la suma global (A + B = 90.000)
     assert.notEqual(
         await saldoIndividualProyecto(proyectoA._id),
-        200000,
+        90000,
         "A: no debe ser el saldo consolidado global"
     );
 
@@ -195,15 +189,15 @@ async function verificarSaldos({ proyectoA, proyectoB, proyectoC, proyectoD }) {
     // 5) El wrapper estricto solo responde por proyectos activos...
     assert.equal(
         await saldoProyectosActivos(proyectoA._id),
-        140000,
+        40000,
         "wrapper: proyecto activo"
     );
     assert.equal(await saldoProyectosActivos(proyectoD._id), 0, "wrapper: proyecto de baja = 0");
     // ...pero el detalle del proyecto de baja sigue mostrando su saldo propio
     assert.equal(
         await saldoIndividualProyecto(proyectoD._id),
-        15000,
-        "D (baja): saldo individual (10000 + 5000)"
+        5000,
+        "D (baja): saldo individual (5000)"
     );
 }
 
@@ -214,7 +208,7 @@ async function main() {
         await limpiarDatosDePrueba();
         const datos = await sembrarDatosDePrueba();
         await verificarSaldos(datos);
-        console.log("OK: saldos individuales verificados (A=140000, B=60000, C=0, D=15000).");
+        console.log("OK: saldos individuales verificados (A=40000, B=10000, C=0, D=5000).");
         console.log("OK: dos proyectos distintos mantienen saldos independientes.");
     } catch (error) {
         fallo = true;
