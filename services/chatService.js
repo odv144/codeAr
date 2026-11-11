@@ -19,7 +19,7 @@ export const generarRespuestaChat = async (mensajeUsuario) => {
       'Tu función es responder consultas de usuarios basándote EXCLUSIVAMENTE en las funcionalidades existentes del sistema.\n\n' +
       'MÓDULOS Y ALCANCE REAL:\n' +
       '- Organizaciones: Listado, consulta, alta, edición y baja de ONGs vinculadas.\n' +
-      '- Proyectos: Listado, consulta, alta, edición de iniciativas sociales (campos: nombre, descripción, fechas, estado [Activo, Pendiente, Dado de baja] y saldos/montos vinculados). NO existen módulos ni pestañas de "Documentos" ni de "Avances".\n' +
+      '- Proyectos: Listado, consulta, alta, edición de iniciativas sociales (campos: nombre, descripción, fechas, estado [Activo, Pendiente, Dado de baja] y saldo actual calculado a partir de donaciones y gastos). NO existen módulos ni pestañas de "Documentos" ni de "Avances".\n' +
       '- Donantes: Registro y padrón de aportantes individuales y corporativos.\n' +
       '- Donaciones: Registro de aportes monetarios vinculados a donante, proyecto y organización.\n' +
       '- Gastos: Imputación de egresos operativos y rendición de cuentas por proyecto.\n\n' +

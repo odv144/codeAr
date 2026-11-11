@@ -6,22 +6,18 @@ block content
 
     form(action=`/vistas/donaciones/${donacion._id}/editar` method="POST")
       div
-        label(for="idOrganizacion") Organización
-        select(name="idOrganizacion" id="idOrganizacion" required)
-          option(value="") Seleccioná una organización...
-          each org in organizaciones
-            option(value=org._id selected=(String(org._id) === String(donacion.idOrganizacion)))= org.nombre
-
-      div
         label(for="idProyecto") Proyecto
         select(name="idProyecto" id="idProyecto" required)
           option(value="") Seleccioná un proyecto...
-          each proyecto in proyectos
-            option(
-              value=proyecto._id
-              data-org=proyecto.idOrganizacion
-              selected=(String(proyecto._id) === String(donacion.idProyecto))
-            )= proyecto.nomProyecto
+          each org in organizaciones
+            - const propios = proyectos.filter(p => String(p.idOrganizacion) === String(org._id))
+            if propios.length
+              optgroup(label=org.nombre)
+                each proyecto in propios
+                  option(
+                    value=proyecto._id
+                    selected=(String(proyecto._id) === String(donacion.idProyecto))
+                  )= proyecto.nomProyecto
 
       div
         label(for="idDonante") Donante
@@ -49,4 +45,4 @@ block content
         a.btn-secundario(href="/vistas/donaciones") Cancelar
         button(type="submit") Guardar Cambios
 
-    script(src="/js/filtrar-proyectos.js")
+

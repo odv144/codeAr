@@ -70,7 +70,7 @@ async function eliminarGasto(_id) {
     return eliminado ? eliminado.toJSON() : null;
 }
 
-// Saldo disponible para imputar un gasto: ingresos del proyecto menos sus
+// Saldo disponible para imputar un gasto: donaciones del proyecto menos sus
 // gastos (con exclusión opcional de un gasto al editar).
 async function saldoDisponible(idProyecto, excluirId = null) {
     const ingresos = await ingresosProyecto(idProyecto);

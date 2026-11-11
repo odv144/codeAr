@@ -712,8 +712,7 @@ tr.fila-baja td {
 }
 
 .badge-donacion,
-.badge-gasto,
-.badge-apertura {
+.badge-gasto {
   display: inline-block;
   padding: 0.1rem 0.55rem;
   border-radius: 999px;
@@ -725,11 +724,6 @@ tr.fila-baja td {
 .badge-donacion {
   background: #e3f4e8;
   color: #1f6b3a;
-}
-
-.badge-apertura {
-  background: #e0edfb;
-  color: #1f4e79;
 }
 
 .badge-gasto {

@@ -144,8 +144,7 @@ const ESQUEMA_DONACION = {
   cbu: texto({ patron: { regex: /^\d{22}$/, mensaje: MENSAJE_CBU }, mensajeTipo: MENSAJE_CBU }),
   fecha: fecha({ ejemplo: "2026-10-09" }),
   idProyecto: objectId(),
-  idDonante: objectId(),
-  idOrganizacion: objectId()
+  idDonante: objectId()
 };
 
 const ESQUEMA_GASTO = {
@@ -159,8 +158,7 @@ const ESQUEMA_GASTO = {
 const ESQUEMA_PROYECTO = {
   idOrganizacion: objectId(),
   nomProyecto: texto({ min: 2, max: 100 }),
-  descripcion: texto({ min: 3, max: 500 }),
-  saldo: numero({ minimo: 0, inclusivo: true, opcional: true })
+  descripcion: texto({ min: 3, max: 500 })
 };
 
 // Listo para usar en el módulo Donantes (crear / modificar con todos los datos).
